@@ -1,0 +1,104 @@
+/* Compiled CSS from LESS for Binary Tree */
+.flex-tree-container ul {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    text-align: center;
+}
+
+.flex-tree-container ul > li {
+    box-sizing: border-box;
+    flex: 1;
+    padding: 0 5px;
+}
+
+.flex-tree-container ul > li > *:not(ul):not(li) {
+    border: 1px solid #e9ecef;
+    display: inline-block;
+    margin: 0 auto;
+    padding: 15px 20px;
+    position: relative;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.flex-tree-container ul > li > *:not(ul):not(li):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+}
+
+/* Vertical connector from parent to children */
+.flex-tree-container ul > li > *:not(ul):not(li):not(:last-child):after {
+    border-left: 2px solid var(--primary);
+    bottom: -30px;
+    content: '';
+    height: 30px;
+    left: 50%;
+    position: absolute;
+    opacity: 0.4;
+}
+
+/* Children container */
+.flex-tree-container ul > li ul {
+    margin-top: 59px;
+    position: relative;
+}
+
+.flex-tree-container ul > li ul li {
+    position: relative;
+}
+
+/* Horizontal lines connecting siblings */
+.flex-tree-container ul > li ul li:after,
+.flex-tree-container ul > li ul li:before {
+    border-top: 2px solid var(--primary);
+    content: '';
+    position: absolute;
+    top: -30px;
+    width: 50%;
+    opacity: 0.4;
+}
+
+/* Vertical line down from parent */
+.flex-tree-container ul > li ul li:before {
+    border-left: 2px solid var(--primary);
+    height: 30px;
+    left: 50%;
+}
+
+/* Horizontal line to the right */
+.flex-tree-container ul > li ul li:after {
+    right: 50%;
+}
+
+/* First and last child adjustments */
+.flex-tree-container ul > li ul li:first-child:before,
+.flex-tree-container ul > li ul li:last-child:before {
+    border-top: 2px solid var(--primary);
+    border-top-left-radius: 10px;
+    top: -30px;
+}
+
+.flex-tree-container ul > li ul li:first-child:after,
+.flex-tree-container ul > li ul li:last-child:after {
+    border: none;
+}
+
+/* Last child specific styling */
+.flex-tree-container ul > li ul li:last-child:before {
+    border-left: 0;
+    border-right: 2px solid var(--primary);
+    border-top-left-radius: 0;
+    border-top-right-radius: 10px;
+    left: 0;
+    right: 50%;
+}
+
+/* Only child styling */
+.flex-tree-container ul > li ul li:only-child:before {
+    border-top: none;
+    border-top-right-radius: 0;
+}

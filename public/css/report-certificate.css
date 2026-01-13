@@ -1,0 +1,641 @@
+/* ========================================
+   Certificate Report Styles
+   ======================================== */
+
+/* Container and Layout */
+.certificate-container {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    padding: 30px;
+    position: relative;
+    max-width: 850px;
+    overflow: hidden;
+}
+
+/* Decorative Borders */
+.certificate-border-top,
+.certificate-border-bottom {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #007bff, transparent);
+    margin: 0 -30px;
+    border-radius: 2px;
+}
+
+.certificate-border-top {
+    margin-bottom: 20px;
+}
+
+.certificate-border-bottom {
+    margin-top: 20px;
+}
+
+/* Header Section */
+.certificate-header {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.logo-container {
+    margin-bottom: 15px;
+}
+
+.certificate-logo {
+    max-width: 120px;
+    height: auto;
+}
+
+.certificate-title {
+    position: relative;
+}
+
+.main-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.sub-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.certificate-ornament {
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #007bff, transparent);
+    margin: 10px auto;
+}
+
+.tahun-ajaran {
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Section Headers */
+.section-header {
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #007bff;
+    font-size: 16px;
+}
+
+/* Information Sections */
+.student-info,
+.registration-info,
+.achievement-info,
+.reregistration-info {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    border: 1px dashed #ccc;
+    margin-bottom: 20px;
+}
+
+/* Table Styling */
+.info-table {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.label-col {
+    width: 18%;
+    font-weight: 600;
+    color: #555;
+    vertical-align: middle;
+    padding: 8px;
+    border: none;
+    background-color: #f3f7fa;
+}
+
+.colon-col {
+    width: 2%;
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    vertical-align: middle;
+    padding: 8px 4px;
+    border: none;
+}
+
+.value-col {
+    color: #333;
+    vertical-align: middle;
+    padding: 8px;
+    border: none;
+}
+
+.info-table tr:nth-child(even) {
+    background-color: rgba(248, 249, 250, 0.5);
+}
+
+/* Badge Styling */
+.badge {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 600;
+}
+
+.bg-primary {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: #fff !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+    color: #fff !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.bg-secondary {
+    background-color: #6c757d !important;
+    color: #fff !important;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+/* Footer Section */
+.certificate-footer {
+    margin-top: 30px;
+    position: relative;
+    border-top: 1px dashed #ddd;
+    padding-top: 20px;
+}
+
+/* Signature Area */
+.signature-container {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    position: relative;
+}
+
+.signature-date {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.signature-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.qr-code-wrapper {
+    display: inline-block;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    margin: 10px 0;
+}
+
+.signature-name {
+    font-weight: 700;
+    font-size: 17px;
+    color: #333;
+    margin-top: 10px;
+    display: block;
+    padding-top: 5px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.signature-line {
+    width: 120px;
+    height: 2px;
+    background: #007bff;
+    margin: 8px auto 0;
+    border-radius: 1px;
+}
+
+/* Watermark */
+.watermark {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%) rotate(-45deg);
+    font-size: 60px;
+    color: rgba(0, 0, 0, 0.03);
+    font-weight: bold;
+    letter-spacing: 5px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Button Styling */
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+    color: #fff;
+}
+
+.btn i {
+    font-size: 14px;
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #print,
+    #print * {
+        visibility: visible;
+    }
+
+    #print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+    }
+
+    .certificate-container {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+        background: white !important;
+        padding: 15px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        font-size: 11px !important;
+        line-height: 1.2 !important;
+    }
+
+    .certificate-border-top,
+    .certificate-border-bottom {
+        background: #000 !important;
+        height: 2px !important;
+        margin: 8px -15px !important;
+    }
+
+    .certificate-header {
+        margin-bottom: 15px !important;
+    }
+
+    .logo-container {
+        margin-bottom: 8px !important;
+    }
+
+    .certificate-logo {
+        max-width: 80px !important;
+    }
+
+    .main-title {
+        font-size: 18px !important;
+        color: #000 !important;
+        margin-bottom: 3px !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .sub-title {
+        font-size: 14px !important;
+        color: #000 !important;
+        margin-bottom: 8px !important;
+    }
+
+    .certificate-ornament {
+        height: 2px !important;
+        margin: 5px auto !important;
+        width: 40% !important;
+    }
+
+    .tahun-ajaran {
+        font-size: 11px !important;
+        color: #000 !important;
+    }
+
+    .section-header {
+        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+    }
+
+    .section-title {
+        font-size: 13px !important;
+        color: #000 !important;
+    }
+
+    .section-title i {
+        font-size: 12px !important;
+        color: #000 !important;
+    }
+
+    .student-info,
+    .registration-info,
+    .achievement-info,
+    .reregistration-info {
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+        background-color: #f9f9f9 !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .info-table {
+        font-size: 10px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .label-col {
+        padding: 3px 5px !important;
+        font-size: 10px !important;
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+        width: 16% !important;
+    }
+
+    .colon-col {
+        padding: 3px 2px !important;
+        font-size: 10px !important;
+        color: #000 !important;
+        width: 2% !important;
+    }
+
+    .value-col {
+        padding: 3px 5px !important;
+        font-size: 10px !important;
+        color: #000 !important;
+    }
+
+    .badge {
+        border: 1px solid #000 !important;
+        background: white !important;
+        color: black !important;
+        font-size: 9px !important;
+        padding: 2px 6px !important;
+        border-radius: 3px !important;
+    }
+
+    .certificate-footer {
+        margin-top: 15px !important;
+        padding-top: 10px !important;
+    }
+
+    .signature-container {
+        padding: 8px !important;
+        background-color: #f8f9fa !important;
+    }
+
+    .signature-date {
+        font-size: 10px !important;
+        color: #000 !important;
+        margin-bottom: 3px !important;
+    }
+
+    .signature-title {
+        font-size: 11px !important;
+        color: #000 !important;
+        margin-bottom: 5px !important;
+    }
+
+    .qr-code-wrapper {
+        padding: 5px !important;
+        margin: 5px 0 !important;
+    }
+
+    .qr-code-wrapper svg {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .signature-name {
+        font-size: 11px !important;
+        color: #000 !important;
+        margin-top: 5px !important;
+        padding-top: 3px !important;
+    }
+
+    .signature-line {
+        width: 80px !important;
+        height: 1px !important;
+        margin: 5px auto 0 !important;
+    }
+
+    .watermark {
+        opacity: 0.05 !important;
+        font-size: 40px !important;
+        color: #000 !important;
+    }
+
+    /* Force single page */
+    .certificate-container {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Reduce table row spacing */
+    .info-table tr {
+        line-height: 1.1 !important;
+    }
+
+    .info-table th,
+    .info-table td {
+        padding: 2px 4px !important;
+        vertical-align: middle !important;
+    }
+
+    /* Compact spacing for sections */
+    .certificate-body > div {
+        margin-bottom: 8px !important;
+    }
+
+    /* Ensure content fits */
+    @page {
+        margin: 0.5in !important;
+        size: A4 !important;
+    }
+
+    /* Additional space optimizations */
+    .certificate-body {
+        margin-bottom: 10px !important;
+    }
+
+    /* Compact badge styling for print */
+    .badge.fs-6 {
+        font-size: 8px !important;
+        padding: 1px 4px !important;
+    }
+
+    /* Reduce icon spacing */
+    .section-title .me-2 {
+        margin-right: 0.25rem !important;
+    }
+
+    /* Optimize table cell heights */
+    .info-table tr {
+        height: auto !important;
+    }
+
+    /* Reduce ornament size */
+    .certificate-ornament {
+        width: 30% !important;
+        height: 1px !important;
+        margin: 3px auto !important;
+    }
+
+    /* Compact footer */
+    .certificate-footer {
+        margin-top: 10px !important;
+        padding-top: 8px !important;
+    }
+
+    /* Smaller QR code for print */
+    .qr-code-wrapper {
+        padding: 3px !important;
+        margin: 3px 0 !important;
+    }
+
+    .qr-code-wrapper svg {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    /* Force compact layout */
+    .student-info,
+    .registration-info,
+    .achievement-info,
+    .reregistration-info {
+        padding: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Reduce section header spacing */
+    .section-header {
+        margin-bottom: 6px !important;
+        padding-bottom: 3px !important;
+    }
+
+    /* Optimize certificate header */
+    .certificate-header {
+        margin-bottom: 12px !important;
+    }
+
+    .logo-container {
+        margin-bottom: 6px !important;
+    }
+
+    /* Compact signature area */
+    .signature-container {
+        padding: 6px !important;
+    }
+
+    .signature-date,
+    .signature-title,
+    .signature-name {
+        margin-bottom: 2px !important;
+    }
+
+    /* Ensure no page breaks within sections */
+    .student-info,
+    .registration-info,
+    .achievement-info,
+    .reregistration-info,
+    .certificate-footer {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .certificate-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .main-title {
+        font-size: 20px;
+    }
+
+    .sub-title {
+        font-size: 14px;
+    }
+
+    .info-table {
+        font-size: 12px;
+    }
+
+    .label-col,
+    .value-col {
+        padding: 6px 4px;
+    }
+
+    .watermark {
+        font-size: 40px;
+        letter-spacing: 3px;
+    }
+} 
