@@ -77,8 +77,8 @@
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Password</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                   id="password" name="password" required
-                                   value="{{ old('password',$pengguna->password??'') }}"/>
+                                   id="password" name="password" {{ request()->routeIs('pengguna.create') ? 'required' : '' }}
+                                   />
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Role</label>

@@ -72,17 +72,31 @@ class PenggunaController extends Controller
     public function edit(User $pengguna)
     {
 
-        $members = User::query()
-            ->where('role',RoleUser::USER)
-            ->where('is_active',true)
-            ->get();
-        return view('pages.pengguna.create', compact('pengguna','members'));
+        // $members = User::query()
+        //     ->where('role',RoleUser::USER)
+        //     ->where('is_active',true)
+        //     ->get();
+        return view('pages.pengguna.create', compact('pengguna'));
     }
     public function update(PenggunaRequest $request, User $pengguna)
     {
         try {
             DB::beginTransaction();
-            $pengguna->update($request->validated());
+            $validated = $request->validated();
+
+            if ($pengguna->email == $validated['email']) {
+                unset($validated['email']);
+            }
+            if ($pengguna->username == $validated['username']) {
+                unset($validated['username']);
+            }
+            if (empty($validated['password'])) {
+                unset($validated['password']);
+            } else {
+                $validated['password'] = bcrypt($validated['password']);
+            }
+
+            $pengguna->update($validated);
             DB::commit();
             toast()->success('Yeeayy !!','Data berhasil disimpan');
             return redirect()->route('pengguna.index');

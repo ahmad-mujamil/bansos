@@ -34,7 +34,12 @@
            -->
                         </div>
                         <button type="submit" class="btn btn-lg btn-primary w-100">Masuk</button>
-                    </form><br><br><br>
+                    </form>
+                    <br>
+                    <div class="text-center">
+                        <p class="text-small">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></p>
+                    </div>
+                    <br><br>
                     <span class="badge rounded-pill bg-foreground mt-2">Copyright &copy;2026. Pemerintah Kabupaten Lombok Barat</span>
 
                 </div>

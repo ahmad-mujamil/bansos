@@ -9,6 +9,10 @@ Auth::routes([
     "reset" => false
 ]);
 
+// Registration Routes
+Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+
 Route::group(['middleware' => ['auth:web']], function () {
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
