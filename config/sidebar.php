@@ -9,55 +9,21 @@ return [
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'USER',
+                'id' => 'PROFILE_PERORANGAN',
                 'icon' => 'user',
-                'url' => '/pengguna',
-                'title' => 'Pengguna'
+                'url' => '/profile-perorangan',
+                'title' => 'Profile Perorangan'
             ],
             [
-                'id' => 'OPD',
+                'id' => 'PROFILE_ORGANISASI',
                 'icon' => 'building',
-                'url' => '/opd',
-                'title' => 'OPD'
-            ],
-        ]
-    ],
-
-    [
-        'id' => 'MASTER_DATA',
-        'icon' => '',
-        'title' => 'Master Data',
-        'url' => 'javascript:;',
-        'caret' => true,
-        'sub_menu' => [
-            [
-                'id' => 'KECAMATAN',
-                'icon' => 'pin',
-                'url' => '/kecamatan',
-                'title' => 'Kecamatan'
-            ],
-            [
-                'id' => 'DESA',
-                'icon' => 'destination',
-                'url' => '/desa',
-                'title' => 'Desa'
-            ],
-            [
-                'id' => 'ORGANISASI',
-                'icon' => 'diagram-1',
-                'url' => '/organisasi',
-                'title' => 'Organisasi'
-            ],
-            [
-                'id' => 'PENDUDUK',
-                'icon' => 'content',
-                'url' => '/id-penduduk',
-                'title' => 'ID Penduduk'
+                'url' => '/profile-organisasi',
+                'title' => 'PROFILE ORGANISASI'
             ],
         ]
     ],
     [
-        'id' => 'BANTUAN SOSIAL',
+        'id' => 'BANTUAN_SOSIAL',
         'icon' => '',
         'title' => 'Bantuan Sosial',
         'url' => 'javascript:;',
@@ -75,12 +41,6 @@ return [
                 'url' => '/realisasi',
                 'title' => 'Realisasi'
             ],
-            [
-                'id' => 'VERIFIKASI',
-                'icon' => 'check-square',
-                'url' => '/verifikasi',
-                'title' => 'Verifikasi'
-            ],
         ]
     ],
     [
@@ -91,24 +51,16 @@ return [
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'REALISASI_OPD',
-                'icon' => 'file-text',
-                'url' => '/realisasi-opd',
-                'title' => 'Realisasis OPD'
+                'id' => 'LAP_PENGAJUAN',
+                'icon' => 'copy',
+                'url' => '/lap-pengajuan',
+                'title' => 'Pengajuan'
             ],
-
             [
-                'id' => 'REALISASI_ORGAN',
-                'icon' => 'file-text',
-                'url' => '/realisasi-organisasi',
-                'title' => 'Realisasi Organisasi'
-            ],
-
-            [
-                'id' => 'REALISASI_PERORANGAN',
-                'icon' => 'file-text',
-                'url' => '/realisasi-perorangan',
-                'title' => 'Realisasi Perorangan'
+                'id' => 'LAP_REALISASI',
+                'icon' => 'copy',
+                'url' => '/lap-realisasi',
+                'title' => 'Realisasi'
             ],
         ]
     ],

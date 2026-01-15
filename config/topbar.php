@@ -10,4 +10,114 @@ return [
         'sub_menu' => []
     ],
 
+    [
+        'id' => 'MASTER_DATA',
+        'icon' => 'gear',
+        'title' => 'Master Data',
+        'url' => 'javascript:;',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'PENDUDUK',
+                'url' => '/penduduk',
+                'title' => 'penduduk'
+            ],
+            [
+                'id' => 'ORGANISASI',
+                'url' => '/organisasi',
+                'title' => 'Organisasi'
+            ],
+            [
+                'id' => 'JENIS_BANTUAN',
+                'url' => '/jenis-bantuan',
+                'title' => 'Jenis Bantuan'
+            ],
+
+        ]
+    ],
+    [
+        'id' => 'WILAYAH_ADMINISTRASI',
+        'icon' => 'pin',
+        'title' => 'Wilayah Administrasi',
+        'url' => 'javascript:;',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'KECAMATAN',
+                'icon' => 'pin',
+                'url' => '/kecamatan',
+                'title' => 'Kecamatan'
+            ],
+            [
+                'id' => 'DESA',
+                'icon' => 'destination',
+                'url' => '/desa',
+                'title' => 'Desa'
+            ],
+
+        ]
+    ],
+    [
+        'id' => 'ADMIN',
+        'url' => 'javascript:;',
+        'icon' => 'shield-check',
+        'title' => 'Administrator',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'BLACKLIST',
+                'url' => '/blacklist',
+                'title' => 'Blacklist Pengguna'
+            ],
+            [
+                'id' => 'PENILAIAN_REALISASI',
+                'url' => '/penilaian-realisasi',
+                'title' => 'Penilaian Realisasi'
+            ],
+        ]
+    ],
+    [
+        'id' => 'VERIFIKASI',
+        'url' => 'javascript:;',
+        'title' => 'Verifikasi',
+        'icon' => 'check-square',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'VERIFY_PENGGUNA',
+                'url' => '/verifikasi-pengguna',
+                'title' => 'Pendaftaran Perorangan'
+            ],
+            [
+                'id' => 'VERIFY_ORGANISASI',
+                'url' => '/verifikasi-organisasi',
+                'title' => 'Pendaftaran Organisasi'
+            ],
+            [
+                'id' => 'VERIFY_BANSOS',
+                'url' => '/verifikasi-bansos',
+                'title' => 'Pengajuan Bansos'
+            ],
+        ]
+    ],
+    [
+        'id' => 'LAPORAN',
+        'url' => 'javascript:;',
+        'icon' => 'file-text',
+        'title' => 'Laporan',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'LAP_PENGAJUAN',
+                'url' => '/laporan-pengajuan',
+                'title' => 'Pengajuan Bansos'
+            ],
+            [
+                'id' => 'LAP_REALISASI',
+                'url' => '/laporan-realisasi',
+                'title' => 'Realisasi'
+            ],
+        ]
+    ],
+
 ];
