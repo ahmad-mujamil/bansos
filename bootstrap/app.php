@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'access' => \App\Http\Middleware\CheckAccess::class,
             'role' => \App\Http\Middleware\CheckRole::class,
+            'check.perorangan.detail' => \App\Http\Middleware\CheckPeroranganDetail::class,
             ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

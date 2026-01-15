@@ -12,6 +12,7 @@ enum StatusUser:int {
     case KASIE = 6;
     case PERORANGAN = 7;
     case ORGANISASI = 8;
+    case KELOMPOK = 9;
 
 
     public function getDescription() : string
@@ -26,6 +27,7 @@ enum StatusUser:int {
             self::KASIE => "Kepala Seksi",
             self::PERORANGAN => "Perorangan",
             self::ORGANISASI => "Organisasi",
+            self::KELOMPOK => "Kelompok",
         };
     }
 }

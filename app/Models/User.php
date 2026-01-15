@@ -47,4 +47,9 @@ class User extends Authenticatable
         return $this->role->value==='user';
     }
 
+    public function peroranganDetail() : HasOne
+    {
+        return $this->hasOne(PeroranganDetail::class, 'user_id', 'id');
+    }
+
 }

@@ -70,6 +70,9 @@
                                 <option value="{{ \App\Enums\StatusUser::ORGANISASI->value }}" {{ old('status') == \App\Enums\StatusUser::ORGANISASI->value ? 'selected' : '' }}>
                                     {{ \App\Enums\StatusUser::ORGANISASI->getDescription() }}
                                 </option>
+                                <option value="{{ \App\Enums\StatusUser::KELOMPOK->value }}" {{ old('status') == \App\Enums\StatusUser::KELOMPOK->value ? 'selected' : '' }}>
+                                    {{ \App\Enums\StatusUser::KELOMPOK->getDescription() }}
+                                </option>
                             </select>
                         </div>
 

@@ -31,6 +31,18 @@ return [
         'caret' => true,
         'sub_menu' => [
             [
+                'id' => 'KECAMATAN',
+                'icon' => 'pin',
+                'url' => '/kecamatan',
+                'title' => 'Kecamatan'
+            ],
+            [
+                'id' => 'DESA',
+                'icon' => 'destination',
+                'url' => '/desa',
+                'title' => 'Desa'
+            ],
+            [
                 'id' => 'ORGANISASI',
                 'icon' => 'diagram-1',
                 'url' => '/organisasi',

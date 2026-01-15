@@ -39,7 +39,7 @@
                     <div class="mb-3 row">
                         <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Nama Lengkap</label>
                         <div class="col-sm-8 col-md-9 col-lg-10">
-                            <input type="text" class="form-control" value="{{ auth()->user()->pengguna->nama??'' }}" name="nama" id="nama" />
+                            <input type="text" class="form-control" value="{{ auth()->user()->nama??'' }}" name="nama" id="nama" />
                         </div>
                     </div>
                     <div class="mb-3 row">
@@ -48,17 +48,12 @@
                             <input type="text" class="form-control" value="{{ auth()->user()->username??'' }}" disabled />
                         </div>
                     </div>
-                    <div class="mb-3 row">
-                        <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Sekolah</label>
-                        <div class="col-sm-8 col-md-9 col-lg-10">
-                            <input type="text" class="form-control" value="{{ auth()->user()->pengguna->sekolah->nama??'-' }}" name="sekolah" id="sekolah" disabled />
-                        </div>
-                    </div>
+                   
                     <div class="mb-3 row">
                         <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Email</label>
                         <div class="col-sm-8 col-md-9 col-lg-10">
                             <input type="email" class="form-control" name="email" id="email"
-                                   value="{{ auth()->user()->pengguna->email??'' }}" required />
+                                   value="{{ auth()->user()->email??'' }}" required />
                         </div>
                     </div>
                     <div class="mb-3 row">
