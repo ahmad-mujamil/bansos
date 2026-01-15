@@ -2,9 +2,9 @@
 
 return [
     [
-        'id' => 'MANAGEMENT',
+        'id' => 'PROFILE',
         'icon' => '',
-        'title' => 'Management',
+        'title' => 'Profile',
         'url' => 'javascript:;',
         'caret' => true,
         'sub_menu' => [
@@ -12,13 +12,13 @@ return [
                 'id' => 'PROFILE_PERORANGAN',
                 'icon' => 'user',
                 'url' => '/profile-perorangan',
-                'title' => 'Profile Perorangan'
+                'title' => 'Perorangan'
             ],
             [
                 'id' => 'PROFILE_ORGANISASI',
                 'icon' => 'building',
                 'url' => '/profile-organisasi',
-                'title' => 'PROFILE ORGANISASI'
+                'title' => 'Organisasi'
             ],
         ]
     ],
@@ -52,17 +52,17 @@ return [
         'sub_menu' => [
             [
                 'id' => 'LAP_PENGAJUAN',
-                'icon' => 'copy',
+                'icon' => 'file-text',
                 'url' => '/lap-pengajuan',
                 'title' => 'Pengajuan'
             ],
             [
                 'id' => 'LAP_REALISASI',
-                'icon' => 'copy',
+                'icon' => 'file-text',
                 'url' => '/lap-realisasi',
                 'title' => 'Realisasi'
             ],
-        ]
+        ],
     ],
 
 ];

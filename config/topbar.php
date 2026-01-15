@@ -2,15 +2,6 @@
 
 return [
     [
-        'id' => 'HELP',
-        'url' => '/help',
-        'title' => 'Bantuan',
-        'icon' => 'question-circle',
-        'caret' => false,
-        'sub_menu' => []
-    ],
-
-    [
         'id' => 'MASTER_DATA',
         'icon' => 'gear',
         'title' => 'Master Data',
