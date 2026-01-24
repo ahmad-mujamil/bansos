@@ -2,27 +2,6 @@
 
 return [
     [
-        'id' => 'PROFILE',
-        'icon' => '',
-        'title' => 'Profile',
-        'url' => 'javascript:;',
-        'caret' => true,
-        'sub_menu' => [
-            [
-                'id' => 'PROFILE_PERORANGAN',
-                'icon' => 'user',
-                'url' => '/profile-perorangan',
-                'title' => 'Perorangan'
-            ],
-            [
-                'id' => 'PROFILE_ORGANISASI',
-                'icon' => 'building',
-                'url' => '/profile-organisasi',
-                'title' => 'Organisasi'
-            ],
-        ]
-    ],
-    [
         'id' => 'BANTUAN_SOSIAL',
         'icon' => '',
         'title' => 'Bantuan Sosial',
