@@ -2,6 +2,29 @@
 
 return [
     [
+        'id' => 'ADMIN',
+        'url' => 'javascript:;',
+        'icon' => 'shield-check',
+        'title' => 'Administrator',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'PENGGUNA',
+                'url' => '/pengguna',
+                'title' => 'Pengguna'
+            ],
+            [
+                'id' => 'BLACKLIST',
+                'url' => '/blacklist',
+                'title' => 'Blacklist Pengguna'
+            ],
+            [
+                'id' => 'PENILAIAN_REALISASI',
+                'url' => '/penilaian-realisasi',
+                'title' => 'Penilaian Realisasi'
+            ],
+        ]
+    ],[
         'id' => 'MASTER_DATA',
         'icon' => 'gear',
         'title' => 'Master Data',
@@ -11,17 +34,22 @@ return [
             [
                 'id' => 'PENDUDUK',
                 'url' => '/penduduk',
-                'title' => 'penduduk'
+                'title' => 'Penduduk'
             ],
             [
-                'id' => 'ORGANISASI',
-                'url' => '/organisasi',
-                'title' => 'Organisasi'
+                'id' => 'KELOMPOK_MASYARAKAT',
+                'url' => '/kelompok-masyarakat',
+                'title' => 'Kelompok Masyarakat'
             ],
             [
                 'id' => 'JENIS_BANTUAN',
                 'url' => '/jenis-bantuan',
                 'title' => 'Jenis Bantuan'
+            ],
+            [
+                'id' => 'OPD',
+                'url' => '/opd',
+                'title' => 'OPD'
             ],
 
         ]
@@ -29,7 +57,7 @@ return [
     [
         'id' => 'WILAYAH_ADMINISTRASI',
         'icon' => 'pin',
-        'title' => 'Wilayah Administrasi',
+        'title' => 'Wilayah',
         'url' => 'javascript:;',
         'caret' => true,
         'sub_menu' => [
@@ -43,28 +71,9 @@ return [
                 'id' => 'DESA',
                 'icon' => 'destination',
                 'url' => '/desa',
-                'title' => 'Desa'
+                'title' => 'Desa/Kelurahan'
             ],
 
-        ]
-    ],
-    [
-        'id' => 'ADMIN',
-        'url' => 'javascript:;',
-        'icon' => 'shield-check',
-        'title' => 'Administrator',
-        'caret' => true,
-        'sub_menu' => [
-            [
-                'id' => 'BLACKLIST',
-                'url' => '/blacklist',
-                'title' => 'Blacklist Pengguna'
-            ],
-            [
-                'id' => 'PENILAIAN_REALISASI',
-                'url' => '/penilaian-realisasi',
-                'title' => 'Penilaian Realisasi'
-            ],
         ]
     ],
     [

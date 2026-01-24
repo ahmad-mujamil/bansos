@@ -7,7 +7,7 @@ enum JenisUsaha: string
     case UMKM_KECIL = "UMKM kecil";
     case PETANI = "Petani";
     case NELAYAN = "Nelayan";
-    case WARGA_KURANG_MAMPU = "Warga Kurang Mampu";
+    case SENIMAN = "Seniman";
 
     public function getDescription(): string
     {
@@ -15,7 +15,7 @@ enum JenisUsaha: string
             self::UMKM_KECIL => "UMKM kecil",
             self::PETANI => "Petani",
             self::NELAYAN => "Nelayan",
-            self::WARGA_KURANG_MAMPU => "Warga Kurang Mampu",
+            self::SENIMAN => "Seniman",
         };
     }
 }

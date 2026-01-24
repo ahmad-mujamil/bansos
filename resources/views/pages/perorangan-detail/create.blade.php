@@ -20,7 +20,7 @@
             </div>
         </div>
         <!-- Title and Top Buttons End -->
-        
+
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -241,7 +241,7 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                                     <label class="form-label text-small text-uppercase">Terdaftar pada DTKS</label>
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="status_dtks" name="status_dtks" 
+                                        <input class="form-check-input" type="checkbox" id="status_dtks" name="status_dtks"
                                                {{ old('status_dtks', $peroranganDetail->status_dtks ?? false) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="status_dtks">
                                             Ya, terdaftar pada DTKS
@@ -314,20 +314,20 @@
             // Function untuk load desa berdasarkan kecamatan
             function loadDesaByKecamatan(kecamatanId, selectedDesaId = null) {
                 var desaSelect = $('#desa_id');
-                
+
                 // Destroy Select2 untuk update opsi
                 if (desaSelect.data('select2')) {
                     desaSelect.select2('destroy');
                 }
-                
+
                 desaSelect.empty();
-                desaSelect.append('<option value="">Pilih Desa</option>');
-                
+                desaSelect.append('<option value="">Pilih Opd</option>');
+
                 if (kecamatanId) {
                     var selectedKecamatan = kecamatansData.find(function(k) {
                         return k.id === kecamatanId;
                     });
-                    
+
                     if (selectedKecamatan && selectedKecamatan.desa) {
                         selectedKecamatan.desa.forEach(function(desa) {
                             var selected = selectedDesaId && selectedDesaId === desa.id ? 'selected' : '';
@@ -335,11 +335,11 @@
                         });
                     }
                 }
-                
+
                 // Re-initialize Select2
                 desaSelect.select2({
                     theme: 'bootstrap4',
-                    placeholder: 'Pilih Desa',
+                    placeholder: 'Pilih Opd',
                     allowClear: true,
                 });
             }
@@ -354,7 +354,7 @@
             // Initialize Select2 untuk desa
             $('#desa_id').select2({
                 theme: 'bootstrap4',
-                placeholder: 'Pilih Desa',
+                placeholder: 'Pilih Opd',
                 allowClear: true,
             });
 
@@ -391,10 +391,10 @@
                         desaSelect.select2('destroy');
                     }
                     desaSelect.empty();
-                    desaSelect.append('<option value="">Pilih Desa</option>');
+                    desaSelect.append('<option value="">Pilih Opd</option>');
                     desaSelect.select2({
                         theme: 'bootstrap4',
-                        placeholder: 'Pilih Desa',
+                        placeholder: 'Pilih Opd',
                         allowClear: true,
                     });
                 }

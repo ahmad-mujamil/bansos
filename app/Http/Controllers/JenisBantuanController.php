@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\KecamatanRequest;
-use App\Models\Kecamatan;
+use App\Http\Requests\JenisBantuanRequest;
+use App\Models\JenisBantuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
-class KecamatanController extends Controller
+class JenisBantuanController extends Controller
 {
     private function data(): \Illuminate\Http\JsonResponse
     {
-        $data = Kecamatan::query()
+        $data = JenisBantuan::query()
             ->latest();
 
         return DataTables::of($data)
+            ->addColumn('nama_kecamatan', fn($data) => $data->kecamatan->nama ?? '-')
             ->addColumn('action', function ($data) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
                 $navActionEnd = "</ul></nav>";
 
-                $delete = "<li class='breadcrumb-item'><a href='" . route('kecamatan.destroy', $data->id) . "' data-confirm-delete='true'
+                $delete = "<li class='breadcrumb-item'><a href='" . route('jenis-bantuan.destroy', $data->id) . "' data-confirm-delete='true'
                         title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
 
-                $edit = "<li class='breadcrumb-item'><a href='" . route('kecamatan.edit', $data->id) . "'  title='Edit Data'
+                $edit = "<li class='breadcrumb-item'><a href='" . route('jenis-bantuan.edit', $data->id) . "'  title='Edit Data'
                         class='fw-bold text-success' >Edit</a></li>";
 
                 return $navActionStart . $edit . $delete . $navActionEnd;
@@ -39,58 +40,59 @@ class KecamatanController extends Controller
             return $this->data();
         }
 
-        return view('pages.kecamatan.index');
+        return view('pages.jenis-bantuan.index');
     }
 
     public function create()
     {
-        return view('pages.kecamatan.create');
+        return view('pages.jenis-bantuan.create');
     }
 
-    public function store(KecamatanRequest $request): ?\Illuminate\Http\RedirectResponse
+    public function store(JenisBantuanRequest $request): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            Kecamatan::query()->create($request->validated());
+            JenisBantuan::query()->create($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('jenis-bantuan.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }
     }
 
-    public function edit(Kecamatan $kecamatan)
+    public function edit(JenisBantuan $jenisBantuan)
     {
-        return view('pages.kecamatan.create', compact('kecamatan'));
+
+        return view('pages.jenis-bantuan.create', compact('jenisBantuan'));
     }
 
-    public function update(KecamatanRequest $request, Kecamatan $kecamatan): ?\Illuminate\Http\RedirectResponse
+    public function update(JenisBantuanRequest $request, JenisBantuan $jenisBantuan): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $kecamatan->update($request->validated());
+            $jenisBantuan->update($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('jenis-bantuan.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }
     }
 
-    public function destroy(Kecamatan $kecamatan): ?\Illuminate\Http\RedirectResponse
+    public function destroy(JenisBantuan $jenisBantuan): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $kecamatan->delete();
+            $jenisBantuan->delete();
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil dihapus');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('jenis-bantuan.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('jenis-bantuan.index');
         }
     }
 }

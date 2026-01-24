@@ -1,5 +1,5 @@
 @extends('layouts.layout')
-@section('title', 'Kecamatan')
+@section('title', 'OPD')
 @section('content')
     <!-- Page Content Start -->
     <div class="col">
@@ -8,12 +8,12 @@
             <div class="row">
                 <!-- Title Start -->
                 <div class="col mb-2">
-                    <h1 class="mb-2 pb-0 display-4" id="title">Kecamatan</h1>
+                    <h1 class="mb-2 pb-0 display-4" id="title">OPD</h1>
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Wilayah Administrasi</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('kecamatan.index') }}">Kecamatan</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Master Data</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('opd.index') }}">OPD</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -21,7 +21,7 @@
                 <!-- Top Buttons Start -->
                 <div class="col-12 col-md-5 d-flex align-items-start justify-content-end">
                     <!-- Add New Button Start -->
-                    <a href="{{ route('kecamatan.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
+                    <a href="{{ route('opd.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
                         <i data-acorn-icon="plus"></i>
                         <span>Tambah Data</span>
                     </a>
@@ -114,7 +114,7 @@
             responsive: true,
             lengthChange: false,
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
-            ajax: "{!! route('kecamatan.index') !!}",
+            ajax: "{!! route('opd.index') !!}",
             columns: [
                 {
                     data: 'nama',

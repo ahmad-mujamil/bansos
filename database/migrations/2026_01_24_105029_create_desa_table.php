@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kecamatan', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('desa', function (Blueprint $table) {
+            $table->uuid("id")->primary();
             $table->string('nama');
+            $table->foreignUuid('kecamatan_id');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kecamatan');
+        Schema::dropIfExists('desa');
     }
 };

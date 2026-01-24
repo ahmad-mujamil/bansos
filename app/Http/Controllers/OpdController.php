@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\KecamatanRequest;
-use App\Models\Kecamatan;
+use App\Http\Requests\OpdRequest;
+use App\Models\Opd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
-class KecamatanController extends Controller
+class OpdController extends Controller
 {
     private function data(): \Illuminate\Http\JsonResponse
     {
-        $data = Kecamatan::query()
+        $data = Opd::query()
             ->latest();
 
         return DataTables::of($data)
@@ -20,10 +20,10 @@ class KecamatanController extends Controller
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
                 $navActionEnd = "</ul></nav>";
 
-                $delete = "<li class='breadcrumb-item'><a href='" . route('kecamatan.destroy', $data->id) . "' data-confirm-delete='true'
+                $delete = "<li class='breadcrumb-item'><a href='" . route('opd.destroy', $data->id) . "' data-confirm-delete='true'
                         title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
 
-                $edit = "<li class='breadcrumb-item'><a href='" . route('kecamatan.edit', $data->id) . "'  title='Edit Data'
+                $edit = "<li class='breadcrumb-item'><a href='" . route('opd.edit', $data->id) . "'  title='Edit Data'
                         class='fw-bold text-success' >Edit</a></li>";
 
                 return $navActionStart . $edit . $delete . $navActionEnd;
@@ -39,58 +39,58 @@ class KecamatanController extends Controller
             return $this->data();
         }
 
-        return view('pages.kecamatan.index');
+        return view('pages.opd.index');
     }
 
     public function create()
     {
-        return view('pages.kecamatan.create');
+        return view('pages.opd.create');
     }
 
-    public function store(KecamatanRequest $request): ?\Illuminate\Http\RedirectResponse
+    public function store(OpdRequest $request): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            Kecamatan::query()->create($request->validated());
+            Opd::query()->create($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }
     }
 
-    public function edit(Kecamatan $kecamatan)
+    public function edit(Opd $opd)
     {
-        return view('pages.kecamatan.create', compact('kecamatan'));
+        return view('pages.opd.create', compact('opd'));
     }
 
-    public function update(KecamatanRequest $request, Kecamatan $kecamatan): ?\Illuminate\Http\RedirectResponse
+    public function update(OpdRequest $request, Opd $opd): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $kecamatan->update($request->validated());
+            $opd->update($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }
     }
 
-    public function destroy(Kecamatan $kecamatan): ?\Illuminate\Http\RedirectResponse
+    public function destroy(Opd $opd): ?\Illuminate\Http\RedirectResponse
     {
         try {
             DB::beginTransaction();
-            $kecamatan->delete();
+            $opd->delete();
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil dihapus');
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
-            return redirect()->route('kecamatan.index');
+            return redirect()->route('opd.index');
         }
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class DesaRequest extends FormRequest
+class OpdRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,9 +16,7 @@ class DesaRequest extends FormRequest
     {
 
         return [
-            "nama" => ["required", "string", "max:255"],
-            "kecamatan_id" => ["required", "exists:kecamatan,id"],
-        ];
+            "nama" => ["required", "string", "max:255"]        ];
     }
 }
 

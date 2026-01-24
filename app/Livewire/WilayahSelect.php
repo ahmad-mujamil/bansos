@@ -3,14 +3,15 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Enums\Kecamatan;
+use App\Models\Kecamatan;
+use App\Models\Desa;
 
 class WilayahSelect extends Component
 {
     public ?string $kecamatan = null;
     public ?string $desa = null;
 
-    public array $desaOptions = [];
+    public $desaOptions = [];
 
     public function mount(?string $kecamatan = null, ?string $desa = null): void
     {
@@ -25,6 +26,8 @@ class WilayahSelect extends Component
         $this->desa = null;
 
         $this->syncDesaOptions();
+
+        $this->dispatch('resyncSelect2');
     }
 
     private function syncDesaOptions(): void
@@ -34,18 +37,18 @@ class WilayahSelect extends Component
             return;
         }
 
-        // aman: dari string -> enum
-        try {
-            $this->desaOptions = Kecamatan::from($this->kecamatan)->desaKelurahan();
-        } catch (\ValueError) {
-            $this->desaOptions = [];
-        }
+        $this->desaOptions = Desa::query()->where('kecamatan_id', $this->kecamatan)
+            ->orderBy('nama')
+            ->get(['id', 'nama'])
+            ->toArray();
     }
 
     public function render()
     {
         return view('livewire.wilayah-select', [
-            'kecamatanOptions' => Kecamatan::options(),
+            'kecamatanOptions' => Kecamatan::query()
+                ->orderBy('nama')
+                ->get(['id', 'nama']),
         ]);
     }
 }

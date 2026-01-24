@@ -12,7 +12,7 @@
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Master Data</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Wilayah Administrasi</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('desa.index') }}">Desa</a></li>
                             <li class="breadcrumb-item"><a
                                     href="javascript:;">{{ request()->routeIs('desa.create') ? 'Tambah Data' : 'Edit Data' }}</a>

@@ -1,5 +1,5 @@
 @extends('layouts.layout')
-@section('title', 'Kecamatan')
+@section('title', 'Jenis Bantuan')
 @section('content')
     <!-- Page Content Start -->
     <div class="col">
@@ -8,12 +8,12 @@
             <div class="row">
                 <!-- Title Start -->
                 <div class="col mb-2">
-                    <h1 class="mb-2 pb-0 display-4" id="title">Kecamatan</h1>
+                    <h1 class="mb-2 pb-0 display-4" id="title">Jenis Bantuan</h1>
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Wilayah Administrasi</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('kecamatan.index') }}">Kecamatan</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Master Data</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('jenis-bantuan.index') }}">Jenis Bantuan</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -21,7 +21,7 @@
                 <!-- Top Buttons Start -->
                 <div class="col-12 col-md-5 d-flex align-items-start justify-content-end">
                     <!-- Add New Button Start -->
-                    <a href="{{ route('kecamatan.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
+                    <a href="{{ route('jenis-bantuan.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
                         <i data-acorn-icon="plus"></i>
                         <span>Tambah Data</span>
                     </a>
@@ -79,6 +79,7 @@
                     <thead>
                     <tr>
                         <th class="text-muted text-small text-uppercase">Nama</th>
+                        <th class="text-muted text-small text-uppercase">Keterangan</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                     </tr>
                     </thead>
@@ -114,11 +115,15 @@
             responsive: true,
             lengthChange: false,
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
-            ajax: "{!! route('kecamatan.index') !!}",
+            ajax: "{!! route('jenis-bantuan.index') !!}",
             columns: [
                 {
                     data: 'nama',
                     name: 'nama'
+                },
+                {
+                    data: 'keterangan',
+                    name: 'keterangan'
                 },
                 {
                     data: 'action',
