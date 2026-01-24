@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->default('user');
             $table->string('no_telp',15)->nullable();
-            $table->tinyInteger('status')->nullable()->comment('enum statususer');
             $table->boolean('is_active')->default(true);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->foreignUuid('opd_id')->nullable()->constrained('opd')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
         });

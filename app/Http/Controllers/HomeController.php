@@ -2,10 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JenisPenilaian;
-use App\Models\Classroom;
-use App\Models\GradeNilai;
-use App\Models\Pasien;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 

@@ -25,10 +25,9 @@ return new class extends Migration
             $table->string('pekerjaan');
             $table->string('pendidikan');
             $table->string('rt_rw',7)->comment('RT/RW');
-            $table->string('kelurahan');
-            $table->string('kecamatan');
-            $table->string('kabupaten');
-            $table->foreignUuid('user_id')->nullable()->constrained('users');
+            $table->foreignUuid('desa_id')->nullable()->constrained('desa')->nullOnDelete();
+            $table->foreignUuid('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
+            $table->tinyInteger('level_desil');
             $table->timestamps();
         });
     }

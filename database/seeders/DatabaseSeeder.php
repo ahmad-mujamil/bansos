@@ -16,14 +16,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::query()->create([
-            'nama' => 'Administrator',
+        $this->call([
+            KecamatanSeeder::class,
+        ]);
+
+        User::query()->updateOrCreate([
             'email' => 'admin@bansos.test',
+        ], [
+            'nama' => 'Administrator',
             'role' => 'super',
             'is_active' => true,
             'username' => 'admin',
             'password' => bcrypt('1q2w3e4r5t'),
-            'status' => StatusUser::ADMIN_APP
         ]);
     }
 }

@@ -2,24 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Kecamatan extends Model
 {
-    use HasFactory, HasUuids;
-
+    use HasUuids;
     protected $table = 'kecamatan';
+    protected $keyType = 'string';
 
-    protected $fillable = [
-        'nama',
-    ];
 
     public function desa(): HasMany
     {
         return $this->hasMany(Desa::class);
     }
 }
-

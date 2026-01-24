@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
-  
+
     protected $redirectTo = '/login';
 
     public function __construct()
@@ -28,25 +28,23 @@ class RegisterController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $validated = $request->validated();
-            
+
             User::create([
                 'nama' => $validated['nama'],
                 'email' => $validated['email'],
                 'username' => $validated['username'],
-                'password' => $validated['password'], 
+                'password' => $validated['password'],
                 'role' => RoleUser::USER,
-                'status' => StatusUser::from($validated['status']),
                 'is_active' => true,
             ]);
 
             DB::commit();
-            
+
             toast()->success('Berhasil !!', 'Registrasi berhasil! Silakan login dengan akun Anda.');
             return redirect()->route('login');
         } catch (\Throwable $th) {
-            DB::rollBack();
             toast()->error('Oppss !!', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
             return back()->withInput();
         }

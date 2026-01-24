@@ -15,17 +15,12 @@ class RegisterRequest extends FormRequest
 
     public function rules(): array
     {
-        $statusValues = [
-            StatusUser::PERORANGAN->value,
-            StatusUser::ORGANISASI->value
-        ];
 
         return [
             "nama" => ["required", "string", "max:255"],
             "email" => ["required", "email", "max:255", "unique:users,email"],
             "username" => ["required", "string", "max:50", "unique:users,username"],
             "password" => ["required", "string", "min:8", "confirmed"],
-            "status" => ["required", "integer", Rule::in($statusValues)],
         ];
     }
 
@@ -47,9 +42,6 @@ class RegisterRequest extends FormRequest
             "password.string" => "Password harus berupa teks.",
             "password.min" => "Password minimal 8 karakter.",
             "password.confirmed" => "Konfirmasi password tidak cocok.",
-            "status.required" => "Status user harus dipilih.",
-            "status.integer" => "Status user harus berupa angka.",
-            "status.in" => "Status user tidak valid.",
         ];
     }
 }

@@ -32,23 +32,4 @@ enum RoleUser:string {
             ],
         };
     }
-
-    public function getStatusUser() : array
-    {
-        return match ($this) {
-            self::SUPER, self::ADMIN => [StatusUser::ADMIN_APP],
-            self::OPD => [
-                StatusUser::BUPATI,
-                StatusUser::WAKIL_BUPATI,
-                StatusUser::KADIS,
-                StatusUser::SEKRETARIS,
-                StatusUser::KABAG,
-                StatusUser::KASIE
-            ],
-            self::USER => [
-                StatusUser::PERORANGAN,
-                StatusUser::ORGANISASI
-            ],
-        };
-    }
 }

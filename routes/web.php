@@ -23,11 +23,6 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail']], function
     Route::get('/my-profile/security', [App\Http\Controllers\ProfileController::class, 'security'])->name('security.index');
     Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
 
-    //PERORANGAN DETAIL
-    Route::get('/perorangan-detail/create', [App\Http\Controllers\PeroranganDetailController::class, 'create'])->name('perorangan-detail.create');
-    Route::post('/perorangan-detail', [App\Http\Controllers\PeroranganDetailController::class, 'store'])->name('perorangan-detail.store');
-    Route::get('/perorangan-detail/edit', [App\Http\Controllers\PeroranganDetailController::class, 'edit'])->name('perorangan-detail.edit');
-    Route::put('/perorangan-detail', [App\Http\Controllers\PeroranganDetailController::class, 'update'])->name('perorangan-detail.update');
 
     //USERS
     Route::middleware(['role:super'])->group(function () {
@@ -35,9 +30,12 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail']], function
     });
 
     //MASTER DATA
-    Route::middleware(['role:super'])->group(function () {
+    Route::middleware(['role:super,admin'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
         Route::resource('desa', App\Http\Controllers\DesaController::class);
+        Route::resource('opd', App\Http\Controllers\OpdController::class);
+        Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
     });
+
 
 });

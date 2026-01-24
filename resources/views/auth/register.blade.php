@@ -18,7 +18,7 @@
                 <div>
                     <form id="registerForm" class="tooltip-end-bottom" novalidate action="{{ route('register') }}" method="post">
                         @csrf
-                        
+
                         @if ($errors->any())
                             <div class="alert alert-danger mb-3">
                                 <ul class="mb-0">
@@ -39,7 +39,7 @@
                             <i data-acorn-icon="user"></i>
                             <input class="form-control @error('nama') is-invalid @enderror" placeholder="Nama" name="nama" id="nama" value="{{ old('nama') }}" required />
                         </div>
-                        
+
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="email"></i>
                             <input type="email" class="form-control @error('email') is-invalid @enderror" placeholder="Email" name="email" id="email" value="{{ old('email') }}" required />
@@ -60,21 +60,6 @@
                             <input type="password" class="form-control pe-7 @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="Konfirmasi Password" required />
                         </div>
 
-                        <div class="mb-3 filled form-group tooltip-end-top">
-                            <i data-acorn-icon="user"></i>
-                            <select class="form-control @error('status') is-invalid @enderror" name="status" id="status" required>
-                                <option value="">Pilih Status User</option>
-                                <option value="{{ \App\Enums\StatusUser::PERORANGAN->value }}" {{ old('status') == \App\Enums\StatusUser::PERORANGAN->value ? 'selected' : '' }}>
-                                    {{ \App\Enums\StatusUser::PERORANGAN->getDescription() }}
-                                </option>
-                                <option value="{{ \App\Enums\StatusUser::ORGANISASI->value }}" {{ old('status') == \App\Enums\StatusUser::ORGANISASI->value ? 'selected' : '' }}>
-                                    {{ \App\Enums\StatusUser::ORGANISASI->getDescription() }}
-                                </option>
-                                <option value="{{ \App\Enums\StatusUser::KELOMPOK->value }}" {{ old('status') == \App\Enums\StatusUser::KELOMPOK->value ? 'selected' : '' }}>
-                                    {{ \App\Enums\StatusUser::KELOMPOK->getDescription() }}
-                                </option>
-                            </select>
-                        </div>
 
                         <button type="submit" class="btn btn-lg btn-primary w-100">Daftar</button>
                     </form>
@@ -92,5 +77,5 @@
     <!-- Right Side End -->
 @endsection
 @section('content_left')
-   
+
 @endsection

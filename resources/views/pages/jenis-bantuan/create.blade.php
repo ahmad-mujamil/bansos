@@ -1,5 +1,5 @@
 @extends('layouts.layout')
-@section('title', 'Kecamatan')
+@section('title', 'Jenis Bantuan')
 @section('content')
     <!-- Page Content Start -->
     <div class="col">
@@ -8,14 +8,14 @@
             <div class="row">
                 <!-- Title Start -->
                 <div class="col mb-2">
-                    <h1 class="mb-2 pb-0 display-4" id="title">Kecamatan</h1>
+                    <h1 class="mb-2 pb-0 display-4" id="title">Jenis Bantuan</h1>
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Wilayah Administrasi</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('kecamatan.index') }}">Kecamatan</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Master Data</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('jenis-bantuan.index') }}">Jenis Bantuan</a></li>
                             <li class="breadcrumb-item"><a
-                                    href="javascript:;">{{ request()->routeIs('kecamatan.create') ? 'Tambah Data' : 'Edit Data' }}</a>
+                                    href="javascript:;">{{ request()->routeIs('jenis-bantuan.create') ? 'Tambah Data' : 'Edit Data' }}</a>
                             </li>
                         </ul>
                     </nav>
@@ -24,7 +24,7 @@
                 <!-- Top Buttons Start -->
                 <div class="col-12 col-md-5 d-flex align-items-start justify-content-end">
                     <!-- Back Button Start -->
-                    <a href="{{ route('kecamatan.index') }}"
+                    <a href="{{ route('jenis-bantuan.index') }}"
                        class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
                         <i data-acorn-icon="arrow-left"></i>
                         <span>Kembali</span>
@@ -47,19 +47,25 @@
 
         <div class="card mb-5">
             @php
-                $route = request()->routeIs('kecamatan.create') ? route('kecamatan.store') : route('kecamatan.update',$kecamatan->id??'');
-                $method = request()->routeIs('kecamatan.create') ? 'POST' : 'PUT';
+                $route = request()->routeIs('jenis-bantuan.create') ? route('jenis-bantuan.store') : route('jenis-bantuan.update',$jenisBantuan->id??'');
+                $method = request()->routeIs('jenis-bantuan.create') ? 'POST' : 'PUT';
             @endphp
             <form novalidate enctype="multipart/form-data" action="{{ $route }}" method="POST" class="needs-validation">
                 @csrf
                 @method($method)
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Nama Kecamatan</label>
+                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Nama Jenis</label>
                             <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama"
                                    name="nama" required
-                                   value="{{ old('nama',$kecamatan->nama??'') }}"/>
+                                   value="{{ old('nama',$jenisBantuan->nama??'') }}"/>
+                        </div>
+                        <div class="col-lg-9 col-md-9 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Keterangan</label>
+                            <input type="text" class="form-control @error('keterangan') is-invalid @enderror" id="keterangan"
+                                   name="keterangan" required
+                                   value="{{ old('keterangan',$jenisBantuan->keterangan??'') }}"/>
                         </div>
                     </div>
 

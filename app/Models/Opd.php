@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Desa extends Model
+class Opd extends Model
 {
     use HasUuids;
-    protected $table = 'desa';
+    protected $table = 'opd';
     protected $keyType = 'string';
 
-    public function kecamatan(): BelongsTo
+    public function user(): HasMany
     {
-        return $this->belongsTo(Kecamatan::class);
+        return $this->hasMany(User::class);
     }
 }
+

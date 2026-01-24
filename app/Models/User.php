@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleUser;
-use App\Enums\StatusUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasUuids;
     protected $keyType = 'string';
@@ -28,7 +27,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'role' => RoleUser::class,
-            'status' => StatusUser::class,
         ];
     }
 
@@ -45,11 +43,6 @@ class User extends Authenticatable
     public function is_user() : bool
     {
         return $this->role->value==='user';
-    }
-
-    public function peroranganDetail() : HasOne
-    {
-        return $this->hasOne(PeroranganDetail::class, 'user_id', 'id');
     }
 
 }
