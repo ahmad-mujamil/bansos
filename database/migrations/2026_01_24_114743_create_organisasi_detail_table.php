@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelompok_masyarakat_detail', function (Blueprint $table) {
+        Schema::create('organisasi_detail', function (Blueprint $table) {
             $table->uuid("id")->primary();
-            $table->foreignUuid('kelompok_masyarakat_id')->constrained("kelompok_masyarakat");
+            $table->foreignUuid('organisasi_id')->constrained("organisasi");
             $table->foreignUuid("penduduk_id")->constrained("penduduk");
             $table->string("jabatan")->comment("dari enum jabatan organisasi");
             $table->timestamps();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelompok_masyarakat_detail');
+        Schema::dropIfExists('organisasi_detail');
     }
 };

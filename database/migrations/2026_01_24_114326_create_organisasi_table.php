@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelompok_masyarakat', function (Blueprint $table) {
+        Schema::create('organisasi', function (Blueprint $table) {
             $table->uuid("id")->primary();
             $table->string('nama');
-            $table->string('nomor_sk',100)->unique()->comment('nomor sk kelompok masyarakat');
+            $table->string('nomor',100)->unique()->comment('nomor sk/akta/kemenkumham');
             $table->date('tgl_pembentukan');
+            $table->string('jenis')->comment('dari enum jenis organisasi');
             $table->foreignUuid('desa_id')->constrained("desa");
             $table->foreignUuid("kecamatan_id")->constrained("kecamatan");
             $table->foreignUuid("opd_id")->constrained("opd");
             $table->foreignUuid("user_id")->constrained('users');
+            $table->boolean("is_active")->default(true);
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelompok_masyarakat');
+        Schema::dropIfExists('organisasi');
     }
 };
