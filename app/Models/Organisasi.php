@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class KelompokMasyarakat extends Model
+class Organisasi extends Model
 {
     use HasUuids;
-    protected $table = 'kelompok_masyarakat';
+    protected $table = 'organisasi';
     protected $keyType = 'string';
 
     protected function casts(): array
@@ -17,6 +18,11 @@ class KelompokMasyarakat extends Model
         return [
             'tgl_pembentukan' => 'date:Y-m-d'
         ];
+    }
+
+    public function organisasiDetail(): HasMany
+    {
+        return $this->hasMany(OrganisasiDetail::class);
     }
 
     public function kecamatan(): BelongsTo
