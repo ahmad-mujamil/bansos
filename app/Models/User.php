@@ -45,4 +45,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role->value==='user';
     }
 
+    public function opd(): BelongsTo
+    {
+        return $this->belongsTo(Opd::class);
+    }
+
 }

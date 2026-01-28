@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Penduduk extends Model
 {
@@ -11,6 +12,14 @@ class Penduduk extends Model
     protected $table = 'penduduk';
     protected $keyType = 'string';
 
+    protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'tgl_lahir' => 'date',
+        ];
+    }
 
     public function desa(): BelongsTo
     {

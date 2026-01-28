@@ -35,6 +35,9 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail']], function
         Route::resource('desa', App\Http\Controllers\DesaController::class);
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
+        Route::resource('kelompok-masyarakat', App\Http\Controllers\KelompokMasyarakatController::class);
+        Route::resource('kelompok-masyarakat.anggota', App\Http\Controllers\KelompokMasyarakatAnggotaController::class)->except(['show']);
+        Route::resource('kelompok-masyarakat.dokumen', App\Http\Controllers\KelompokMasyarakatDokumenController::class)->except(['show']);
     });
 
 

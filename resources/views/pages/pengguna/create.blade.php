@@ -55,7 +55,7 @@
                 @method($method)
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
+                        <div class="col-lg-5 col-md-5 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Nama Pengguna</label>
                             <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama"
                                    name="nama" required
@@ -66,19 +66,6 @@
                             <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
                                    name="email" required
                                    value="{{ old('email',$pengguna->email??'') }}"/>
-                        </div>
-
-                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Username</label>
-                            <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                   id="username" name="username" required
-                                   value="{{ old('username',$pengguna->username??'') }}"/>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Password</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                   id="password" name="password" {{ request()->routeIs('pengguna.create') ? 'required' : '' }}
-                                   />
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Role</label>
@@ -93,6 +80,19 @@
                             </select>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Username</label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror"
+                                   id="username" name="username" required
+                                   value="{{ old('username',$pengguna->username??'') }}"/>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Password</label>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                   id="password" name="password" {{ request()->routeIs('pengguna.create') ? 'required' : '' }}
+                                   />
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Status</label>
                             <select name="is_active" id="is_active"
                                     class="form-control @error('is_active') is-invalid @enderror">
@@ -105,6 +105,18 @@
                                     value="0" {{ (old('is_active',$pengguna->is_active??'') == 0) ? 'selected' : '' }}>
                                     Non Active
                                 </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">OPD</label>
+                            <select name="opd_id" id="opd_id" class="form-control @error('opd_id') is-invalid @enderror">
+                                <option value="">Pilih OPD</option>
+                                @foreach($opds ?? [] as $opd)
+                                    <option
+                                        value="{{ $opd->id }}" {{ (old('opd_id',$pengguna->opd_id??'') == $opd->id) ? 'selected' : '' }}>
+                                        {{ $opd->nama }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -133,6 +145,11 @@
             $('#is_active').select2({
                 theme: 'bootstrap4',
                 placeholder: 'Pilih Status',
+                allowClear: true,
+            });
+            $('#opd_id').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Pilih OPD',
                 allowClear: true,
             });
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleUser;
 use App\Http\Requests\PenggunaRequest;
+use App\Models\Opd;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -53,7 +54,8 @@ class PenggunaController extends Controller
             ->where('role',RoleUser::USER)
             ->where('is_active',true)
             ->get();
-        return view('pages.pengguna.create',compact('members'));
+        $opds = Opd::query()->orderBy('nama')->get();
+        return view('pages.pengguna.create',compact('members', 'opds'));
     }
     public function store(PenggunaRequest $request)
     {
@@ -76,7 +78,8 @@ class PenggunaController extends Controller
         //     ->where('role',RoleUser::USER)
         //     ->where('is_active',true)
         //     ->get();
-        return view('pages.pengguna.create', compact('pengguna'));
+        $opds = Opd::query()->orderBy('nama')->get();
+        return view('pages.pengguna.create', compact('pengguna', 'opds'));
     }
     public function update(PenggunaRequest $request, User $pengguna)
     {

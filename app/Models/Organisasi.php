@@ -13,16 +13,24 @@ class Organisasi extends Model
     protected $table = 'organisasi';
     protected $keyType = 'string';
 
+    protected $guarded = [];
+
     protected function casts(): array
     {
         return [
-            'tgl_pembentukan' => 'date:Y-m-d'
+            'tgl_pembentukan' => 'date:Y-m-d',
+            'is_active' => 'boolean',
         ];
     }
 
     public function organisasiDetail(): HasMany
     {
         return $this->hasMany(OrganisasiDetail::class);
+    }
+
+    public function organisasiDokumen(): HasMany
+    {
+        return $this->hasMany(OrganisasiDokumen::class);
     }
 
     public function kecamatan(): BelongsTo
