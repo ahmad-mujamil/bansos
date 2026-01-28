@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             KecamatanSeeder::class,
+            PendudukSeeder::class,
         ]);
 
         User::query()->updateOrCreate([

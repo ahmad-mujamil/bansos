@@ -26,6 +26,7 @@ class PenggunaRequest extends FormRequest
             "password" => [$userId ? "nullable" : "required", "string", "min:8"],
             "is_active" => ["required", "boolean"],
             "role" => ["required", "string", Rule::in($roles)],
+            "opd_id" => ["nullable", "uuid", "exists:opd,id"],
         ];
     }
 }

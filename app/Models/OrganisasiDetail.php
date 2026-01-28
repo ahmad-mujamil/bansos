@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\JabatanOrganisasi;
-use App\Enums\JenisOrganisasi;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,12 +13,12 @@ class OrganisasiDetail extends Model
     protected $table = 'organisasi_detail';
     protected $keyType = 'string';
 
+    protected $fillable = ['organisasi_id', 'penduduk_id', 'jabatan'];
+
     protected function casts(): array
     {
         return [
             'jabatan' => JabatanOrganisasi::class,
-            'jenis' => JenisOrganisasi::class
-
         ];
     }
 
