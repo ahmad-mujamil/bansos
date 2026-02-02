@@ -23,27 +23,22 @@ enum RoleUser: string
     public function getPermissions(): array
     {
         return match ($this) {
-            self::SUPER, self::ADMIN => ["*"],
-            self::OPD => [
-                "MASTER_DATA",
-                "KELOMPOK_MASYARAKAT",
+            self::SUPER =>  ["*"],
+            self::ADMIN => [
+                "ADMIN","PENGGUNA","BLACKLIST","MONITORING",
+                "MASTER_DATA","PENDUDUK","KELOMPOK_MASYARAKAT","JENIS_BANTUAN","OPD",
+                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA",
                 "LAPORAN","LAP_PENGAJUAN","LAP_REALISASI"
             ],
+            self::OPD => [
+                "ADMIN","PENILAIAN_REALISASI","MONITORING",
+                "MASTER_DATA", "PENDUDUK", "KELOMPOK_MASYARAKAT",
+                "VERIFIKASI", "VERIFY_PENGGUNA","VERIFY_ORGANISASI", "VERIFY_BANSOS",
+                "LAPORAN","LAP_PENGAJUAN","LAP_REALISASI",
+            ],
             self::USER => [
-                "PENGUMUMAN",
-                "MANAGEMENT_ANGGOTA",
-                "DAFTAR_ANGGOTA",
-                "PENEMPATAN",
-                "TRANSAKSI",
-                "BUY-TIKET",
-                "BUY-PAKET",
-                "KONFIRMASI_PEMBELIAN",
-                "JARINGAN",
-                "POHON_SPONSOR",
-                "CARI_DOWNLINE",
-                "WALLET",
-                "SALDO",
-                "WITHDRAW"
+                "BANTUAN_SOSIAL","PENGAJUAN","REALISASI",
+                "SIDE_LAPORAN","SIDE_LAP_PENGAJUAN","SIDE_LAP_REALISASI"
             ],
         };
     }

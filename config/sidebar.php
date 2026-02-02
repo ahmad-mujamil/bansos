@@ -23,20 +23,20 @@ return [
         ]
     ],
     [
-        'id' => 'LAPORAN',
+        'id' => 'SIDE_LAPORAN',
         'icon' => '',
         'title' => 'Laporan',
         'url' => 'javascript:;',
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'LAP_PENGAJUAN',
+                'id' => 'SIDE_LAP_PENGAJUAN',
                 'icon' => 'file-text',
                 'url' => '/lap-pengajuan',
                 'title' => 'Pengajuan'
             ],
             [
-                'id' => 'LAP_REALISASI',
+                'id' => 'SIDE_LAP_REALISASI',
                 'icon' => 'file-text',
                 'url' => '/lap-realisasi',
                 'title' => 'Realisasi'

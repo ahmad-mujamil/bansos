@@ -23,6 +23,11 @@ return [
                 'url' => '/penilaian-realisasi',
                 'title' => 'Penilaian Realisasi'
             ],
+            [
+                'id' => 'MONITORING',
+                'url' => '/monitoring',
+                'title' => 'Monitoring'
+            ],
         ]
     ],[
         'id' => 'MASTER_DATA',
