@@ -17,7 +17,8 @@ class JenisBantuanRequest extends FormRequest
 
         return [
             "nama" => ["required", "string", "max:255"]  ,
-            'keterangan' => ['required', 'string']
+            'keterangan' => ['required', 'string'],
+            "kategori" => ["required", "string"],
         ];
     }
 }

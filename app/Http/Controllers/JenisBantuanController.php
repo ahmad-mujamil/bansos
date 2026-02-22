@@ -16,7 +16,7 @@ class JenisBantuanController extends Controller
             ->latest();
 
         return DataTables::of($data)
-            ->addColumn('nama_kecamatan', fn($data) => $data->kecamatan->nama ?? '-')
+            ->addColumn('kategori', fn($data) => $data->kategori->getBadge() ?? '-')
             ->addColumn('action', function ($data) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
                 $navActionEnd = "</ul></nav>";
@@ -29,7 +29,7 @@ class JenisBantuanController extends Controller
 
                 return $navActionStart . $edit . $delete . $navActionEnd;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'kategori'])
             ->toJson();
     }
 

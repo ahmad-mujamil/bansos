@@ -78,6 +78,7 @@
                     id="datatable-serverside">
                     <thead>
                     <tr>
+                        <th class="text-muted text-small text-uppercase">Kategori</th>
                         <th class="text-muted text-small text-uppercase">Nama</th>
                         <th class="text-muted text-small text-uppercase">Keterangan</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
@@ -117,6 +118,10 @@
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
             ajax: "{!! route('jenis-bantuan.index') !!}",
             columns: [
+                {
+                    data: 'kategori',
+                    name: 'kategori'
+                },
                 {
                     data: 'nama',
                     name: 'nama'
