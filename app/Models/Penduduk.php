@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\JenisKelamin;
+use App\Enums\LevelDesil;
+use App\Enums\StatusPerkawinan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -18,6 +21,9 @@ class Penduduk extends Model
     {
         return [
             'tgl_lahir' => 'date',
+            'status_perkawinan' => StatusPerkawinan::class,
+            'level_desil' => LevelDesil::class,
+            'jk' => JenisKelamin::class,
         ];
     }
 

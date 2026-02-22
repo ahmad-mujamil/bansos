@@ -24,10 +24,14 @@ class WilayahSelect extends Component
     public function updatedKecamatan($value): void
     {
         $this->desa = null;
-
         $this->syncDesaOptions();
+        $this->dispatch('set-kecamatan', kecamatan: $this->kecamatan);
+        $this->dispatch('resync-desa', desaOptions: $this->desaOptions, desa: $this->desa);
+    }
 
-        $this->dispatch('resyncSelect2');
+    public function updatedDesa($value): void
+    {
+        $this->dispatch('set-desa', desa: $value);
     }
 
     private function syncDesaOptions(): void

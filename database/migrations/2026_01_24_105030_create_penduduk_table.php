@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('penduduk', static function (Blueprint $table) {
             $table->uuid("id")->primary();
             $table->string('nik',25)->unique();
-            $table->string('no_kk',25)->unique();
+            $table->string('no_kk',25);
             $table->string('nama');
             $table->string('alamat');
             $table->string('tempat_lahir');
@@ -29,6 +29,8 @@ return new class extends Migration
             $table->foreignUuid('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
             $table->tinyInteger('level_desil');
             $table->timestamps();
+
+            $table->unique(['nik','no_kk']);
         });
     }
 

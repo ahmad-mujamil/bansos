@@ -33,6 +33,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail']], function
     Route::middleware(['role:super,admin'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
         Route::resource('desa', App\Http\Controllers\DesaController::class);
+        Route::resource('penduduk', App\Http\Controllers\PendudukController::class);
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
         Route::resource('kelompok-masyarakat', App\Http\Controllers\KelompokMasyarakatController::class);
