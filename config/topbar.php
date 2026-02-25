@@ -91,13 +91,9 @@ return [
             [
                 'id' => 'VERIFY_PENGGUNA',
                 'url' => '/verifikasi-pengguna',
-                'title' => 'Pendaftaran Perorangan'
+                'title' => 'Verifikasi Pengguna'
             ],
-            [
-                'id' => 'VERIFY_ORGANISASI',
-                'url' => '/verifikasi-organisasi',
-                'title' => 'Pendaftaran Organisasi'
-            ],
+            
             [
                 'id' => 'VERIFY_BANSOS',
                 'url' => '/verifikasi-bansos',

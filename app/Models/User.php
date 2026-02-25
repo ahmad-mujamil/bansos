@@ -50,4 +50,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Opd::class);
     }
 
+    public function userDetail(): HasOne
+    {
+        return $this->hasOne(UserDetail::class);
+    }
+
 }

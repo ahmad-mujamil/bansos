@@ -37,7 +37,7 @@ class RegisterController extends Controller
                 'username' => $validated['username'],
                 'password' => $validated['password'],
                 'role' => RoleUser::USER,
-                'is_active' => true,
+                'is_active' => false,
             ]);
 
             DB::commit();

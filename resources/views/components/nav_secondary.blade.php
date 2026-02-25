@@ -21,7 +21,9 @@
                     $currentUrl = Request::path();
                     $sidebarMenus = collect(config('sidebar'));
                     $userMenus = auth()->user()->role->getPermissions();
+                    $canAccessSidebarMenus = !auth()->user()->is_user() || auth()->user()->is_active;
                 @endphp
+                @if($canAccessSidebarMenus)
                 @foreach($sidebarMenus as $menu)
                     @if(in_array($menu["id"], $userMenus) || auth()->user()->is_super())
 
@@ -54,6 +56,7 @@
                         </li>
                     @endif
                 @endforeach
+                @endif
             </ul>
         </li>
     </ul>

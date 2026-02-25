@@ -28,6 +28,7 @@ enum RoleUser: string
                 "ADMIN","PENGGUNA","BLACKLIST","MONITORING",
                 "MASTER_DATA","PENDUDUK","KELOMPOK_MASYARAKAT","JENIS_BANTUAN","OPD",
                 "WILAYAH_ADMINISTRASI","KECAMATAN","DESA",
+                "VERIFIKASI","VERIFY_PENGGUNA","VERIFY_BANSOS",
                 "LAPORAN","LAP_PENGAJUAN","LAP_REALISASI"
             ],
             self::OPD => [
@@ -38,7 +39,7 @@ enum RoleUser: string
             ],
             self::USER => [
                 "BANTUAN_SOSIAL","PENGAJUAN","REALISASI",
-                "SIDE_LAPORAN","SIDE_LAP_PENGAJUAN","SIDE_LAP_REALISASI"
+                "PROFILE_USER","PROFILE_USER_DETAIL"
             ],
         };
     }
