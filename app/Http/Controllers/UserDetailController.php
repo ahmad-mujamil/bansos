@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JenisUser;
+use App\Enums\VerificationStatus;
 use App\Models\Kecamatan;
 use App\Models\UserDetail;
 use Illuminate\Http\Request;
@@ -17,8 +18,12 @@ class UserDetailController extends Controller
         $user = auth()->user();
         $userDetail = $user->userDetail;
         if ($userDetail) {
-            $userDetail->load('desa.kecamatan.desa');
+            $userDetail->load('desa.kecamatan.desa', 'verifiedBy');
         }
+        $isLocked = $userDetail && (
+            $userDetail->verification_status === VerificationStatus::APPROVED
+            || $user->is_active
+        );
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
         $kecamatansData = $kecamatans->map(function ($k) {
             return [
@@ -33,6 +38,7 @@ class UserDetailController extends Controller
             'kecamatans' => $kecamatans,
             'kecamatansData' => $kecamatansData,
             'jenisUserOptions' => JenisUser::cases(),
+            'isLocked' => $isLocked,
         ]);
     }
 
@@ -76,6 +82,11 @@ class UserDetailController extends Controller
         $userDetail = $user->userDetail;
 
         if (!$userDetail) {
+            return redirect()->route('user-detail.create');
+        }
+
+        if ($userDetail->verification_status === VerificationStatus::APPROVED || $user->is_active) {
+            toast()->warning('Data tidak dapat diubah', 'Data detail sudah diverifikasi/aktif dan tidak dapat diubah.');
             return redirect()->route('user-detail.create');
         }
 
