@@ -223,7 +223,7 @@
             <div class="row g-4">
                 {{-- Card Hibah --}}
                 <div class="col-12 col-md-6 col-lg-4">
-                    <a href="{{ url('/pengajuan') }}" class="text-decoration-none d-block h-100">
+                    <a href="{{ route('pengajuan.create', ['jenis' => 'hibah']) }}" class="text-decoration-none d-block h-100">
                         <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                             <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%); min-height: 200px;">
                                 <div class="p-4 position-relative z-1">
@@ -246,7 +246,7 @@
                 </div>
                 {{-- Card Bantuan ke Masyarakat --}}
                 <div class="col-12 col-md-6 col-lg-4">
-                    <a href="{{ url('/pengajuan') }}" class="text-decoration-none d-block h-100">
+                    <a href="{{ route('pengajuan.create', ['jenis' => 'bantuan_kelompok']) }}" class="text-decoration-none d-block h-100">
                         <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                             <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #0d9488 0%, #0f766e 50%, #115e59 100%); min-height: 200px;">
                                 <div class="p-4 position-relative z-1">
@@ -269,7 +269,7 @@
                 </div>
                 {{-- Card Bantuan Sosial --}}
                 <div class="col-12 col-md-6 col-lg-4">
-                    <a href="{{ url('/pengajuan') }}" class="text-decoration-none d-block h-100">
+                    <a href="{{ route('pengajuan.create', ['jenis' => 'bansos']) }}" class="text-decoration-none d-block h-100">
                         <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                             <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #ea580c 0%, #c2410c 50%, #9a3412 100%); min-height: 200px;">
                                 <div class="p-4 position-relative z-1">

@@ -21,6 +21,15 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::get('/user-detail', [App\Http\Controllers\UserDetailController::class, 'create'])->name('user-detail.create');
     Route::post('/user-detail', [App\Http\Controllers\UserDetailController::class, 'store'])->name('user-detail.store');
     Route::put('/user-detail', [App\Http\Controllers\UserDetailController::class, 'update'])->name('user-detail.update');
+
+    // Pengajuan (user)
+    Route::get('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'index'])->name('pengajuan.index');
+    Route::get('/pengajuan/create', [App\Http\Controllers\PengajuanController::class, 'create'])->name('pengajuan.create');
+    Route::post('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'store'])->name('pengajuan.store');
+    Route::get('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'show'])->name('pengajuan.show');
+    Route::get('/pengajuan/{pengajuan}/edit', [App\Http\Controllers\PengajuanController::class, 'edit'])->name('pengajuan.edit');
+    Route::put('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'update'])->name('pengajuan.update');
+    Route::post('/pengajuan/{pengajuan}/submit', [App\Http\Controllers\PengajuanController::class, 'submit'])->name('pengajuan.submit');
     //PROFILE
     Route::get('/my-profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::put('/my-profile', [App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
