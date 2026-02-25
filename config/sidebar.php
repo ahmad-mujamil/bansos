@@ -1,10 +1,26 @@
 <?php
 
 return [
+
+    [
+        'id' => 'PROFILE_USER',
+        'icon' => 'user',
+        'title' => 'Profile User',
+        'url' => 'javascript:;',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'PROFILE_USER_DETAIL',
+                'icon' => 'user',
+                'url' => '/user-detail',
+                'title' => 'Detail Data'
+            ],
+        ],
+    ],
     [
         'id' => 'BANTUAN_SOSIAL',
         'icon' => '',
-        'title' => 'Bantuan Sosial',
+        'title' => 'Pengajuan Bantuan',
         'url' => 'javascript:;',
         'caret' => true,
         'sub_menu' => [
@@ -43,5 +59,7 @@ return [
             ],
         ],
     ],
+
+
 
 ];

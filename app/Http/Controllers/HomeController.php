@@ -31,6 +31,17 @@ class HomeController extends Controller
             }
         }
 
+        if(auth()->user()->is_user()){
+            auth()->user()->load('userDetail.desa');
+            return view('home-user', compact('totalPerorangan',
+                'totalOrganisasi',
+                'totalBansos',
+                'totalPengajuan',
+                'dataLabel',
+                'dataChartPengajuan',
+                'dataChartBansos'));
+        } 
+
         return view('home', compact('totalPerorangan',
             'totalOrganisasi',
             'totalBansos',
