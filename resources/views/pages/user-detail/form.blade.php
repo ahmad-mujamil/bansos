@@ -38,7 +38,11 @@
             $isEdit = (bool) $userDetail;
             $route = $isEdit ? route('user-detail.update') : route('user-detail.store');
             $method = $isEdit ? 'PUT' : 'POST';
-            $type = old('type', $userDetail?->type?->value ?? \App\Enums\JenisUser::INDIVIDUAL->value);
+            // Pastikan nilai jenis_user dari auth selalu string
+            $authJenis = auth()->user()?->jenis_user;
+            $authJenisValue = $authJenis instanceof \App\Enums\JenisUser ? $authJenis->value : $authJenis;
+            // Prioritas: old() -> jenis_user di tabel users -> default INDIVIDUAL
+            $type = old('type', $authJenisValue ?? \App\Enums\JenisUser::INDIVIDUAL->value);
             $isIndividual = $type === \App\Enums\JenisUser::INDIVIDUAL->value;
             $isLocked = $isLocked ?? false;
         @endphp
@@ -91,17 +95,18 @@
 
             <div class="card mb-5">
                 <div class="card-body">
-                    <h2 class="small-title mb-4">Jenis & Data Umum</h2>
+                    <h2 class="small-title mb-4">Jenis & Data Umum </h2>
                     <div class="row">
                         <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Jenis User <span class="text-danger">*</span></label>
-                            <select name="type" id="type" class="form-select @error('type') is-invalid @enderror" required @disabled($isLocked)>
+                            <select id="type" class="form-select" disabled>
                                 @foreach($jenisUserOptions as $opt)
-                                    <option value="{{ $opt->value }}" {{ old('type', $userDetail?->type?->value ?? '') == $opt->value ? 'selected' : '' }}>
+                                    <option value="{{ $opt->value }}" {{ $type == $opt->value ? 'selected' : '' }}>
                                         {{ $opt->getDescription() }}
                                     </option>
                                 @endforeach
                             </select>
+                            <input type="hidden" name="type" value="{{ $type }}">
                             @error('type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -203,7 +208,7 @@
             {{-- Bukan perorangan --}}
             <div class="card mb-5" id="card-lembaga" style="{{ $isIndividual ? 'display:none;' : '' }}">
                 <div class="card-body">
-                    <h2 class="small-title mb-4">Data Lembaga</h2>
+                    <h2 class="small-title mb-4">Data Lembaga/Kelompok</h2>
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Nama Lembaga <span class="text-danger">*</span></label>

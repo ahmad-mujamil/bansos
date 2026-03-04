@@ -52,7 +52,8 @@
                     <div class="row g-3">
                         <div class="col-md-6 col-sm-12">
                             <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
-                            <select name="jenis" id="jenis" class="form-select @error('jenis') is-invalid @enderror" required>
+                            <input type="hidden" name="jenis" value="{{ $jenis }}">
+                            <select id="jenis" class="form-select @error('jenis') is-invalid @enderror" disabled>
                                 <option value="">Pilih Jenis</option>
                                 @foreach($jenisOptions as $opt)
                                     <option value="{{ $opt->value }}" {{ $jenis == $opt->value ? 'selected' : '' }}>

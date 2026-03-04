@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\StatusUser;
+use App\Enums\JenisUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,6 +22,7 @@ class RegisterRequest extends FormRequest
             "email" => ["required", "email", "max:255", "unique:users,email"],
             "username" => ["required", "string", "max:50", "unique:users,username"],
             "password" => ["required", "string", "min:8", "confirmed"],
+            "jenis_user" => ["required", Rule::enum(JenisUser::class)],
         ];
     }
 
@@ -42,6 +44,7 @@ class RegisterRequest extends FormRequest
             "password.string" => "Password harus berupa teks.",
             "password.min" => "Password minimal 8 karakter.",
             "password.confirmed" => "Konfirmasi password tidak cocok.",
+            "jenis_user.required" => "Jenis user harus dipilih.",
         ];
     }
 }

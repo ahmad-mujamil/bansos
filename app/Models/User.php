@@ -4,6 +4,7 @@ namespace App\Models;
 
  use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleUser;
+use App\Enums\JenisUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'role' => RoleUser::class,
+            'jenis_user' => JenisUser::class,
         ];
     }
 
