@@ -13,21 +13,6 @@ return [
                 'url' => '/pengguna',
                 'title' => 'Pengguna'
             ],
-            [
-                'id' => 'BLACKLIST',
-                'url' => '/blacklist',
-                'title' => 'Blacklist Pengguna'
-            ],
-            [
-                'id' => 'PENILAIAN_REALISASI',
-                'url' => '/penilaian-realisasi',
-                'title' => 'Penilaian Realisasi'
-            ],
-            [
-                'id' => 'MONITORING',
-                'url' => '/monitoring',
-                'title' => 'Monitoring'
-            ],
         ]
     ],[
         'id' => 'MASTER_DATA',
@@ -79,26 +64,6 @@ return [
                 'title' => 'Desa/Kelurahan'
             ],
 
-        ]
-    ],
-    [
-        'id' => 'VERIFIKASI',
-        'url' => 'javascript:;',
-        'title' => 'Verifikasi',
-        'icon' => 'check-square',
-        'caret' => true,
-        'sub_menu' => [
-            [
-                'id' => 'VERIFY_PENGGUNA',
-                'url' => '/verifikasi-pengguna',
-                'title' => 'Verifikasi Pengguna'
-            ],
-            
-            [
-                'id' => 'VERIFY_BANSOS',
-                'url' => '/verifikasi-bansos',
-                'title' => 'Pengajuan Bansos'
-            ],
         ]
     ],
     [
