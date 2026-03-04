@@ -97,6 +97,7 @@ class UserDetailController extends Controller
                 $organisasi = Organisasi::query()->find($validated['organisasi_id']);
                 if ($organisasi) {
                     $validated['nama_lembaga'] = $organisasi->nama;
+                $validated['organisasi_id'] = $validated['organisasi_id'];
                 }
             }
 
@@ -141,6 +142,7 @@ class UserDetailController extends Controller
                 $organisasi = Organisasi::query()->find($validated['organisasi_id']);
                 if ($organisasi) {
                     $validated['nama_lembaga'] = $organisasi->nama;
+                    $validated['organisasi_id'] = $validated['organisasi_id'];
                 }
             }
 
@@ -178,6 +180,7 @@ class UserDetailController extends Controller
             'nama_user' => 'required|string|max:255',
             'alamat' => 'nullable|string',
             'desa_id' => 'nullable|exists:desa,id',
+            'organisasi_id' => 'nullable|exists:organisasi,id',
             'phone' => 'nullable|string|max:20',
         ];
 

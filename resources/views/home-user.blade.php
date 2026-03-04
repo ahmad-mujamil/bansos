@@ -129,7 +129,8 @@
                             <div class="fw-semibold">{{ $d->desa?->nama ?? '-' }}</div>
                         </div>
                         @endif
-                        @if(in_array($d->type?->value ?? '', ['IND', 'KLP']))
+                        @php $jenisDetail = $d->type?->value ?? null; @endphp
+                        @if($jenisDetail === 'IND')
                         <div class="col-12 col-md-6">
                             <label class="text-muted text-small text-uppercase">Nama Personal</label>
                             <div class="fw-semibold">{{ $d->nama_personal ?? '-' }}</div>
@@ -138,11 +139,17 @@
                             <label class="text-muted text-small text-uppercase">NIK</label>
                             <div class="fw-semibold">{{ $d->nik ?? '-' }}</div>
                         </div>
-                        @else
+                        @elseif($jenisDetail === 'KLP')
                         <div class="col-12 col-md-6">
                             <label class="text-muted text-small text-uppercase">Nama Lembaga</label>
                             <div class="fw-semibold">{{ $d->nama_lembaga ?? '-' }}</div>
                         </div>
+                        {{-- <div class="col-12 col-md-6">
+                            <label class="text-muted text-small text-uppercase">Organisasi</label>
+                            <div class="fw-semibold">
+                                {{ $d->organisasi->nama ?? $d->nama_lembaga ?? '-' }}
+                            </div>
+                        </div> --}}
                         @endif
                         @if($d->verification_status->value === 'rejected' && $d->verification_note)
                         <div class="col-12">

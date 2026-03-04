@@ -98,7 +98,7 @@
                 <div class="card-body">
                     <h2 class="small-title mb-4">Jenis & Data Umum </h2>
                     <div class="row">
-                        <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                        {{-- <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Jenis User <span class="text-danger">*</span></label>
                             <select id="type" class="form-select" disabled>
                                 @foreach($jenisUserOptions as $opt)
@@ -111,8 +111,10 @@
                             @error('type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                        </div> --}}
+
+                        <input type="hidden" name="type" value="{{ $type }}">
+                        <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Nama User / Kontak <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nama_user') is-invalid @enderror" name="nama_user" required
                                    value="{{ old('nama_user', $userDetail?->nama_user ?? auth()->user()->nama ?? '') }}" @readonly($isLocked)/>
@@ -249,14 +251,14 @@
                             @enderror
                         </div>
                         <div class="col-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Nama Lembaga (otomatis)</label>
-                            <input type="text" class="form-control @error('nama_lembaga') is-invalid @enderror" name="nama_lembaga" id="nama_lembaga"
+                            {{-- <label class="form-label text-small text-uppercase">Nama Lembaga (otomatis)</label> --}}
+                            <input type="hidden" class="form-control @error('nama_lembaga') is-invalid @enderror" name="nama_lembaga" id="nama_lembaga"
                                    value="{{ old('nama_lembaga', $userDetail?->nama_lembaga ?? '') }}" readonly/>
                             @error('nama_lembaga')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">{{ $isLocked ? 'Dokumen Surat Kuasa' : 'Upload Surat Kuasa' }}@if(!$isLocked)<span class="text-danger">*</span>@endif</label>
                             @if(!$isLocked)
                                 <input type="file" class="form-control @error('file_surat_kuasa') is-invalid @enderror" name="file_surat_kuasa" accept="image/jpeg,image/png,image/jpg,application/pdf"/>
