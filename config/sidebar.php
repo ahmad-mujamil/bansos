@@ -75,7 +75,7 @@ return [
             ],
             [
                 'id' => 'KELOMPOK_MASYARAKAT',
-                'icon' => 'users',
+                'icon' => 'diagram-1',
                 'url' => '/kelompok-masyarakat',
                 'title' => 'Kelompok Masyarakat'
             ],
@@ -97,9 +97,9 @@ return [
             ],
 
             [
-                'id' => 'VERIFY_BANTUAN',
+                'id' => 'VERIFY_PENGAJUAN',
                 'icon' => 'check-square',
-                'url' => '/verifikasi-bantuan',
+                'url' => '/verifikasi-pengajuan',
                 'title' => 'Pengajuan Bantuan'
             ],
         ]
@@ -108,20 +108,20 @@ return [
     [
         'id' => 'PENGAJUAN_DAN_BAST',
         'url' => 'javascript:;',
-        'title' => 'Verifikasi',
+        'title' => 'Pengajuan & BAST',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'PENGAJUAN_BANTUAN',
-                'icon' => 'check-square',
-                'url' => '/pengajuan-bantuan',
-                'title' => 'Pengajuan Bantuan'
+                'id' => 'PENGAJUAN_ANGGARAN',
+                'icon' => 'box',
+                'url' => '/pengajuan-anggaran',
+                'title' => 'Pengajuan Anggaran'
             ],
 
             [
                 'id' => 'BAST',
-                'icon' => 'check-square',
+                'icon' => 'book',
                 'url' => '/bast',
                 'title' => 'BA Serah Terima'
             ],
@@ -131,24 +131,25 @@ return [
     [
         'id' => 'MONITORING_DAN_REALISASI',
         'url' => 'javascript:;',
-        'title' => 'Verifikasi',
+        'title' => 'Monitoring & Realisasi',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
                 'id' => 'BLACKLIST',
-                'icon' => 'check-square',
+                'icon' => 'close-circle',
                 'url' => '/blacklist',
                 'title' => 'Blacklist Pengguna'
             ],
             [
                 'id' => 'MONITORING',
-                'icon' => 'check-square',
+                'icon' => 'activity',
                 'url' => '/monitoring-bantuan',
                 'title' => 'Monitoring Bantuan'
             ],
             [
                 'id' => 'REALISASI_BANTUAN',
+                'icon' => 'delivery-truck',
                 'url' => '/realisasi-bantuan',
                 'title' => 'Realisasi Bantuan'
             ],
