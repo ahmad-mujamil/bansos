@@ -60,6 +60,22 @@
                             <input type="password" class="form-control pe-7 @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="Konfirmasi Password" required />
                         </div>
 
+                        @php
+                            use App\Enums\JenisUser;
+                        @endphp
+
+                        <div class="mb-3 filled form-group tooltip-end-top">
+                            <i data-acorn-icon="user"></i>
+                            <select class="form-control @error('jenis_user') is-invalid @enderror" name="jenis_user" id="jenis_user" required>
+                                <option value="" disabled {{ old('jenis_user') ? '' : 'selected' }}>Pilih Jenis User</option>
+                                @foreach (JenisUser::cases() as $jenis)
+                                    <option value="{{ $jenis->value }}" {{ old('jenis_user') === $jenis->value ? 'selected' : '' }}>
+                                        {{ $jenis->getDescription() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
 
                         <button type="submit" class="btn btn-lg btn-primary w-100">Daftar</button>
                     </form>

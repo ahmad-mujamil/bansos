@@ -29,6 +29,13 @@ class PengajuanController extends Controller
 
     public function create()
     {
+        $jenisUser = auth()->user()->jenis_user?->value ?? null;
+        $jenisOptions = match ($jenisUser) {
+            'IND' => [JenisPengajuan::BANSOS],
+            'KLP' => [JenisPengajuan::BANTUAN_KELOMPOK],
+            default => [JenisPengajuan::HIBAH],
+        };
+
         $kelompokList = Organisasi::query()
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->where('is_active', true)
@@ -42,7 +49,7 @@ class PengajuanController extends Controller
             'pengajuan' => null,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
-            'jenisOptions' => JenisPengajuan::cases(),
+            'jenisOptions' => $jenisOptions,
         ]);
     }
 
@@ -88,6 +95,14 @@ class PengajuanController extends Controller
         }
 
         $pengajuan->load('details');
+
+        $jenisUser = auth()->user()->jenis_user?->value ?? null;
+        $jenisOptions = match ($jenisUser) {
+            'IND' => [JenisPengajuan::BANSOS],
+            'KLP' => [JenisPengajuan::BANTUAN_KELOMPOK],
+            default => [JenisPengajuan::HIBAH],
+        };
+
         $kelompokList = Organisasi::query()
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->where('is_active', true)
@@ -101,7 +116,7 @@ class PengajuanController extends Controller
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
-            'jenisOptions' => JenisPengajuan::cases(),
+            'jenisOptions' => $jenisOptions,
         ]);
     }
 
