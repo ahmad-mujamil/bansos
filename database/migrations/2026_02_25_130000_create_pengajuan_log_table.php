@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete()->comment('user yang melakukan aksi');
             $table->string('action')->comment('created, status_changed, updated, dll');
             $table->string('status_from')->nullable()->comment('status sebelum perubahan');
-            $table->string('status_to')->nullable()->comment('status setelah perubahan');
+            $table->string('')->nullable()->comment('status setelah perubahan');
             $table->text('catatan')->nullable();
             $table->json('metadata')->nullable()->comment('data tambahan misal old/new values');
             $table->timestamps();
