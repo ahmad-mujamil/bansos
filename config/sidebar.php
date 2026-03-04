@@ -59,23 +59,26 @@ return [
             ],
         ],
     ],
-
-    //ROLE OPD
-    'id' => 'SIDE_MASTER_DATA',
-    'icon' => 'gear',
-    'title' => 'Master Data',
-    'url' => 'javascript:;',
-    'caret' => true,
-    'sub_menu' => [
-        [
-            'id' => 'PENDUDUK',
-            'url' => '/penduduk',
-            'title' => 'Penduduk'
-        ],
-        [
-            'id' => 'KELOMPOK_MASYARAKAT',
-            'url' => '/kelompok-masyarakat',
-            'title' => 'Kelompok Masyarakat'
+    [
+        //ROLE OPD
+        'id' => 'SIDE_MASTER_DATA',
+        'icon' => '',
+        'title' => 'Master Data',
+        'url' => 'javascript:;',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'PENDUDUK',
+                'icon' => 'user',
+                'url' => '/penduduk',
+                'title' => 'Penduduk'
+            ],
+            [
+                'id' => 'KELOMPOK_MASYARAKAT',
+                'icon' => 'users',
+                'url' => '/kelompok-masyarakat',
+                'title' => 'Kelompok Masyarakat'
+            ],
         ],
     ],
 
@@ -83,17 +86,19 @@ return [
         'id' => 'SIDE_VERIFIKASI',
         'url' => 'javascript:;',
         'title' => 'Verifikasi',
-        'icon' => 'check-square',
+        'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
                 'id' => 'VERIFY_PENGGUNA',
+                'icon' => 'check-square',
                 'url' => '/verifikasi-pengguna',
                 'title' => 'Verifikasi Pengguna'
             ],
 
             [
                 'id' => 'VERIFY_BANTUAN',
+                'icon' => 'check-square',
                 'url' => '/verifikasi-bantuan',
                 'title' => 'Pengajuan Bantuan'
             ],
@@ -104,19 +109,21 @@ return [
         'id' => 'PENGAJUAN_DAN_BAST',
         'url' => 'javascript:;',
         'title' => 'Verifikasi',
-        'icon' => 'check-square',
+        'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
                 'id' => 'PENGAJUAN_BANTUAN',
+                'icon' => 'check-square',
                 'url' => '/pengajuan-bantuan',
                 'title' => 'Pengajuan Bantuan'
             ],
 
             [
                 'id' => 'BAST',
+                'icon' => 'check-square',
                 'url' => '/bast',
-                'title' => 'Berita Acara Serah Terima'
+                'title' => 'BA Serah Terima'
             ],
         ]
     ],
@@ -125,20 +132,21 @@ return [
         'id' => 'MONITORING_DAN_REALISASI',
         'url' => 'javascript:;',
         'title' => 'Verifikasi',
-        'icon' => 'check-square',
+        'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
                 'id' => 'BLACKLIST',
+                'icon' => 'check-square',
                 'url' => '/blacklist',
                 'title' => 'Blacklist Pengguna'
             ],
             [
                 'id' => 'MONITORING',
+                'icon' => 'check-square',
                 'url' => '/monitoring-bantuan',
                 'title' => 'Monitoring Bantuan'
             ],
-
             [
                 'id' => 'REALISASI_BANTUAN',
                 'url' => '/realisasi-bantuan',
@@ -146,6 +154,4 @@ return [
             ],
         ]
     ],
-
-
 ];

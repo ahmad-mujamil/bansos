@@ -41,6 +41,9 @@ enum RoleUser: string
                 "BANTUAN_SOSIAL","PENGAJUAN","REALISASI",
                 "PROFILE_USER","PROFILE_USER_DETAIL"
             ],
+            self::BUD => [
+                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA"
+            ]
         };
     }
 }
