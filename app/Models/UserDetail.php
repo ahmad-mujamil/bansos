@@ -7,6 +7,7 @@ use App\Enums\VerificationStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Organisasi;
 
 class UserDetail extends Model
 {
@@ -40,5 +41,10 @@ class UserDetail extends Model
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function organisasi(): BelongsTo
+    {
+        return $this->belongsTo(Organisasi::class);
     }
 }

@@ -1,5 +1,6 @@
 @extends('layouts.layout')
 @section('title', 'Lengkapi Data Diri')
+
 @section('content')
     <!-- Page Content Start -->
     <div class="col">
@@ -208,12 +209,49 @@
             {{-- Bukan perorangan --}}
             <div class="card mb-5" id="card-lembaga" style="{{ $isIndividual ? 'display:none;' : '' }}">
                 <div class="card-body">
-                    <h2 class="small-title mb-4">Data Lembaga/Kelompok</h2>
+                    <h2 class="small-title mb-1">Data Lembaga/Kelompok</h2>
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Nama Lembaga <span class="text-danger">*</span></label>
+                            <label class="form-label text-small text-uppercase">OPD <span class="text-danger">*</span></label>
+                            <select id="opd_id" class="form-select @error('opd_id') is-invalid @enderror" name="opd_id" @disabled($isLocked)>
+                                <option value="">Pilih OPD</option>
+                                @php
+                                    $selectedOpdId = old('opd_id', $userDetail?->organisasi?->opd_id ?? '');
+                                @endphp
+                                @foreach($opds as $opd)
+                                    <option value="{{ $opd->id }}" {{ $selectedOpdId == $opd->id ? 'selected' : '' }}>
+                                        {{ $opd->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('opd_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase mb-1">Kelompok / Organisasi <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center gap-2 organisasi-select-wrapper">
+                                <select id="organisasi_id" name="organisasi_id" class="form-select @error('organisasi_id') is-invalid @enderror flex-grow-1" @disabled($isLocked)>
+                                    <option value="">Pilih Kelompok / Organisasi</option>
+                                </select>
+                                <button type="button"
+                                        class="btn btn-outline-info rounded-circle btn-icon-only shadow-sm"
+                                        id="btnInfoOrganisasi"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalInfoOrganisasi"
+                                        disabled
+                                        title="Lihat informasi kelompok">
+                                    <i data-acorn-icon="info-circle"></i>
+                                </button>
+                            </div>
+                            @error('organisasi_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Nama Lembaga (otomatis)</label>
                             <input type="text" class="form-control @error('nama_lembaga') is-invalid @enderror" name="nama_lembaga" id="nama_lembaga"
-                                   value="{{ old('nama_lembaga', $userDetail?->nama_lembaga ?? '') }}" @readonly($isLocked)/>
+                                   value="{{ old('nama_lembaga', $userDetail?->nama_lembaga ?? '') }}" readonly/>
                             @error('nama_lembaga')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -251,9 +289,77 @@
     <!-- Page Content End -->
 @endsection
 
+{{-- Modal Info Kelompok --}}
+<div class="modal fade" id="modalInfoOrganisasi" tabindex="-1" aria-labelledby="modalInfoOrganisasiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalInfoOrganisasiLabel">Informasi Kelompok / Organisasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-small text-uppercase text-muted">Nama Kelompok</dt>
+                    <dd class="col-sm-8" id="infoOrgNama">-</dd>
+
+                    <dt class="col-sm-4 text-small text-uppercase text-muted">Nomor SK / Akta / Kemenkumham</dt>
+                    <dd class="col-sm-8" id="infoOrgNomor">-</dd>
+
+                    <dt class="col-sm-4 text-small text-uppercase text-muted">Tanggal Pembentukan</dt>
+                    <dd class="col-sm-8" id="infoOrgTgl">-</dd>
+
+                    <dt class="col-sm-4 text-small text-uppercase text-muted">Wilayah</dt>
+                    <dd class="col-sm-8" id="infoOrgWilayah">-</dd>
+
+                    <dt class="col-sm-4 text-small text-uppercase text-muted">Status</dt>
+                    <dd class="col-sm-8" id="infoOrgStatus">-</dd>
+
+                    <dt class="col-sm-4 text-small text-uppercase text-muted mt-3">Anggota</dt>
+                    <dd class="col-sm-8 mt-3" id="infoOrgAnggotaCount">-</dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('css')
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <style>
+        /* Teks di kotak terpilih (closed) */
+        .select2-container--bootstrap4 .select2-selection--single,
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            color: #212529 !important;
+        }
+
+        /* Teks option saat cursor/hover di list dropdown — warna hitam */
+        .select2-container--bootstrap4 .select2-results__option--highlighted,
+        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected],
+        .select2-container--bootstrap4 .select2-results__option[aria-selected=true] {
+            color: #212529 !important;
+        }
+
+        .select2-results__option--highlighted {
+            color: #212529 !important;
+        }
+
+        /* Tombol info bulat di samping select organisasi */
+        .btn-icon-only {
+            width: 2.35rem;
+            height: 2.35rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .organisasi-select-wrapper .select2-container {
+            flex: 1 1 auto;
+        }
+    </style>
 @endpush
 
 @push('js_vendor')
@@ -272,7 +378,8 @@
                 $('#card-perorangan').toggle(isInd);
                 $('#card-lembaga').toggle(!isInd);
                 $('#nama_personal').prop('required', isInd);
-                $('#nama_lembaga').prop('required', !isInd);
+                $('#opd_id').prop('required', !isInd);
+                $('#organisasi_id').prop('required', !isInd);
                 $('input[name="nik"]').prop('required', isInd);
                 $('input[name="file_ktp"]').prop('required', isInd);
                 $('input[name="file_surat_kuasa"]').prop('required', !isInd);
@@ -303,6 +410,104 @@
             });
 
             $('#kecamatan_id, #desa_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih', allowClear: true });
+
+            var opdsData = @json($opdsData);
+
+            function loadOrganisasi(opdId, selectedOrganisasiId) {
+                var $org = $('#organisasi_id');
+                $org.empty().append('<option value="">Pilih Kelompok / Organisasi</option>');
+                if (!opdId) {
+                    $('#nama_lembaga').val('');
+                    return;
+                }
+                var o = opdsData.find(function (x) { return x.id === opdId; });
+                if (o && o.organisasi) {
+                    o.organisasi.forEach(function (org) {
+                        var sel = (selectedOrganisasiId && org.id === selectedOrganisasiId) ? ' selected' : '';
+                        $org.append('<option value="' + org.id + '"' + sel + '>' + org.nama + '</option>');
+                    });
+                }
+            }
+
+            function findSelectedOrganisasi(opdId, orgId) {
+                if (!opdId || !orgId) return null;
+                var opdFound = opdsData.find(function (x) { return x.id === opdId; });
+                if (!opdFound || !opdFound.organisasi) return null;
+                return opdFound.organisasi.find(function (o) { return o.id === orgId; }) || null;
+            }
+
+            function fillOrganisasiDetail(org) {
+                if (!org) {
+                    $('#infoOrgNama').text('-');
+                    $('#infoOrgNomor').text('-');
+                    $('#infoOrgTgl').text('-');
+                    $('#infoOrgWilayah').text('-');
+                    $('#infoOrgStatus').text('-');
+                    $('#infoOrgAnggotaCount').text('-');
+                    $('#btnInfoOrganisasi').prop('disabled', true);
+                    return;
+                }
+                $('#infoOrgNama').text(org.nama || '-');
+                $('#infoOrgNomor').text(org.nomor || '-');
+                $('#infoOrgTgl').text(org.tgl_pembentukan || '-');
+                var wilayah = '';
+                if (org.kecamatan) {
+                    wilayah += org.kecamatan;
+                }
+                if (org.desa) {
+                    wilayah += (wilayah ? ' / ' : '') + org.desa;
+                }
+                $('#infoOrgWilayah').text(wilayah || '-');
+                $('#infoOrgStatus').text(org.is_active ? 'Aktif' : 'Nonaktif');
+
+                var count = typeof org.anggota_count !== 'undefined' ? org.anggota_count : null;
+                if (count === null) {
+                    $('#infoOrgAnggotaCount').text('-');
+                } else {
+                    $('#infoOrgAnggotaCount').text(count + ' orang');
+                }
+
+                $('#btnInfoOrganisasi').prop('disabled', false);
+            }
+
+            var initOpd = $('#opd_id').val();
+            var initOrganisasi = '{{ old('organisasi_id', $userDetail?->organisasi_id ?? '') }}';
+            if (initOpd) {
+                loadOrganisasi(initOpd, initOrganisasi);
+                var selectedOrg = findSelectedOrganisasi(initOpd, initOrganisasi);
+                if (selectedOrg) {
+                    $('#nama_lembaga').val(selectedOrg.nama);
+                    fillOrganisasiDetail(selectedOrg);
+                } else {
+                    fillOrganisasiDetail(null);
+                }
+            } else {
+                fillOrganisasiDetail(null);
+            }
+
+            $('#opd_id').on('change', function () {
+                var opdId = $(this).val();
+                loadOrganisasi(opdId, null);
+                $('#nama_lembaga').val('');
+                fillOrganisasiDetail(null);
+            });
+
+            $('#organisasi_id').on('change', function () {
+                var opdId = $('#opd_id').val();
+                var orgId = $(this).val();
+                var org = findSelectedOrganisasi(opdId, orgId);
+                $('#nama_lembaga').val(org ? org.nama : '');
+                fillOrganisasiDetail(org);
+            });
+
+            $('#btnInfoOrganisasi').on('click', function () {
+                var opdId = $('#opd_id').val();
+                var orgId = $('#organisasi_id').val();
+                var org = findSelectedOrganisasi(opdId, orgId);
+                fillOrganisasiDetail(org);
+            });
+
+            $('#opd_id, #organisasi_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih', allowClear: true });
         });
     </script>
 @endpush
