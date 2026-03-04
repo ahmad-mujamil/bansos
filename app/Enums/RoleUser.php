@@ -8,6 +8,7 @@ enum RoleUser: string
     case ADMIN = "admin";
     case OPD = "opd";
     case USER = "user";
+    case BUD = "bud";
 
 
     public function getDescription(): string
@@ -17,6 +18,7 @@ enum RoleUser: string
             self::ADMIN => "Administrator",
             self::OPD => "OPD",
             self::USER => "User",
+            self::BUD => "BUD",
         };
     }
 
@@ -25,22 +27,23 @@ enum RoleUser: string
         return match ($this) {
             self::SUPER =>  ["*"],
             self::ADMIN => [
-                "ADMIN","PENGGUNA","BLACKLIST","MONITORING",
+                "ADMIN","PENGGUNA",
                 "MASTER_DATA","PENDUDUK","KELOMPOK_MASYARAKAT","JENIS_BANTUAN","OPD",
-                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA",
-                "VERIFIKASI","VERIFY_PENGGUNA","VERIFY_BANSOS",
-                "LAPORAN","LAP_PENGAJUAN","LAP_REALISASI"
+                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA"
             ],
             self::OPD => [
-                "ADMIN","PENILAIAN_REALISASI","MONITORING",
-                "MASTER_DATA", "PENDUDUK", "KELOMPOK_MASYARAKAT",
-                "VERIFIKASI", "VERIFY_PENGGUNA","VERIFY_ORGANISASI", "VERIFY_BANSOS",
-                "LAPORAN","LAP_PENGAJUAN","LAP_REALISASI",
+                "SIDE_MASTER_DATA", "PENDUDUK", "KELOMPOK_MASYARAKAT",
+                "SIDE_VERIFIKASI", "VERIFY_PENGGUNA", "VERIFY_BANTUAN",
+                "PENGAJUAN_DAN_BAST","PENGAJUAN_BANTUAN","BAST",
+                "MONITORING_DAN_REALISASI","MONITORING","REALISASI_BANTUAN","BLACKLIST"
             ],
             self::USER => [
                 "BANTUAN_SOSIAL","PENGAJUAN","REALISASI",
                 "PROFILE_USER","PROFILE_USER_DETAIL"
             ],
+            self::BUD => [
+                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA"
+            ]
         };
     }
 }
