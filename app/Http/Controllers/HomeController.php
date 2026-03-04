@@ -40,7 +40,15 @@ class HomeController extends Controller
                 'dataLabel',
                 'dataChartPengajuan',
                 'dataChartBansos'));
-        } 
+        }
+
+        if(auth()->user()->is_opd()){
+            return view('home-opd', compact(
+                'totalPerorangan',
+                'totalOrganisasi',
+                'totalBansos',
+                'totalPengajuan'));
+        }
 
         return view('home', compact('totalPerorangan',
             'totalOrganisasi',
