@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\JenisUser;
 use App\Enums\VerificationStatus;
+use App\Enums\JenisOrganisasi;
 use App\Models\Kecamatan;
 use App\Models\UserDetail;
+use App\Models\Opd;
+use App\Models\Organisasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +21,7 @@ class UserDetailController extends Controller
         $user = auth()->user();
         $userDetail = $user->userDetail;
         if ($userDetail) {
-            $userDetail->load('desa.kecamatan.desa', 'verifiedBy');
+            $userDetail->load('desa.kecamatan.desa', 'verifiedBy', 'organisasi.opd');
         }
         $isLocked = $userDetail && (
             $userDetail->verification_status === VerificationStatus::APPROVED
@@ -33,12 +36,44 @@ class UserDetailController extends Controller
             ];
         })->values()->all();
 
+        $opds = Opd::query()
+            ->with(['organisasi' => function ($q) {
+                $q->where('is_active', true)
+                    ->where('jenis', JenisOrganisasi::KELOMPOK)
+                    ->with(['kecamatan', 'desa'])
+                    ->withCount('organisasiDetail');
+            }])
+            ->orderBy('nama')
+            ->get();
+
+        $opdsData = $opds->map(function ($opd) {
+            return [
+                'id' => $opd->id,
+                'nama' => $opd->nama,
+                'organisasi' => $opd->organisasi->map(function ($org) {
+                    return [
+                        'id' => $org->id,
+                        'nama' => $org->nama,
+                        'nomor' => $org->nomor,
+                        'tgl_pembentukan' => optional($org->tgl_pembentukan)->format('d-m-Y'),
+                        'kecamatan' => $org->kecamatan->nama ?? null,
+                        'desa' => $org->desa->nama ?? null,
+                        'is_active' => $org->is_active,
+                        'anggota_count' => (int) ($org->organisasi_detail_count ?? 0),
+                        'anggota_url' => route('kelompok-masyarakat.anggota.index', $org->id),
+                    ];
+                })->values()->all(),
+            ];
+        })->values()->all();
+
         return view('pages.user-detail.form', [
             'userDetail' => $userDetail,
             'kecamatans' => $kecamatans,
             'kecamatansData' => $kecamatansData,
             'jenisUserOptions' => JenisUser::cases(),
             'isLocked' => $isLocked,
+            'opds' => $opds,
+            'opdsData' => $opdsData,
         ]);
     }
 
@@ -57,6 +92,14 @@ class UserDetailController extends Controller
             DB::beginTransaction();
             $validated['user_id'] = $user->id;
             $validated['type'] = $validated['type'] ?? JenisUser::INDIVIDUAL->value;
+
+            if (isset($validated['organisasi_id'])) {
+                $organisasi = Organisasi::query()->find($validated['organisasi_id']);
+                if ($organisasi) {
+                    $validated['nama_lembaga'] = $organisasi->nama;
+                $validated['organisasi_id'] = $validated['organisasi_id'];
+                }
+            }
 
             if ($request->hasFile('file_ktp')) {
                 $validated['file_ktp'] = $request->file('file_ktp')->store('user-detail/ktp', 'public');
@@ -95,6 +138,14 @@ class UserDetailController extends Controller
         try {
             DB::beginTransaction();
 
+            if (isset($validated['organisasi_id'])) {
+                $organisasi = Organisasi::query()->find($validated['organisasi_id']);
+                if ($organisasi) {
+                    $validated['nama_lembaga'] = $organisasi->nama;
+                    $validated['organisasi_id'] = $validated['organisasi_id'];
+                }
+            }
+
             if ($request->hasFile('file_ktp')) {
                 if ($userDetail->file_ktp) {
                     Storage::disk('public')->delete($userDetail->file_ktp);
@@ -129,6 +180,7 @@ class UserDetailController extends Controller
             'nama_user' => 'required|string|max:255',
             'alamat' => 'nullable|string',
             'desa_id' => 'nullable|exists:desa,id',
+            'organisasi_id' => 'nullable|exists:organisasi,id',
             'phone' => 'nullable|string|max:20',
         ];
 
@@ -137,7 +189,8 @@ class UserDetailController extends Controller
             $rules['nik'] = 'required|string|size:16';
             $rules['file_ktp'] = $userDetail ? 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048' : 'required|file|mimes:jpeg,png,jpg,pdf|max:2048';
         } else {
-            $rules['nama_lembaga'] = 'required|string|max:255';
+            $rules['organisasi_id'] = 'required|exists:organisasi,id';
+            $rules['nama_lembaga'] = 'nullable|string|max:255';
             $rules['file_surat_kuasa'] = $userDetail ? 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048' : 'required|file|mimes:jpeg,png,jpg,pdf|max:2048';
         }
 
