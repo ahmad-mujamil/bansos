@@ -22,6 +22,14 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::post('/user-detail', [App\Http\Controllers\UserDetailController::class, 'store'])->name('user-detail.store');
     Route::put('/user-detail', [App\Http\Controllers\UserDetailController::class, 'update'])->name('user-detail.update');
 
+    // Kelompok baru dari user-detail (is_active = false), lengkapi anggota & dokumen
+    Route::post('/user-detail/kelompok', [App\Http\Controllers\UserDetailController::class, 'storeKelompok'])->name('user-detail.kelompok.store');
+    Route::get('/user-detail/kelompok/{organisasi}/lengkapi', [App\Http\Controllers\UserDetailKelompokController::class, 'lengkapi'])->name('user-detail.kelompok.lengkapi');
+    Route::post('/user-detail/kelompok/{organisasi}/anggota', [App\Http\Controllers\UserDetailKelompokController::class, 'storeAnggota'])->name('user-detail.kelompok.anggota.store');
+    Route::match(['DELETE'], '/user-detail/kelompok/{organisasi}/anggota/{anggota}', [App\Http\Controllers\UserDetailKelompokController::class, 'destroyAnggota'])->name('user-detail.kelompok.anggota.destroy');
+    Route::post('/user-detail/kelompok/{organisasi}/dokumen', [App\Http\Controllers\UserDetailKelompokController::class, 'storeDokumen'])->name('user-detail.kelompok.dokumen.store');
+    Route::match(['DELETE'], '/user-detail/kelompok/{organisasi}/dokumen/{dokumen}', [App\Http\Controllers\UserDetailKelompokController::class, 'destroyDokumen'])->name('user-detail.kelompok.dokumen.destroy');
+
     // Pengajuan (user)
     Route::get('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'index'])->name('pengajuan.index');
     Route::get('/pengajuan/create', [App\Http\Controllers\PengajuanController::class, 'create'])->name('pengajuan.create');

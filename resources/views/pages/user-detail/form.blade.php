@@ -218,7 +218,7 @@
                             <select id="opd_id" class="form-select @error('opd_id') is-invalid @enderror" name="opd_id" @disabled($isLocked)>
                                 <option value="">Pilih OPD</option>
                                 @php
-                                    $selectedOpdId = old('opd_id', $userDetail?->organisasi?->opd_id ?? '');
+                                    $selectedOpdId = old('opd_id', $userDetail?->organisasi?->opd_id ?? $preselectOpdId ?? '');
                                 @endphp
                                 @foreach($opds as $opd)
                                     <option value="{{ $opd->id }}" {{ $selectedOpdId == $opd->id ? 'selected' : '' }}>
@@ -246,18 +246,172 @@
                                     <i data-acorn-icon="info-circle"></i>
                                 </button>
                             </div>
+                            @php
+                                // Secara otomatis pilih 'Tambah Kelompok Baru' saat edit data
+                                $isEdit = (bool) $userDetail;
+                            @endphp
+                            @if($isEdit && !$isLocked)
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        // Tunggu select sudah terisi dari JS utama, lalu set nilainya ke __new__ dan trigger event
+                                        setTimeout(function() {
+                                            const $org = document.getElementById('organisasi_id');
+                                            if ($org) {
+                                                $org.value = '__new__';
+                                                if ("createEvent" in document) {
+                                                    var evt = document.createEvent("HTMLEvents");
+                                                    evt.initEvent("change", false, true);
+                                                    $org.dispatchEvent(evt);
+                                                } else {
+                                                    $org.dispatchEvent(new Event('change'));
+                                                }
+                                            }
+                                        }, 400);
+                                    });
+                                </script>
+                            @endif
                             @error('organisasi_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-12 mb-3">
-                            {{-- <label class="form-label text-small text-uppercase">Nama Lembaga (otomatis)</label> --}}
-                            <input type="hidden" class="form-control @error('nama_lembaga') is-invalid @enderror" name="nama_lembaga" id="nama_lembaga"
-                                   value="{{ old('nama_lembaga', $userDetail?->nama_lembaga ?? '') }}" readonly/>
+                            <input type="hidden" name="nama_lembaga" id="nama_lembaga" value="{{ old('nama_lembaga', $userDetail?->nama_lembaga ?? '') }}"/>
                             @error('nama_lembaga')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        {{-- Blok Tambah Kelompok Baru (satu form dengan data diri): data kelompok + anggota + dokumen --}}
+                        @if(!$isLocked)
+                            @php
+                                $org = ($selectedOrganisasiInactive ?? false) ? $userDetail?->organisasi : null;
+                                $defaultNamaKelompok = old('nama_kelompok', $org?->nama);
+                                $defaultNomorKelompok = old('nomor_kelompok', $org?->nomor);
+                                $defaultTglKelompok = old('tgl_pembentukan_kelompok', $org?->tgl_pembentukan?->format('Y-m-d'));
+                                $defaultKecamatanKelompok = old('kecamatan_id_kelompok', $org?->kecamatan_id);
+                                $defaultDesaKelompok = old('desa_id_kelompok', $org?->desa_id);
+                                $defaultAnggota = old('anggota');
+                                if ($defaultAnggota === null && $org && $org->organisasiDetail && $org->organisasiDetail->isNotEmpty()) {
+                                    $defaultAnggota = $org->organisasiDetail->map(fn($d) => [
+                                        'penduduk_id' => $d->penduduk_id,
+                                        'jabatan' => $d->jabatan instanceof \App\Enums\JabatanOrganisasi ? $d->jabatan->value : $d->jabatan,
+                                    ])->values()->all();
+                                }
+                                $defaultAnggota = $defaultAnggota ?? [[]];
+                                $defaultDokumen = old('dokumen');
+                                if ($defaultDokumen === null && $org && $org->organisasiDokumen && $org->organisasiDokumen->isNotEmpty()) {
+                                    $defaultDokumen = $org->organisasiDokumen->map(fn($d) => [
+                                        'jenis_dokumen' => $d->jenis_dokumen instanceof \App\Enums\JenisDokumen ? $d->jenis_dokumen->value : $d->jenis_dokumen,
+                                        'keterangan' => $d->keterangan ?? '',
+                                    ])->values()->all();
+                                }
+                                $defaultDokumen = $defaultDokumen ?? [[]];
+                            @endphp
+                            <div class="col-12 mb-3" id="wrap-tambah-kelompok-baru" style="display:none;" data-initial-desa-id="{{ $defaultDesaKelompok ?? '' }}">
+                                <div class="card border border-primary">
+                                    <div class="card-body">
+                                        <h3 class="small-title mb-3">Data Kelompok Baru</h3>
+                                        <input type="hidden" id="input_tambah_kelompok_baru" name="tambah_kelompok_baru" value="1" disabled>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nama Kelompok <span class="text-danger">*</span></label>
+                                                <input type="text" name="nama_kelompok" class="form-control @error('nama_kelompok') is-invalid @enderror" value="{{ $defaultNamaKelompok }}" maxlength="255"/>
+                                                @error('nama_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nomor SK / Akta <span class="text-danger">*</span></label>
+                                                <input type="text" name="nomor_kelompok" class="form-control @error('nomor_kelompok') is-invalid @enderror" value="{{ $defaultNomorKelompok }}" maxlength="100"/>
+                                                @error('nomor_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Tanggal Pembentukan <span class="text-danger">*</span></label>
+                                                <input type="date" name="tgl_pembentukan_kelompok" class="form-control @error('tgl_pembentukan_kelompok') is-invalid @enderror" value="{{ $defaultTglKelompok }}"/>
+                                                @error('tgl_pembentukan_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Kecamatan <span class="text-danger">*</span></label>
+                                                <select name="kecamatan_id_kelompok" id="kel_kecamatan_id" class="form-select @error('kecamatan_id_kelompok') is-invalid @enderror">
+                                                    <option value="">Pilih Kecamatan</option>
+                                                    @foreach($kecamatans as $kec)
+                                                        <option value="{{ $kec->id }}" {{ $defaultKecamatanKelompok == $kec->id ? 'selected' : '' }}>{{ $kec->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('kecamatan_id_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Desa <span class="text-danger">*</span></label>
+                                                <select name="desa_id_kelompok" id="kel_desa_id" class="form-select @error('desa_id_kelompok') is-invalid @enderror">
+                                                    <option value="">Pilih Desa</option>
+                                                </select>
+                                                @error('desa_id_kelompok')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+                                        </div>
+                                        <hr class="my-4">
+                                        <h4 class="small-title mb-2">Anggota Kelompok</h4>
+                                        <div id="anggota-container">
+                                            @php $oldAnggota = $defaultAnggota; @endphp
+                                            @foreach($oldAnggota as $idx => $a)
+                                            <div class="row align-items-end mb-2 row-anggota">
+                                                <div class="col-md-5">
+                                                    <label class="form-label small">Penduduk</label>
+                                                    <select name="anggota[{{ $idx }}][penduduk_id]" class="form-select form-select-sm select-penduduk">
+                                                        <option value="">Pilih</option>
+                                                        @foreach($penduduks ?? [] as $p)
+                                                            <option value="{{ $p->id }}" {{ (isset($a['penduduk_id']) && $a['penduduk_id'] == $p->id) ? 'selected' : '' }}>{{ $p->nama }} — {{ $p->nik }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label small">Jabatan</label>
+                                                    <select name="anggota[{{ $idx }}][jabatan]" class="form-select form-select-sm">
+                                                        <option value="">Pilih</option>
+                                                        @foreach(\App\Enums\JabatanOrganisasi::cases() as $j)
+                                                            <option value="{{ $j->value }}" {{ (isset($a['jabatan']) && $a['jabatan'] == $j->value) ? 'selected' : '' }}>{{ $j->getDescription() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <button type="button" class="btn btn-sm btn-danger btn-hapus-anggota">X</button>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnTambahAnggotaRow"><i data-acorn-icon="plus"></i> Tambah Anggota</button>
+                                        <hr class="my-4">
+                                        <h4 class="small-title mb-2">Dokumen Kelompok</h4>
+                                        <div id="dokumen-container">
+                                            @php $oldDokumen = $defaultDokumen; @endphp
+                                            @foreach($oldDokumen as $idx => $d)
+                                            <div class="row align-items-end mb-2 row-dokumen">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Jenis</label>
+                                                    <select name="dokumen[{{ $idx }}][jenis_dokumen]" class="form-select form-select-sm">
+                                                        <option value="">Pilih</option>
+                                                        @foreach(\App\Enums\JenisDokumen::cases() as $j)
+                                                            <option value="{{ $j->value }}" {{ (isset($d['jenis_dokumen']) && $d['jenis_dokumen'] == $j->value) ? 'selected' : '' }}>{{ $j->getDescription() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Keterangan</label>
+                                                    <input type="text" name="dokumen[{{ $idx }}][keterangan]" class="form-control form-control-sm" value="{{ $d['keterangan'] ?? '' }}" maxlength="255" placeholder="Keterangan">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label small">File</label>
+                                                    <input type="file" name="dokumen[{{ $idx }}][file]" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button type="button" class="btn btn-sm btn-danger btn-hapus-dokumen">X</button>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnTambahDokumenRow"><i data-acorn-icon="plus"></i> Tambah Dokumen</button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">{{ $isLocked ? 'Dokumen Surat Kuasa' : 'Upload Surat Kuasa' }}@if(!$isLocked)<span class="text-danger">*</span>@endif</label>
                             @if(!$isLocked)
@@ -390,6 +544,13 @@
             $('#type').on('change', toggleType);
             toggleType();
 
+            @if(!$isLocked && (($selectedOrganisasiInactive ?? false) || $errors->has('nama_kelompok') || $errors->has('nomor_kelompok')))
+                setTimeout(function () {
+                    var el = document.getElementById('wrap-tambah-kelompok-baru');
+                    if (el) { el.style.display = ''; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                }, 300);
+            @endif
+
             function loadDesa(kecamatanId, selectedDesaId) {
                 var $desa = $('#desa_id');
                 $desa.empty().append('<option value="">Pilih Desa</option>');
@@ -415,19 +576,35 @@
 
             var opdsData = @json($opdsData);
 
+            var NEW_KELOMPOK_VAL = '__new__';
             function loadOrganisasi(opdId, selectedOrganisasiId) {
                 var $org = $('#organisasi_id');
                 $org.empty().append('<option value="">Pilih Kelompok / Organisasi</option>');
                 if (!opdId) {
                     $('#nama_lembaga').val('');
+                    $('#wrap-tambah-kelompok-baru').hide();
                     return;
                 }
+                $org.append('<option value="' + NEW_KELOMPOK_VAL + '">➕ Tambah Kelompok Baru</option>');
                 var o = opdsData.find(function (x) { return x.id === opdId; });
                 if (o && o.organisasi) {
                     o.organisasi.forEach(function (org) {
                         var sel = (selectedOrganisasiId && org.id === selectedOrganisasiId) ? ' selected' : '';
                         $org.append('<option value="' + org.id + '"' + sel + '>' + org.nama + '</option>');
                     });
+                }
+            }
+
+            function toggleWrapTambahKelompok() {
+                var orgId = $('#organisasi_id').val();
+                if (orgId === NEW_KELOMPOK_VAL) {
+                    $('#wrap-tambah-kelompok-baru').show();
+                    $('#input_tambah_kelompok_baru').prop('disabled', false);
+                    $('#organisasi_id').removeAttr('required');
+                } else {
+                    $('#wrap-tambah-kelompok-baru').hide();
+                    $('#input_tambah_kelompok_baru').prop('disabled', true);
+                    $('#organisasi_id').prop('required', true);
                 }
             }
 
@@ -473,9 +650,10 @@
             }
 
             var initOpd = $('#opd_id').val();
-            var initOrganisasi = '{{ old('organisasi_id', $userDetail?->organisasi_id ?? '') }}';
+            var initOrganisasi = '{{ (old("tambah_kelompok_baru") || ($selectedOrganisasiInactive ?? false)) ? "__new__" : old("organisasi_id", $userDetail?->organisasi_id ?? "") }}';
             if (initOpd) {
                 loadOrganisasi(initOpd, initOrganisasi);
+                toggleWrapTambahKelompok();
                 var selectedOrg = findSelectedOrganisasi(initOpd, initOrganisasi);
                 if (selectedOrg) {
                     $('#nama_lembaga').val(selectedOrg.nama);
@@ -497,6 +675,12 @@
             $('#organisasi_id').on('change', function () {
                 var opdId = $('#opd_id').val();
                 var orgId = $(this).val();
+                toggleWrapTambahKelompok();
+                if (orgId === NEW_KELOMPOK_VAL) {
+                    $('#nama_lembaga').val('');
+                    fillOrganisasiDetail(null);
+                    return;
+                }
                 var org = findSelectedOrganisasi(opdId, orgId);
                 $('#nama_lembaga').val(org ? org.nama : '');
                 fillOrganisasiDetail(org);
@@ -510,6 +694,87 @@
             });
 
             $('#opd_id, #organisasi_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih', allowClear: true });
+
+            // Desa untuk blok "Tambah Kelompok Baru"
+            var $wrapTambahKelompok = $('#wrap-tambah-kelompok-baru');
+            if ($wrapTambahKelompok.length) {
+                function loadKelDesa(kecamatanId, selectedDesaId) {
+                    var $desa = $('#kel_desa_id');
+                    $desa.empty().append('<option value="">Pilih Desa</option>');
+                    if (!kecamatanId) return;
+                    var k = kecamatansData.find(function (x) { return x.id === kecamatanId; });
+                    if (k && k.desa) {
+                        k.desa.forEach(function (d) {
+                            var sel = (selectedDesaId && d.id === selectedDesaId) ? ' selected' : '';
+                            $desa.append('<option value="' + d.id + '"' + sel + '>' + d.nama + '</option>');
+                        });
+                    }
+                }
+                $('#kel_kecamatan_id').on('change', function () { loadKelDesa($(this).val(), null); });
+                var kelKec = $('#kel_kecamatan_id').val();
+                var kelDesa = $('#kel_desa_id').val() || ($wrapTambahKelompok.data('initial-desa-id') || '');
+                if (kelKec) loadKelDesa(kelKec, kelDesa);
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $('#kel_kecamatan_id, #kel_desa_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih', allowClear: true });
+                }
+            }
+
+            function initSelect2Penduduk($container) {
+                if (typeof $.fn.select2 === 'undefined') return;
+                var $sel = $container || $(document);
+                $sel.find('.select-penduduk').each(function () {
+                    var $t = $(this);
+                    if ($t.hasClass('select2-hidden-accessible')) return;
+                    $t.select2({ theme: 'bootstrap4', placeholder: 'Pilih Penduduk', allowClear: true, width: '100%' });
+                });
+            }
+            initSelect2Penduduk($('#wrap-tambah-kelompok-baru'));
+
+            // Dynamic row: Anggota Kelompok
+            var penduduksOptions = @json(($penduduks ?? collect())->map(fn($p) => ['id' => $p->id, 'nama' => $p->nama, 'nik' => $p->nik])->values()->all());
+            var jabatanOptions = @json(collect(\App\Enums\JabatanOrganisasi::cases())->map(fn($j) => ['value' => $j->value, 'label' => $j->getDescription()])->values()->all());
+            var jenisDokumenOptions = @json(collect(\App\Enums\JenisDokumen::cases())->map(fn($j) => ['value' => $j->value, 'label' => $j->getDescription()])->values()->all());
+
+            $('#btnTambahAnggotaRow').on('click', function () {
+                var idx = $('.row-anggota').length;
+                var row = '<div class="row align-items-end mb-2 row-anggota">' +
+                    '<div class="col-md-5"><label class="form-label small">Penduduk</label><select name="anggota[' + idx + '][penduduk_id]" class="form-select form-select-sm select-penduduk"><option value="">Pilih</option>' +
+                    penduduksOptions.map(function(p) { return '<option value="' + p.id + '">' + p.nama + ' — ' + (p.nik || '') + '</option>'; }).join('') +
+                    '</select></div>' +
+                    '<div class="col-md-4"><label class="form-label small">Jabatan</label><select name="anggota[' + idx + '][jabatan]" class="form-select form-select-sm"><option value="">Pilih</option>' +
+                    jabatanOptions.map(function(j) { return '<option value="' + j.value + '">' + j.label + '</option>'; }).join('') +
+                    '</select></div>' +
+                    '<div class="col-md-3"><button type="button" class="btn btn-sm btn-outline-danger btn-hapus-anggota"><i data-acorn-icon="bin"></i></button></div></div>';
+                $('#anggota-container').append(row);
+                initSelect2Penduduk($('#anggota-container .row-anggota:last'));
+            });
+            $(document).on('click', '.btn-hapus-anggota', function () {
+                var $row = $(this).closest('.row-anggota');
+                var $sel = $row.find('.select-penduduk');
+                if ($sel.length && $sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+                $row.remove();
+                $('#anggota-container .row-anggota').each(function (i) {
+                    $(this).find('select').attr('name', function (_, n) { return n.replace(/\[\d+\]/, '[' + i + ']'); });
+                });
+            });
+
+            $('#btnTambahDokumenRow').on('click', function () {
+                var idx = $('.row-dokumen').length;
+                var row = '<div class="row align-items-end mb-2 row-dokumen">' +
+                    '<div class="col-md-3"><label class="form-label small">Jenis</label><select name="dokumen[' + idx + '][jenis_dokumen]" class="form-select form-select-sm"><option value="">Pilih</option>' +
+                    jenisDokumenOptions.map(function(j) { return '<option value="' + j.value + '">' + j.label + '</option>'; }).join('') +
+                    '</select></div>' +
+                    '<div class="col-md-3"><label class="form-label small">Keterangan</label><input type="text" name="dokumen[' + idx + '][keterangan]" class="form-control form-control-sm" maxlength="255" placeholder="Keterangan"></div>' +
+                    '<div class="col-md-4"><label class="form-label small">File</label><input type="file" name="dokumen[' + idx + '][file]" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.webp"></div>' +
+                    '<div class="col-md-2"><button type="button" class="btn btn-sm btn-outline-danger btn-hapus-dokumen"><i data-acorn-icon="bin"></i></button></div></div>';
+                $('#dokumen-container').append(row);
+            });
+            $(document).on('click', '.btn-hapus-dokumen', function () {
+                $(this).closest('.row-dokumen').remove();
+                $('#dokumen-container .row-dokumen').each(function (i) {
+                    $(this).find('select, input').attr('name', function (_, n) { return n.replace(/\[\d+\]/, '[' + i + ']'); });
+                });
+            });
         });
     </script>
 @endpush
