@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\StatusUser;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,11 +13,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $this->call([
             KecamatanSeeder::class,
             PendudukSeeder::class,
+            OpdSeeder::class,
+            JenisBantuanSeeder::class,
+            UserSeeder::class,
+            OrganisasiSeeder::class,
+            PengajuanSeeder::class,
         ]);
 
         User::query()->updateOrCreate([

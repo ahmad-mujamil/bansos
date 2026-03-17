@@ -4,21 +4,18 @@ namespace App\Enums;
 
 enum KategoriBantuan: string
 {
-    case BANSOS = "Bansos";
-    case HIBAH = "Hibah";
-    case SUBSIDI = "Subsidi";
-    case PINJAMAN = "Pinjaman";
-    case LAINNYA = "Lainnya";
+    case BANSOS = "bansos";
+    case HIBAH = "hibah";
+    case BANTUAN_KELOMPOK = "bantuan_kelompok";
 
 
     public function getDescription(): string
     {
         return match ($this) {
             self::BANSOS => "Bantuan Sosial",
+            self::BANTUAN_KELOMPOK => "Bantuan Kelompok",
             self::HIBAH => "Hibah",
-            self::SUBSIDI => "Subsidi",
-            self::PINJAMAN => "Pinjaman",
-            self::LAINNYA => "Lainnya",
+
         };
     }
 

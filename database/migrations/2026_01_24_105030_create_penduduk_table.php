@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('rt_rw',7)->comment('RT/RW');
             $table->foreignUuid('desa_id')->nullable()->constrained('desa')->nullOnDelete();
             $table->foreignUuid('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
-            $table->tinyInteger('level_desil');
+            $table->tinyInteger('level_desil')->nullable();
             $table->timestamps();
 
             $table->unique(['nik','no_kk']);

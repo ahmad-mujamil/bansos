@@ -22,6 +22,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->foreignUuid('opd_id')->nullable()->constrained('opd')->nullOnDelete();
+            $table->string('jenis_user', 3)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

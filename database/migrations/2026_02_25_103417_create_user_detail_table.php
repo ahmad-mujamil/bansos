@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('alamat')->nullable();
             $table->foreignUuid('desa_id')->nullable()->constrained('desa')->nullOnDelete();
             $table->string('phone', 20)->nullable();
+            $table->foreignUuid('organisasi_id')->nullable()->constrained('organisasi');
 
             // KHUSUS PERORANGAN
             $table->string('nama_personal')->nullable();
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->timestamp('verified_at')->nullable();
             $table->foreignUuid('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('verification_note')->nullable();
+
 
             $table->timestamps();
         });
