@@ -5,13 +5,14 @@ namespace App\Enums;
 enum JenisUser: string
 {
     case INDIVIDUAL = "IND";
-    case ORGANISASI = "ORG";
+    case KELOMPOK = "KLP";
+
 
     public function getDescription(): string
     {
         return match ($this) {
             self::INDIVIDUAL => "Individual",
-            self::ORGANISASI => "Kelompok/Organisasi",
+            self::KELOMPOK => "Kelompok",
         };
     }
 }

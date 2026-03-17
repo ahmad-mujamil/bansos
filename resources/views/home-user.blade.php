@@ -258,7 +258,7 @@
                 {{-- Jika Kelompok: hanya Bantuan ke Masyarakat --}}
                 @elseif($jenisUser === 'KLP')
                     <div class="col-12">
-                        <a href="{{ route('pengajuan.create', ['jenis' => 'bantuan_kelompok']) }}" class="text-decoration-none d-block h-100">
+                        <a href="{{ route('pengajuan.create') }}" class="text-decoration-none d-block h-100">
                             <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                                 <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #0d9488 0%, #0f766e 50%, #115e59 100%); min-height: 200px;">
                                     <div class="p-4 position-relative z-1">
@@ -313,9 +313,6 @@
             }
         </style>
         <!-- Menu Bantuan End -->
-
-        
-
         <!-- Charts End -->
         @endif
     </div>
