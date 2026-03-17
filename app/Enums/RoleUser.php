@@ -38,7 +38,7 @@ enum RoleUser: string
                 "MONITORING_DAN_REALISASI","MONITORING","REALISASI_BANTUAN","BLACKLIST"
             ],
             self::USER => [
-                "BANTUAN_SOSIAL","PENGAJUAN","REALISASI",
+                "BANTUAN","PENGAJUAN","REALISASI",
                 "PROFILE_USER","PROFILE_USER_DETAIL"
             ],
             self::BUD => [

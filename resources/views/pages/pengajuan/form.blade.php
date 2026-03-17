@@ -39,7 +39,7 @@
             $isEdit = (bool) $pengajuan;
             $route = $isEdit ? route('pengajuan.update', $pengajuan) : route('pengajuan.store');
             $method = $isEdit ? 'PUT' : 'POST';
-            $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
+            // $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
             $isBansos = $jenis === \App\Enums\JenisPengajuan::BANSOS->value;
         @endphp
 
@@ -68,10 +68,10 @@
 
                         <div class="col-md-6 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
                             <label class="form-label text-small text-uppercase">Kelompok <span class="text-danger">*</span></label>
-                            <select name="kelompok_id" id="kelompok_id" class="form-select @error('kelompok_id') is-invalid @enderror">
+                            <select name="kelompok_id" id="kelompok_id" class="form-select @error('kelompok_id') is-invalid @enderror" disabled>
                                 <option value="">Pilih Kelompok</option>
                                 @foreach($kelompokList as $k)
-                                    <option value="{{ $k->id }}" {{ old('kelompok_id', $detail?->kelompok_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                                    <option value="{{ $k->id }}" {{ old('kelompok_id', auth()->user()->userDetail?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
                                 @endforeach
                             </select>
                             @error('kelompok_id')
