@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPengajuan;
+use App\Enums\JenisUser;
 use App\Enums\PengajuanStatus;
 use App\Models\Organisasi;
 use App\Models\Penduduk;
@@ -45,11 +46,15 @@ class PengajuanController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nik']);
 
+          $jenis = auth()->user()->jenis_user?->value === JenisUser::INDIVIDUAL->value ? JenisPengajuan::BANSOS->value : JenisPengajuan::BANTUAN_KELOMPOK->value;
+
+
         return view('pages.pengajuan.form', [
             'pengajuan' => null,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
             'jenisOptions' => $jenisOptions,
+            'jenis' => 'bantuan_kelompok',
         ]);
     }
 
