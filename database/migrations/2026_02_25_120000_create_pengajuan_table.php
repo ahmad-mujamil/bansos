@@ -14,10 +14,15 @@ return new class extends Migration
         Schema::create('pengajuan', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('kode_pengajuan')->unique();
+            $table->foreignUuid('jenis_bantuan_id')->constrained("jenis_bantuan");
+            $table->string('judul');
+            $table->string('lokasi')->nullable();
+            $table->decimal('nilai', 18, 2)->default(0);
+            $table->string('status')->default('draft')->comment('dari enum status pengajuan');
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('jenis')->comment('hibah, bantuan_kelompok, bansos');
-            $table->string('status')->default('draft')->comment('draft, diajukan, verifikasi_administrasi, verifikasi_teknis, disetujui, ditolak, revisi, selesai');
-            $table->text('catatan_verifikator')->nullable();
+            $table->foreignUuid('opd_id')->constrained('opd')->cascadeOnDelete();
+            $table->foreignUuid('organisasi_id')->constrained('organisasi')->cascadeOnDelete();
+            $table->text('catatan')->nullable();
             $table->foreignUuid('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
