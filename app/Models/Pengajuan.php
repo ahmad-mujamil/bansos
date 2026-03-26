@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Pengajuan extends Model
+class Pengajuan extends Model implements HasMedia
 {
-    use HasUuids;
+    use HasUuids, InteractsWithMedia;
 
     protected $table = 'pengajuan';
 
@@ -54,6 +56,13 @@ class Pengajuan extends Model
     public function logs(): HasMany
     {
         return $this->hasMany(PengajuanLog::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('pengajuan')
+            ->singleFile()
+            ->acceptsMimeTypes(['application/pdf']);
     }
 
     public function canEdit(): bool

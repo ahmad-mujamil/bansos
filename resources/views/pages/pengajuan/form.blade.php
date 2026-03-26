@@ -35,7 +35,8 @@
         @endif
 
         @php
-            $detail = $pengajuan?->details->first();
+            $detail = $pengajuan?->first();
+            $mediaPengajuan = $pengajuan?->getFirstMedia('pengajuan');
             $isEdit = (bool) $pengajuan;
             $route = $isEdit ? route('pengajuan.update', $pengajuan) : route('pengajuan.store');
             $method = $isEdit ? 'PUT' : 'POST';
@@ -44,7 +45,7 @@
             $isBantuanKelompok = $jenis === \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value;
         @endphp
 
-        <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan">
+        <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan" enctype="multipart/form-data">
             @csrf
             @method($method)
 
@@ -57,7 +58,7 @@
                             <select id="jenis" class="form-select @error('jenis') is-invalid @enderror" disabled>
                                 <option value="">Pilih Jenis</option>
                                 @foreach($jenisOptions as $opt)
-                                    <option value="{{ $opt->value }}" {{ $jenis == $opt->value ? 'selected' : '' }}>
+                                    <option value="{{ $opt->value }}" {{ 'bantuan_kelompok' == $opt->value ? 'selected' : '' }}>
                                         {{ $opt->getDescription() }}
                                     </option>
                                 @endforeach
@@ -97,7 +98,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-4 col-sm-12" id="wrap-jenis-bantuan" style="{{ $isBantuanKelompok ? '' : 'display:none;' }}">
+                        <div class="col-md-4 col-sm-12" id="wrap-jenis-bantuan" >
                             <label class="form-label text-small text-uppercase">Jenis Bantuan <span class="text-danger">*</span></label>
                             <select name="jenis_bantuan_id" id="jenis_bantuan_id" class="form-select @error('jenis_bantuan_id') is-invalid @enderror">
                                 <option value="">Pilih Jenis Bantuan</option>
@@ -148,6 +149,22 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <div class="col-md-12 col-sm-12">
+                            <label class="form-label text-small text-uppercase">File Pengajuan (PDF)</label>
+                            <input type="file" class="form-control @error('file_pengajuan') is-invalid @enderror" name="file_pengajuan" accept="application/pdf">
+                            <small class="text-muted">Format PDF, maksimal 5 MB.</small>
+                            @if($mediaPengajuan)
+                                <div class="mt-2">
+                                    <a href="{{ $mediaPengajuan->getUrl() }}" target="_blank" class="text-primary fw-semibold">
+                                        Lihat file saat ini: {{ $mediaPengajuan->file_name }}
+                                    </a>
+                                </div>
+                            @endif
+                            @error('file_pengajuan')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <script>
                             document.addEventListener("DOMContentLoaded", function() {
                                 const nilaiInput = document.getElementById('nilai');
@@ -177,9 +194,7 @@
                         
                     </div>
 
-                    <hr class="my-3">
-
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 mt-5">
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-secondary">Batal</a>
                     </div>
