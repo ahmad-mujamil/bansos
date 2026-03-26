@@ -30,7 +30,7 @@ class VerifikasiPengajuanRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:1000',
-                Rule::requiredIf(in_array($this->input('keputusan'), [$ditolak], true)),
+                Rule::requiredIf(in_array($this->input('status'), [$ditolak], true)),
             ],
         ];
     }
