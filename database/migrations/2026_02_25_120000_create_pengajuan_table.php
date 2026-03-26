@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pengajuan', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('kode_pengajuan')->unique();
-            $table->foreignUuid('jenis_bantuan_id')->constrained("jenis_bantuan");
+            $table->foreignUuid('jenis_bantuan_id')->nullable()->constrained("jenis_bantuan");
             $table->string('judul');
             $table->string('lokasi')->nullable();
             $table->decimal('nilai', 18, 2)->default(0);
