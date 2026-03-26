@@ -1,0 +1,18 @@
+---
+description: Konsistensi model/enum Pengajuan & badge
+globs: app/**/Pengajuan*.php
+alwaysApply: false
+---
+
+# Model/Enum Pengajuan Guidelines (bansos)
+
+Saat mengubah `Pengajuan`, `PengajuanDetail`, `PengajuanLog`, atau `PengajuanStatus`:
+
+1. Pastikan transisi status tetap cocok dengan guards:
+   - `Pengajuan::canEdit()` dan `Pengajuan::canSubmit()` adalah gate yang menentukan tombol & route.
+2. Perbarui enum & semua referensi:
+   - jika menambah/menghapus case di `PengajuanStatus`, harus update juga:
+     - mapping badge di `resources/views/pages/pengajuan/index.blade.php` dan `show.blade.php`
+     - transisi/guard di `PengajuanController`
+3. Audit cepat untuk fatal error:
+   - Blade yang mereferensikan case enum yang tidak ada akan menyebabkan error runtime; pastikan case tersebut benar-benar ada di enum.

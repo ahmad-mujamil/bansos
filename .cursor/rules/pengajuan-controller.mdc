@@ -1,0 +1,34 @@
+---
+description: Penguncian flow & aturan `PengajuanController`
+globs: app/Http/Controllers/PengajuanController.php
+alwaysApply: false
+---
+
+# PengajuanController Guidelines (bansos)
+
+Saat mengubah fitur `pengajuan` di controller ini:
+
+1. Selalu gunakan guard otorisasi:
+   - `authorizeUser($pengajuan)` untuk `show/edit/update/submit`.
+2. Gunakan transaksi untuk `store` dan `update`:
+   - `DB::beginTransaction()` -> simpan `Pengajuan` -> simpan detail -> `DB::commit()`
+   - pada exception: `DB::rollBack()` lalu `toast()->error(...)` dan `back()->withInput()`.
+3. `store` wajib:
+   - `user_id = auth()->id()`
+   - `kode_pengajuan = generateKodePengajuan()`
+   - `jenis = validated['jenis']`
+   - `jenis_bantuan_id` mengikuti validasi
+   - `status = PengajuanStatus::DRAFT`
+   - `logPengajuan($pengajuan, 'created', null, PengajuanStatus::DRAFT->value)`
+4. `update` wajib:
+   - guard `if (! $pengajuan->canEdit())` sesuai pola (toast warning + redirect).
+   - hapus detail lama: `$pengajuan->details()->delete()`
+   - simpan ulang detail via `saveDetail($pengajuan, $validated)`
+5. `submit` wajib:
+   - guard `if (! $pengajuan->canSubmit())`
+   - transisi `DRAFT -> DIAJUKAN` dan `logPengajuan(..., 'status_changed', $old, PengajuanStatus::DIAJUKAN->value)`
+6. Validasi harus tetap “source of truth”:
+   - seluruh required/toggle di Blade harus konsisten dengan `validatePengajuan()`.
+7. Konsistensi log:
+   - action: `created`, `updated`, `status_changed`
+   - isi `status_from` dan `status_to` sesuai perubahan status (jangan asal set).

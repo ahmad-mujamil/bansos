@@ -36,6 +36,11 @@ class Pengajuan extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function organisasi(): BelongsTo
+    {
+        return $this->belongsTo(Organisasi::class);
+    }
+
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');

@@ -1,0 +1,24 @@
+---
+description: Sinkronisasi Blade form & aksi `pengajuan`
+globs: resources/views/pages/pengajuan/**/*.blade.php
+alwaysApply: false
+---
+
+# Blade Pengajuan Guidelines (bansos)
+
+Saat mengubah UI pengajuan (form/index/show):
+
+1. Form `resources/views/pages/pengajuan/form.blade.php`:
+   - wajib ada `<input type="hidden" name="jenis" value="{{ $jenis }}">`
+   - logika blok (penduduk/kelompok/jenis_bantuan) mengikuti `validatePengajuan()`:
+     - `BANSOS`: `penduduk_id` required, `kelompok_id` nullable
+     - `BANTUAN_KELOMPOK`: `jenis_bantuan_id` required
+     - lainnya: `kelompok_id` required, `penduduk_id` nullable
+   - `required`/toggle di JS harus konsisten dengan validasi server.
+2. Aksi tombol di `index.blade.php` dan `show.blade.php`:
+   - tampilkan `Edit` hanya jika `$pengajuan->canEdit()`
+   - tampilkan `Ajukan` hanya jika `$pengajuan->canSubmit()`
+3. Confirmation dialog:
+   - submit form sebaiknya menggunakan SweetAlert `Swal.fire(...)` sebelum `form.submit()`.
+4. Badge status:
+   - mapping badge warna/status harus konsisten dengan enum `PengajuanStatus` (lihat rule model/enum).
