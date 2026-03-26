@@ -35,7 +35,6 @@
                                     <option value="{{ \App\Enums\PengajuanStatus::DIAJUKAN->value }}">Diajukan</option>
                                     <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}">Disetujui</option>
                                     <option value="{{ \App\Enums\PengajuanStatus::DITOLAK->value }}">Ditolak</option>
-                                    <option value="{{ \App\Enums\PengajuanStatus::DRAFT->value }}">Draft</option>
                                 </select>
                             </div>
 

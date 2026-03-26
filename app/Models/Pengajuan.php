@@ -52,6 +52,10 @@ class Pengajuan extends Model implements HasMedia
     // {
     //     return $this->hasMany(PengajuanDetail::class);
     // }
+    public function details(): HasMany
+    {
+        return $this->hasMany(PengajuanDetail::class);
+    }
 
     public function logs(): HasMany
     {

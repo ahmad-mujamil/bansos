@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PengajuanStatus;
+use App\Enums\RupaBantuan;
 use App\Http\Requests\VerifikasiPengajuanRequest;
+use App\Models\BantuanBarangJasa;
+use App\Models\BantuanUang;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
+use App\Models\VerifikasiPengajuan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +18,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 class VerifikasiPengajuanController extends Controller
 {
-    private function badgeColor(?PengajuanStatus $status): string
+    public function badgeColor(?PengajuanStatus $status): string
     {
         return match ($status) {
             PengajuanStatus::DRAFT => 'secondary',
@@ -36,7 +40,6 @@ class VerifikasiPengajuanController extends Controller
     {
         $statusRequest = (string) request('status', 'all');
         $allowedStatuses = [
-            PengajuanStatus::DRAFT->value,
             PengajuanStatus::DIAJUKAN->value,
             PengajuanStatus::DISETUJUI->value,
             PengajuanStatus::DITOLAK->value,
@@ -52,6 +55,8 @@ class VerifikasiPengajuanController extends Controller
         } elseif ($statusRequest !== 'all') {
             // Default to `diajukan` if filter value invalid.
             $query->where('status', PengajuanStatus::DIAJUKAN->value);
+        } elseif ($statusRequest == 'all') {
+            $query->whereIn('status', [PengajuanStatus::DIAJUKAN->value, PengajuanStatus::DISETUJUI->value, PengajuanStatus::DITOLAK->value]);
         }
 
         return DataTables::of($query)
@@ -86,31 +91,60 @@ class VerifikasiPengajuanController extends Controller
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->load(['user', 'verifiedBy', 'logs.user']);
+        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk']);
 
-        return view('pages.verifikasi-pengajuan.show', compact('pengajuan'));
+        $verifikasiIds = $pengajuan->logs
+            ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $bantuanUangByVerifikasi = BantuanUang::query()
+            ->with('penduduk')
+            ->whereIn('verifikasi_pengajuan_id', $verifikasiIds)
+            ->get()
+            ->groupBy('verifikasi_pengajuan_id');
+
+        $bantuanBarangJasaByVerifikasi = BantuanBarangJasa::query()
+            ->whereIn('verifikasi_pengajuan_id', $verifikasiIds)
+            ->get()
+            ->groupBy('verifikasi_pengajuan_id');
+
+        return view('pages.verifikasi-pengajuan.show', [
+            'pengajuan' => $pengajuan,
+            'bantuanUangByVerifikasi' => $bantuanUangByVerifikasi,
+            'bantuanBarangJasaByVerifikasi' => $bantuanBarangJasaByVerifikasi,
+        ]);
     }
 
     public function verifikasi(VerifikasiPengajuanRequest $request, Pengajuan $pengajuan): RedirectResponse
     {
-        $decision = $request->validated('status');
+        $oldStatus = $pengajuan->status;
         $catatan = $request->validated('catatan');
 
-        $oldStatus = $pengajuan->status;
+        $allPassed = (bool) $request->validated('lulus_kriteria')
+            && (bool) $request->validated('lulus_administrasi')
+            && (bool) $request->validated('lulus_kesesuaian')
+            && (bool) $request->validated('sesuai_program_pemda');
 
-        $newStatus = match ($decision) {
-            PengajuanStatus::DISETUJUI->value => PengajuanStatus::DISETUJUI,
-            PengajuanStatus::DITOLAK->value => PengajuanStatus::DITOLAK,
-            default => null,
-        };
-
-        if (! $newStatus) {
-            abort(422);
-        }
+        $newStatus = $allPassed ? PengajuanStatus::DISETUJUI : PengajuanStatus::DITOLAK;
 
         DB::beginTransaction();
 
         try {
+            $verifikasi = VerifikasiPengajuan::create([
+                'pengajuan_id' => $pengajuan->id,
+                'user_id' => Auth::id(),
+                'catatan' => $catatan,
+                'nilai_rekomendasi' => $request->validated('nilai_rekomendasi'),
+                'rupa_bantuan' => $request->validated('rupa_bantuan'),
+                'lulus_kriteria' => (bool) $request->validated('lulus_kriteria'),
+                'lulus_administrasi' => (bool) $request->validated('lulus_administrasi'),
+                'lulus_kesesuaian' => (bool) $request->validated('lulus_kesesuaian'),
+                'sesuai_program_pemda' => (bool) $request->validated('sesuai_program_pemda'),
+            ]);
+
             $pengajuan->verified_at = now();
             $pengajuan->verified_by = Auth::id();
             $pengajuan->status = $newStatus;
@@ -123,8 +157,69 @@ class VerifikasiPengajuanController extends Controller
                 'status_from' => $oldStatus?->value,
                 'status_to' => $newStatus->value,
                 'catatan' => $catatan,
-                'metadata' => null,
+                'metadata' => [
+                    'verifikasi_pengajuan_id' => $verifikasi->id,
+                ],
             ]);
+
+            if ($newStatus === PengajuanStatus::DISETUJUI) {
+                $rupa = $request->validated('rupa_bantuan');
+
+                if (! $rupa) {
+                    throw new \RuntimeException('Rupa bantuan wajib dipilih untuk pengajuan yang disetujui.');
+                }
+
+                if ($rupa === RupaBantuan::UANG->value) {
+                    $details = $request->validated('detail') ?? [];
+
+                    if (count($details) < 1) {
+                        throw new \RuntimeException('Detail bantuan uang wajib diisi.');
+                    }
+
+                    foreach ($details as $row) {
+                        BantuanUang::create([
+                            'verifikasi_pengajuan_id' => $verifikasi->id,
+                            'penduduk_id' => $row['penduduk_id'],
+                            'nilai' => $row['nilai'],
+                        ]);
+                    }
+                }
+
+                if (in_array($rupa, [RupaBantuan::BARANG->value, RupaBantuan::JASA->value], true)) {
+                    $items = $request->validated('items');
+
+                    if (is_array($items) && count($items) > 0) {
+                        foreach ($items as $item) {
+                            BantuanBarangJasa::create([
+                                'verifikasi_pengajuan_id' => $verifikasi->id,
+                                'nama_barang' => $item['nama_barang'],
+                                'satuan' => $item['satuan'],
+                                'spesifikasi' => $item['spesifikasi'],
+                                'harga_satuan' => $item['harga_satuan'],
+                                'qty' => $item['qty'],
+                            ]);
+                        }
+                    } else {
+                        // Backward-compatible: support single-item payload.
+                        $payload = $request->safe()->only(['nama_barang', 'satuan', 'spesifikasi', 'harga_satuan', 'qty']);
+
+                        foreach (['nama_barang', 'satuan', 'spesifikasi', 'harga_satuan', 'qty'] as $field) {
+                            if (! isset($payload[$field]) || $payload[$field] === '' || $payload[$field] === null) {
+                                throw new \RuntimeException('Detail barang/jasa wajib diisi.');
+                            }
+                        }
+
+                        BantuanBarangJasa::create([
+                            'verifikasi_pengajuan_id' => $verifikasi->id,
+                            'nama_barang' => $payload['nama_barang'],
+                            'satuan' => $payload['satuan'],
+                            'spesifikasi' => $payload['spesifikasi'],
+                            'harga_satuan' => $payload['harga_satuan'],
+                            'qty' => $payload['qty'],
+                        ]);
+                    }
+                }
+            }
 
             DB::commit();
 
