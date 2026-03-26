@@ -61,7 +61,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <span class="text-small text-uppercase text-muted">Jenis</span>
-                        <div class="fw-semibold">{{ $pengajuan->jenis_bantuan->nama ?? '-' }}</div>
+                        <div class="fw-semibold">{{ $pengajuan->jenisBantuan?->nama ?? '-' }}</div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <span class="text-small text-uppercase text-muted">Status</span>
@@ -102,7 +102,7 @@
                         @if($detail->organisasi_id)
                             <div class="col-md-6 mb-3">
                                 <span class="text-small text-uppercase text-muted">Kelompok</span>
-                                <div>{{ $detail->organisasi }}</div>
+                                <div>{{ $detail->organisasi->nama ?? '-' }}</div>
                             </div>
                         @endif
                         @if($detail->penduduk_id)
@@ -113,29 +113,19 @@
                         @endif
                         <div class="col-12 mb-3">
                             <span class="text-small text-uppercase text-muted">Judul Usulan</span>
-                            <div class="fw-semibold">{{ $detail->judul_usulan }}</div>
+                            <div class="fw-semibold">{{ $detail->judul }}</div>
                         </div>
-                        @if($detail->latar_belakang)
-                            <div class="col-12 mb-3">
-                                <span class="text-small text-uppercase text-muted">Latar Belakang</span>
-                                <div>{{ $detail->latar_belakang }}</div>
-                            </div>
-                        @endif
-                        @if($detail->tujuan)
-                            <div class="col-12 mb-3">
-                                <span class="text-small text-uppercase text-muted">Tujuan</span>
-                                <div>{{ $detail->tujuan }}</div>
-                            </div>
-                        @endif
+                       
+                       
                         @if($detail->lokasi_kegiatan)
                             <div class="col-md-6 mb-3">
                                 <span class="text-small text-uppercase text-muted">Lokasi Kegiatan</span>
-                                <div>{{ $detail->lokasi_kegiatan }}</div>
+                                <div>{{ $detail->lokasi }}</div>
                             </div>
                         @endif
                         <div class="col-md-6 mb-3">
                             <span class="text-small text-uppercase text-muted">Nilai Usulan</span>
-                            <div class="fw-semibold">Rp {{ number_format($detail->nilai_usulan, 0, ',', '.') }}</div>
+                            <div class="fw-semibold">Rp {{ number_format($detail->nilai, 0, ',', '.') }}</div>
                         </div>
                         @if($detail->tanggal_pengajuan)
                             <div class="col-md-6 mb-3">

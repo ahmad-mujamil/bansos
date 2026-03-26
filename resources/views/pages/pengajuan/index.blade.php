@@ -62,7 +62,7 @@
                             </thead>
                             <tbody>
                                 @foreach($pengajuan as $p)
-                                    @php $detail = $p->details->first(); @endphp
+                                    @php $detail = $p->first(); @endphp
                                     <tr data-status="{{ $p->status->value }}">
                                         <td>{{ $p->kode_pengajuan }}</td>
                                         <td>{{ $p->jenisBantuan?->nama ?? '-' }}</td>
