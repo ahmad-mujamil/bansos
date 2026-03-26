@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -22,10 +21,14 @@ class Pengajuan extends Model
     protected function casts(): array
     {
         return [
-            'jenis' => JenisPengajuan::class,
             'status' => PengajuanStatus::class,
             'verified_at' => 'datetime',
         ];
+    }
+
+    public function jenisBantuan(): BelongsTo
+    {
+        return $this->belongsTo(JenisBantuan::class);
     }
 
     public function user(): BelongsTo
@@ -38,10 +41,10 @@ class Pengajuan extends Model
         return $this->belongsTo(User::class, 'verified_by');
     }
 
-    public function details(): HasMany
-    {
-        return $this->hasMany(PengajuanDetail::class);
-    }
+    // public function details(): HasMany
+    // {
+    //     return $this->hasMany(PengajuanDetail::class);
+    // }
 
     public function logs(): HasMany
     {
@@ -50,7 +53,7 @@ class Pengajuan extends Model
 
     public function canEdit(): bool
     {
-        return $this->status === PengajuanStatus::DRAFT || $this->status === PengajuanStatus::REVISI;
+        return $this->status === PengajuanStatus::DRAFT;
     }
 
     public function canSubmit(): bool

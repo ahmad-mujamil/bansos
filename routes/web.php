@@ -1,12 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 route::redirect('/', '/login');
 Auth::routes([
-    "register" => false,
-    "confirm" => false,
-    "reset" => false
+    'register' => false,
+    'confirm' => false,
+    'reset' => false,
 ]);
 
 // Registration Routes
@@ -38,15 +39,14 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::get('/pengajuan/{pengajuan}/edit', [App\Http\Controllers\PengajuanController::class, 'edit'])->name('pengajuan.edit');
     Route::put('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'update'])->name('pengajuan.update');
     Route::post('/pengajuan/{pengajuan}/submit', [App\Http\Controllers\PengajuanController::class, 'submit'])->name('pengajuan.submit');
-    //PROFILE
+    // PROFILE
     Route::get('/my-profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::put('/my-profile', [App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
-    //SECURITY
+    // SECURITY
     Route::get('/my-profile/security', [App\Http\Controllers\ProfileController::class, 'security'])->name('security.index');
     Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
 
-
-    //USERS
+    // USERS
     Route::middleware(['role:super'])->group(function () {
         Route::resource('pengguna', App\Http\Controllers\PenggunaController::class);
     });
@@ -58,7 +58,14 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengguna/{user}', [App\Http\Controllers\VerifikasiPenggunaController::class, 'show'])->name('verifikasi-pengguna.show');
     });
 
-    //MASTER DATA
+    // Verifikasi Pengajuan
+    Route::middleware(['role:opd'])->group(function () {
+        Route::get('verifikasi-pengajuan', [App\Http\Controllers\VerifikasiPengajuanController::class, 'index'])->name('verifikasi-pengajuan.index');
+        Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
+        Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
+    });
+
+    // MASTER DATA
     Route::middleware(['role:super,admin'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
         Route::resource('desa', App\Http\Controllers\DesaController::class);
