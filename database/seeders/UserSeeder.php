@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
                     'is_active'  => true,
                 ],
                 'detail' => [
-                    'type'        => JenisUser::ORGANISASI->value,
+                    'type'        => JenisUser::KELOMPOK->value,
                     'nama_user'   => 'Kelompok Tani Maju Bersama',
                     'nama_lembaga' => 'Kelompok Tani Maju Bersama',
                     'alamat'      => 'Dusun Karang Baru, Narmada',
@@ -104,7 +104,7 @@ class UserSeeder extends Seeder
                     'is_active'  => true,
                 ],
                 'detail' => [
-                    'type'        => JenisUser::ORGANISASI->value,
+                    'type'        => JenisUser::KELOMPOK->value,
                     'nama_user'   => 'Yayasan Peduli Lombok',
                     'nama_lembaga' => 'Yayasan Peduli Lombok',
                     'alamat'      => 'Jl. Gunung Sari No. 22',
