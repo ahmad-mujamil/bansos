@@ -40,7 +40,7 @@
                             <thead>
                                 <tr>
                                     <th class="text-muted text-small text-uppercase">Kode</th>
-                                    <th class="text-muted text-small text-uppercase">Jenis</th>
+                                    <th class="text-muted text-small text-uppercase">Jenis Bantuan</th>
                                     <th class="text-muted text-small text-uppercase">Judul Usulan</th>
                                     <th class="text-muted text-small text-uppercase">Status</th>
                                     <th class="text-muted text-small text-uppercase">Tanggal</th>
@@ -49,11 +49,11 @@
                             </thead>
                             <tbody>
                                 @foreach($pengajuan as $p)
-                                    @php $detail = $p->details->first(); @endphp
+                                  
                                     <tr>
                                         <td>{{ $p->kode_pengajuan }}</td>
-                                        <td>{{ $p->jenis->getDescription() }}</td>
-                                        <td>{{ $detail?->judul_usulan ?? '-' }}</td>
+                                        <td>{{ $p->jenis_bantuan->nama ?? '-' }}</td>
+                                        <td>{{ $p->judul ?? '-' }}</td>
                                         <td>
                                             @php
                                                 $status = $p->status;

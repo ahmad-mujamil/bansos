@@ -41,6 +41,7 @@
             $method = $isEdit ? 'PUT' : 'POST';
             // $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
             $isBansos = $jenis === \App\Enums\JenisPengajuan::BANSOS->value;
+            $isBantuanKelompok = $jenis === \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value;
         @endphp
 
         <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan">
@@ -66,18 +67,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
-                            <label class="form-label text-small text-uppercase">Kelompok <span class="text-danger">*</span></label>
-                            <select name="kelompok_id" id="kelompok_id" class="form-select @error('kelompok_id') is-invalid @enderror" disabled>
-                                <option value="">Pilih Kelompok</option>
-                                @foreach($kelompokList as $k)
-                                    <option value="{{ $k->id }}" {{ old('kelompok_id', auth()->user()->userDetail?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
-                                @endforeach
-                            </select>
-                            @error('kelompok_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        
 
                         <div class="col-md-6 col-sm-12" id="wrap-penduduk" style="{{ !$isBansos ? 'display:none;' : '' }}">
                             <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
@@ -92,54 +82,99 @@
                             @enderror
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-md-6 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
+                            
+
+                            <label class="form-label text-small text-uppercase">Kelompok <span class="text-danger">*</span></label>
+                            <select name="kelompok_id" id="kelompok_id" class="form-select @error('kelompok_id') is-invalid @enderror" disabled>
+                                <option value="">Pilih Kelompok</option>
+                                @foreach($kelompokList as $k)
+                                    <option value="{{ $k->id }}" {{ old('kelompok_id', auth()->user()->userDetail?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                                @endforeach
+                            </select>
+                            @error('kelompok_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4 col-sm-12" id="wrap-jenis-bantuan" style="{{ $isBantuanKelompok ? '' : 'display:none;' }}">
+                            <label class="form-label text-small text-uppercase">Jenis Bantuan <span class="text-danger">*</span></label>
+                            <select name="jenis_bantuan_id" id="jenis_bantuan_id" class="form-select @error('jenis_bantuan_id') is-invalid @enderror">
+                                <option value="">Pilih Jenis Bantuan</option>
+                                @foreach($jenisBantuanKelompokList as $jb)
+                                    <option value="{{ $jb->id }}" {{ old('jenis_bantuan_id', $pengajuan?->jenis_bantuan_id ?? '') == $jb->id ? 'selected' : '' }}>{{ $jb->nama }}@if($jb->keterangan) - {{ $jb->keterangan }}@endif</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @error('jenis_bantuan_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <div class="col-lg-8 col-md-8 col-sm-12">
                             <label class="form-label text-small text-uppercase">Judul Usulan <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('judul_usulan') is-invalid @enderror" name="judul_usulan" required
-                                   value="{{ old('judul_usulan', $detail?->judul_usulan ?? '') }}" placeholder="Judul usulan bantuan" />
-                            @error('judul_usulan')
+                            <input type="text" class="form-control @error('judul') is-invalid @enderror" name="judul" required
+                                   value="{{ old('judul', $detail?->judul ?? '') }}" placeholder="Judul usulan bantuan" />
+                            @error('judul')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                        <input type="hidden" name="opd_id" value="{{ auth()->user()->userDetail?->organisasi?->opd_id ?? '' }}">
+                        <input type="hidden" name="organisasi_id" value="{{ auth()->user()->userDetail?->organisasi_id ?? '' }}">
 
-                        <div class="col-md-6">
-                            <label class="form-label text-small text-uppercase">Latar Belakang</label>
-                            <textarea class="form-control @error('latar_belakang') is-invalid @enderror" name="latar_belakang" rows="3">{{ old('latar_belakang', $detail?->latar_belakang ?? '') }}</textarea>
-                            @error('latar_belakang')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-small text-uppercase">Tujuan</label>
-                            <textarea class="form-control @error('tujuan') is-invalid @enderror" name="tujuan" rows="3">{{ old('tujuan', $detail?->tujuan ?? '') }}</textarea>
-                            @error('tujuan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-4 col-sm-6">
+                        <div class="col-md-12 col-sm-12">
                             <label class="form-label text-small text-uppercase">Lokasi Kegiatan</label>
-                            <input type="text" class="form-control @error('lokasi_kegiatan') is-invalid @enderror" name="lokasi_kegiatan"
-                                   value="{{ old('lokasi_kegiatan', $detail?->lokasi_kegiatan ?? '') }}" />
-                            @error('lokasi_kegiatan')
+                            <textarea class="form-control @error('lokasi') is-invalid @enderror" name="lokasi" rows="2">{{ old('lokasi', $detail?->lokasi ?? '') }}</textarea>
+                            @error('lokasi')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-4 col-sm-6">
-                            <label class="form-label text-small text-uppercase">Nilai Usulan (Rp) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control @error('nilai_usulan') is-invalid @enderror" name="nilai_usulan" min="0" step="0.01" required
-                                   value="{{ old('nilai_usulan', $detail?->nilai_usulan ?? '0') }}" />
-                            @error('nilai_usulan')
+                        <div class="col-md-12 col-sm-12">
+                            <label class="form-label text-small text-uppercase">
+                                Nilai Usulan (Rp) <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control @error('nilai') is-invalid @enderror" 
+                                name="nilai" 
+                                id="nilai"
+                                min="0" 
+                                step="0.01" 
+                                required
+                                value="{{ old('nilai', isset($detail) ? number_format($detail->nilai, 0, ',', '.') : '0') }}"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                />
+                            @error('nilai')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-4 col-sm-6">
-                            <label class="form-label text-small text-uppercase">Tanggal Pengajuan</label>
-                            <input type="date" class="form-control @error('tanggal_pengajuan') is-invalid @enderror" name="tanggal_pengajuan"
-                                   value="{{ old('tanggal_pengajuan', $detail?->tanggal_pengajuan?->format('Y-m-d') ?? date('Y-m-d')) }}" />
-                            @error('tanggal_pengajuan')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const nilaiInput = document.getElementById('nilai');
+                                nilaiInput.addEventListener('input', function(e) {
+                                    let value = this.value.replace(/[^,\d]/g, '').toString();
+                                    if (!value) {
+                                        this.value = '';
+                                        return;
+                                    }
+                                    let split = value.split(',');
+                                    let sisa = split[0].length % 3;
+                                    let rupiah = split[0].substr(0, sisa);
+                                    let ribuan = split[0].substr(sisa).match(/\d{3}/g);
+                                    if (ribuan) {
+                                        rupiah += (sisa ? '.' : '') + ribuan.join('.');
+                                    }
+                                    this.value = rupiah + (split[1] !== undefined ? ',' + split[1] : '');
+                                });
+
+                                // On form submit, remove formatting so the value is numeric
+                                nilaiInput.form && nilaiInput.form.addEventListener('submit', function() {
+                                    let val = nilaiInput.value.replace(/\./g, '').replace(',', '.');
+                                    nilaiInput.value = val;
+                                });
+                            });
+                        </script>
+                        
                     </div>
 
                     <hr class="my-3">
@@ -169,16 +204,22 @@
     <script>
         $(function () {
             var BANSOS = '{{ \App\Enums\JenisPengajuan::BANSOS->value }}';
+            var BANTUAN_KELOMPOK = '{{ \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value }}';
 
             $('#jenis').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jenis', allowClear: false });
+            $('#jenis_bantuan_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jenis Bantuan', allowClear: true });
             $('#kelompok_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Kelompok', allowClear: true });
             $('#penduduk_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Penduduk', allowClear: true });
 
             function toggleJenis() {
                 var jenis = $('#jenis').val();
                 var isBansos = (jenis === BANSOS);
+                var isBantuanKelompok = (jenis === BANTUAN_KELOMPOK);
+
                 $('#wrap-kelompok').toggle(!isBansos);
                 $('#wrap-penduduk').toggle(isBansos);
+                $('#wrap-jenis-bantuan').toggle(isBantuanKelompok);
+                $('#jenis_bantuan_id').prop('required', isBantuanKelompok);
                 $('#kelompok_id').prop('required', !isBansos);
                 $('#penduduk_id').prop('required', isBansos);
             }

@@ -40,7 +40,7 @@
         </div>
 
         @php
-            $detail = $pengajuan->details->first();
+            $detail = $pengajuan->first();
             $status = $pengajuan->status;
             $badge = match($status) {
                 \App\Enums\PengajuanStatus::DRAFT => 'secondary',
@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <span class="text-small text-uppercase text-muted">Jenis</span>
-                        <div class="fw-semibold">{{ $pengajuan->jenis->getDescription() }}</div>
+                        <div class="fw-semibold">{{ $pengajuan->jenis_bantuan->nama ?? '-' }}</div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <span class="text-small text-uppercase text-muted">Status</span>
@@ -100,10 +100,10 @@
                 <div class="card-body">
                     <h2 class="small-title mb-4">Detail Usulan</h2>
                     <div class="row">
-                        @if($detail->kelompok_id)
+                        @if($detail->organisasi_id)
                             <div class="col-md-6 mb-3">
                                 <span class="text-small text-uppercase text-muted">Kelompok</span>
-                                <div>{{ $detail->kelompok?->nama ?? '-' }}</div>
+                                <div>{{ $detail->organisasi }}</div>
                             </div>
                         @endif
                         @if($detail->penduduk_id)

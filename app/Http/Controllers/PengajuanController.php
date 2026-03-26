@@ -11,6 +11,7 @@ use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
 use App\Models\PengajuanLog;
+use App\Models\JenisBantuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,7 +22,6 @@ class PengajuanController extends Controller
     {
         $pengajuan = auth()->user()
             ->pengajuan()
-            ->with(['details.kelompok', 'details.penduduk'])
             ->latest()
             ->get();
 
@@ -48,35 +48,47 @@ class PengajuanController extends Controller
 
           $jenis = auth()->user()->jenis_user?->value === JenisUser::INDIVIDUAL->value ? JenisPengajuan::BANSOS->value : JenisPengajuan::BANTUAN_KELOMPOK->value;
 
+        $jenisBantuanKelompokList = JenisBantuan::query()
+            ->where('kategori', 'bantuan_kelompok')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'keterangan']);
 
         return view('pages.pengajuan.form', [
             'pengajuan' => null,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
             'jenisOptions' => $jenisOptions,
-            'jenis' => 'bantuan_kelompok',
+            'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
+            'jenis' => $jenis,
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $this->validatePengajuan($request);
 
+ 
+        $validated = $this->validatePengajuan($request);
+        // return $request->all();
         try {
             DB::beginTransaction();
             $pengajuan = new Pengajuan();
             $pengajuan->user_id = auth()->id();
             $pengajuan->kode_pengajuan = $this->generateKodePengajuan();
-            $pengajuan->jenis = $validated['jenis'];
+            $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->judul = $validated['judul'];
+            $pengajuan->lokasi = $validated['lokasi'] ?? null;
+            $pengajuan->nilai = $validated['nilai'];
+            $pengajuan->opd_id = $validated['opd_id'];
+            $pengajuan->organisasi_id = $validated['organisasi_id'];
             $pengajuan->status = PengajuanStatus::DRAFT;
             $pengajuan->save();
 
-            $this->saveDetail($pengajuan, $validated);
             $this->logPengajuan($pengajuan, 'created', null, PengajuanStatus::DRAFT->value);
             DB::commit();
             toast()->success('Berhasil', 'Pengajuan berhasil disimpan.');
             return redirect()->route('pengajuan.index');
         } catch (\Throwable $e) {
+            return $e;
             DB::rollBack();
             toast()->error('Gagal', $e->getMessage());
             return back()->withInput();
@@ -86,7 +98,7 @@ class PengajuanController extends Controller
     public function show(Pengajuan $pengajuan)
     {
         $this->authorizeUser($pengajuan);
-        $pengajuan->load(['details.kelompok', 'details.penduduk', 'user', 'verifiedBy']);
+        $pengajuan->load(['user', 'verifiedBy']);
 
         return view('pages.pengajuan.show', compact('pengajuan'));
     }
@@ -117,11 +129,18 @@ class PengajuanController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nik']);
 
+        $jenisBantuanKelompokList = JenisBantuan::query()
+            ->where('kategori', 'bantuan_kelompok')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'keterangan']);
+
         return view('pages.pengajuan.form', [
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
             'jenisOptions' => $jenisOptions,
+            'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
+            'jenis' => $pengajuan->jenis?->value,
         ]);
     }
 
@@ -137,11 +156,10 @@ class PengajuanController extends Controller
 
         try {
             DB::beginTransaction();
-            $pengajuan->jenis = $validated['jenis'];
+            $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
             $pengajuan->save();
 
             $pengajuan->details()->delete();
-            $this->saveDetail($pengajuan, $validated);
             $this->logPengajuan($pengajuan, 'updated', $pengajuan->status->value, $pengajuan->status->value);
             DB::commit();
             toast()->success('Berhasil', 'Pengajuan berhasil diperbarui.');
@@ -155,6 +173,7 @@ class PengajuanController extends Controller
 
     public function submit(Pengajuan $pengajuan)
     {
+        
         $this->authorizeUser($pengajuan);
         if (! $pengajuan->canSubmit()) {
             toast()->warning('Tidak dapat diajukan', 'Status pengajuan tidak memungkinkan untuk diajukan.');
@@ -186,42 +205,20 @@ class PengajuanController extends Controller
 
     private function validatePengajuan(Request $request): array
     {
-        $jenis = $request->input('jenis');
         $rules = [
             'jenis' => 'required|in:' . implode(',', array_column(JenisPengajuan::cases(), 'value')),
-            'judul_usulan' => 'required|string|max:255',
-            'latar_belakang' => 'nullable|string',
-            'tujuan' => 'nullable|string',
-            'lokasi_kegiatan' => 'nullable|string|max:255',
-            'nilai_usulan' => 'required|numeric|min:0',
-            'tanggal_pengajuan' => 'nullable|date',
+            'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
+            'judul' => 'required|string|max:255',
+            'opd_id' => 'required|exists:opd,id',
+            'organisasi_id' => 'required|exists:organisasi,id',
+            'lokasi' => 'nullable|string|max:255',
+            'nilai' => 'required|numeric|min:0',
+            'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
         ];
-
-        if ($jenis === JenisPengajuan::BANSOS->value) {
-            $rules['penduduk_id'] = 'required|exists:penduduk,id';
-            $rules['kelompok_id'] = 'nullable';
-        } else {
-            $rules['kelompok_id'] = 'required|exists:organisasi,id';
-            $rules['penduduk_id'] = 'nullable';
-        }
 
         return $request->validate($rules);
     }
 
-    private function saveDetail(Pengajuan $pengajuan, array $validated): void
-    {
-        $detail = new PengajuanDetail();
-        $detail->pengajuan_id = $pengajuan->id;
-        $detail->kelompok_id = $validated['kelompok_id'] ?? null;
-        $detail->penduduk_id = $validated['penduduk_id'] ?? null;
-        $detail->judul_usulan = $validated['judul_usulan'];
-        $detail->latar_belakang = $validated['latar_belakang'] ?? null;
-        $detail->tujuan = $validated['tujuan'] ?? null;
-        $detail->lokasi_kegiatan = $validated['lokasi_kegiatan'] ?? null;
-        $detail->nilai_usulan = $validated['nilai_usulan'];
-        $detail->tanggal_pengajuan = $validated['tanggal_pengajuan'] ?? null;
-        $detail->save();
-    }
 
     private function logPengajuan(Pengajuan $pengajuan, string $action, ?string $statusFrom, ?string $statusTo, ?string $catatan = null, ?array $metadata = null): void
     {
