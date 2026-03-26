@@ -4,45 +4,44 @@ namespace App\Enums;
 
 enum RoleUser: string
 {
-    case SUPER = "super";
-    case ADMIN = "admin";
-    case OPD = "opd";
-    case USER = "user";
-    case BUD = "bud";
-
+    case SUPER = 'super';
+    case ADMIN = 'admin';
+    case OPD = 'opd';
+    case USER = 'user';
+    case BUD = 'bud';
 
     public function getDescription(): string
     {
         return match ($this) {
-            self::SUPER => "Super Admin",
-            self::ADMIN => "Administrator",
-            self::OPD => "OPD",
-            self::USER => "User",
-            self::BUD => "BUD",
+            self::SUPER => 'Super Admin',
+            self::ADMIN => 'Administrator',
+            self::OPD => 'OPD',
+            self::USER => 'User',
+            self::BUD => 'BUD',
         };
     }
 
     public function getPermissions(): array
     {
         return match ($this) {
-            self::SUPER =>  ["*"],
+            self::SUPER => ['*'],
             self::ADMIN => [
-                "ADMIN","PENGGUNA",
-                "MASTER_DATA","PENDUDUK","KELOMPOK_MASYARAKAT","JENIS_BANTUAN","OPD",
-                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA"
+                'ADMIN', 'PENGGUNA',
+                'MASTER_DATA', 'PENDUDUK', 'KELOMPOK_MASYARAKAT', 'JENIS_BANTUAN', 'OPD',
+                'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
             ],
             self::OPD => [
-                "SIDE_MASTER_DATA", "PENDUDUK", "KELOMPOK_MASYARAKAT",
-                "SIDE_VERIFIKASI", "VERIFY_PENGGUNA", "VERIFY_PENGAJUAN",
-                "PENGAJUAN_DAN_BAST","PENGAJUAN_ANGGARAN","BAST",
-                "MONITORING_DAN_REALISASI","MONITORING","REALISASI_BANTUAN","BLACKLIST"
+                'SIDE_MASTER_DATA', 'PENDUDUK', 'KELOMPOK_MASYARAKAT',
+                'SIDE_VERIFIKASI', 'VERIFY_PENGAJUAN',
+                'PENGAJUAN_DAN_BAST', 'PENGAJUAN_ANGGARAN', 'BAST',
+                'MONITORING_DAN_REALISASI', 'MONITORING', 'REALISASI_BANTUAN', 'BLACKLIST',
             ],
             self::USER => [
-                "BANTUAN","PENGAJUAN","REALISASI",
-                "PROFILE_USER","PROFILE_USER_DETAIL"
+                'BANTUAN', 'PENGAJUAN', 'REALISASI',
+                'PROFILE_USER', 'PROFILE_USER_DETAIL',
             ],
             self::BUD => [
-                "WILAYAH_ADMINISTRASI","KECAMATAN","DESA"
+                'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
             ]
         };
     }

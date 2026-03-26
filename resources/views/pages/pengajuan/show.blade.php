@@ -45,10 +45,8 @@
             $badge = match($status) {
                 \App\Enums\PengajuanStatus::DRAFT => 'secondary',
                 \App\Enums\PengajuanStatus::DIAJUKAN => 'info',
-                \App\Enums\PengajuanStatus::VERIFIKASI_ADMINISTRASI, \App\Enums\PengajuanStatus::VERIFIKASI_TEKNIS => 'warning',
-                \App\Enums\PengajuanStatus::DISETUJUI, \App\Enums\PengajuanStatus::SELESAI => 'success',
+                \App\Enums\PengajuanStatus::DISETUJUI => 'success',
                 \App\Enums\PengajuanStatus::DITOLAK => 'danger',
-                \App\Enums\PengajuanStatus::REVISI => 'primary',
                 default => 'secondary',
             };
         @endphp
@@ -73,10 +71,11 @@
                         <span class="text-small text-uppercase text-muted">Tanggal Dibuat</span>
                         <div>{{ $pengajuan->created_at->translatedFormat('d F Y H:i') }}</div>
                     </div>
-                    @if($pengajuan->catatan_verifikator)
+                    @php $catatan = $pengajuan->catatan_verifikator ?? $pengajuan->catatan; @endphp
+                    @if($catatan)
                         <div class="col-12 mb-3">
                             <span class="text-small text-uppercase text-muted">Catatan Verifikator</span>
-                            <div class="alert alert-light border mt-1 mb-0">{{ $pengajuan->catatan_verifikator }}</div>
+                            <div class="alert alert-light border mt-1 mb-0">{{ $catatan }}</div>
                         </div>
                     @endif
                     @if($pengajuan->verified_at)

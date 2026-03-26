@@ -35,6 +35,19 @@
                 @if($pengajuan->isEmpty())
                     <p class="text-muted mb-0">Belum ada pengajuan. Klik <strong>Tambah Pengajuan</strong> untuk membuat pengajuan baru.</p>
                 @else
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4 mb-3">
+                            <label for="filter-status" class="form-label text-muted text-small text-uppercase">Filter Status</label>
+                            <select id="filter-status" class="form-select">
+                                <option value="">Semua</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DRAFT->value }}">Draft</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DIAJUKAN->value }}">Diajukan</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}">Disetujui</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DITOLAK->value }}">Ditolak</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -50,9 +63,9 @@
                             <tbody>
                                 @foreach($pengajuan as $p)
                                     @php $detail = $p->details->first(); @endphp
-                                    <tr>
+                                    <tr data-status="{{ $p->status->value }}">
                                         <td>{{ $p->kode_pengajuan }}</td>
-                                        <td>{{ $p->jenis->getDescription() }}</td>
+                                        <td>{{ $p->jenisBantuan?->nama ?? '-' }}</td>
                                         <td>{{ $detail?->judul_usulan ?? '-' }}</td>
                                         <td>
                                             @php
@@ -60,10 +73,8 @@
                                                 $badge = match($status) {
                                                     \App\Enums\PengajuanStatus::DRAFT => 'secondary',
                                                     \App\Enums\PengajuanStatus::DIAJUKAN => 'info',
-                                                    \App\Enums\PengajuanStatus::VERIFIKASI_ADMINISTRASI, \App\Enums\PengajuanStatus::VERIFIKASI_TEKNIS => 'warning',
-                                                    \App\Enums\PengajuanStatus::DISETUJUI, \App\Enums\PengajuanStatus::SELESAI => 'success',
+                                                    \App\Enums\PengajuanStatus::DISETUJUI => 'success',
                                                     \App\Enums\PengajuanStatus::DITOLAK => 'danger',
-                                                    \App\Enums\PengajuanStatus::REVISI => 'primary',
                                                     default => 'secondary',
                                                 };
                                             @endphp
@@ -102,6 +113,24 @@
 
 @push('js_page')
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filter = document.getElementById('filter-status');
+            const rows = document.querySelectorAll('table.table tbody tr[data-status]');
+
+            if (!filter || rows.length === 0) return;
+
+            function applyFilter() {
+                const value = filter.value;
+                rows.forEach(function (row) {
+                    const rowStatus = row.getAttribute('data-status') || '';
+                    row.style.display = !value || rowStatus === value ? '' : 'none';
+                });
+            }
+
+            filter.addEventListener('change', applyFilter);
+            applyFilter();
+        });
+
         document.querySelectorAll('form.form-ajukan-pengajuan').forEach(function (form) {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
