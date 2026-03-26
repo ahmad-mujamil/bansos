@@ -93,7 +93,7 @@ class VerifikasiPengajuanController extends Controller
 
     public function verifikasi(VerifikasiPengajuanRequest $request, Pengajuan $pengajuan): RedirectResponse
     {
-        $decision = $request->validated('keputusan');
+        $decision = $request->validated('status');
         $catatan = $request->validated('catatan');
 
         $oldStatus = $pengajuan->status;
@@ -111,7 +111,6 @@ class VerifikasiPengajuanController extends Controller
         DB::beginTransaction();
 
         try {
-            $pengajuan->{$this->getCatatanAttribute()} = $catatan;
             $pengajuan->verified_at = now();
             $pengajuan->verified_by = Auth::id();
             $pengajuan->status = $newStatus;

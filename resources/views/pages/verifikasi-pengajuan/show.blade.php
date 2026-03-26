@@ -80,7 +80,7 @@
                 </div>
                 @if($catatan)
                     <div class="mt-3">
-                        <span class="text-small text-uppercase text-muted">Catatan Verifikasi</span>
+                        <span class="text-small text-uppercase text-muted">Catatan</span>
                         <div class="alert alert-light border mt-1 mb-0">{{ $catatan }}</div>
                     </div>
                 @endif
@@ -105,11 +105,11 @@
                         <div class="row">
                             <div class="col-12 mb-3">
                                 <label class="form-label text-muted text-small text-uppercase">Keputusan</label>
-                                <select id="keputusan" class="form-select" name="keputusan" required>
-                                    <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}" @selected(old('keputusan') === \App\Enums\PengajuanStatus::DISETUJUI->value)>Disetujui</option>
-                                    <option value="{{ \App\Enums\PengajuanStatus::DITOLAK->value }}" @selected(old('keputusan') === \App\Enums\PengajuanStatus::DITOLAK->value)>Ditolak</option>
+                                <select id="keputusan" class="form-select" name="status" required>
+                                    <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}" @selected(old('status') === \App\Enums\PengajuanStatus::DISETUJUI->value)>Disetujui</option>
+                                    <option value="{{ \App\Enums\PengajuanStatus::DITOLAK->value }}" @selected(old('status') === \App\Enums\PengajuanStatus::DITOLAK->value)>Ditolak</option>
                                 </select>
-                                @error('keputusan')
+                                @error('status')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>

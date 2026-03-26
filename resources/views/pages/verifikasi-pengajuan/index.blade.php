@@ -27,8 +27,8 @@
 
                 <!-- Controls Start -->
                 <div class="row">
-                    <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-3">
-                        <div class="d-flex gap-2 w-100 align-items-end">
+                    <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 mb-3">
+                        <div class="d-flex gap-2 w-100 align-items-center">
                             <div class="flex-grow-1 border border-separator bg-foreground">
                                 <select id="filter-status-verifikasi" class="form-select form-select-sm">
                                     <option value="all" selected>Semua</option>
@@ -50,7 +50,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-7 col-lg-9 col-xxl-10 text-end mb-3">
+                    <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 text-end mb-3">
                         <div class="d-inline-block">
                             <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm datatable-print" type="button" data-datatable="#datatable-serverside">
                                 <i data-acorn-icon="print"></i>
@@ -106,6 +106,18 @@
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <style>
+        /* Samakan tinggi Select2 dengan input/selector ukuran kecil */
+        #filter-status-verifikasi + .select2-container--bootstrap4 .select2-selection--single {
+            height: 31px;
+        }
+
+        #filter-status-verifikasi + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            line-height: 31px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    </style>
 @endpush
 
 @push('js_vendor')
