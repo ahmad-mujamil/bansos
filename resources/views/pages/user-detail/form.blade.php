@@ -249,8 +249,29 @@
                             @php
                                 // Secara otomatis pilih 'Tambah Kelompok Baru' saat edit data
                                 $isEdit = (bool) $userDetail;
+                                // Untuk langsung select organisasi jika sudah aktif
+                                $selectedOrganisasiId = old('organisasi_id', $userDetail?->organisasi_id ?? '');
+                                $organisasiIsActive = $userDetail?->organisasi && $userDetail->organisasi->is_active;
                             @endphp
-                            @if($isEdit && !$isLocked)
+                            @if($organisasiIsActive && !$isLocked)
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        setTimeout(function() {
+                                            const $org = document.getElementById('organisasi_id');
+                                            if ($org) {
+                                                $org.value = "{{ $selectedOrganisasiId }}";
+                                                if ("createEvent" in document) {
+                                                    var evt = document.createEvent("HTMLEvents");
+                                                    evt.initEvent("change", false, true);
+                                                    $org.dispatchEvent(evt);
+                                                } else {
+                                                    $org.dispatchEvent(new Event('change'));
+                                                }
+                                            }
+                                        }, 400);
+                                    });
+                                </script>
+                            @elseif($isEdit && !$isLocked)
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function () {
                                         // Tunggu select sudah terisi dari JS utama, lalu set nilainya ke __new__ dan trigger event
