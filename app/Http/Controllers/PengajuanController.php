@@ -83,6 +83,10 @@ class PengajuanController extends Controller
             $pengajuan->status = PengajuanStatus::DRAFT;
             $pengajuan->save();
 
+            if ($request->hasFile('file_pengajuan')) {
+                $pengajuan->addMediaFromRequest('file_pengajuan')->toMediaCollection('pengajuan');
+            }
+
             $this->logPengajuan($pengajuan, 'created', null, PengajuanStatus::DRAFT->value);
             DB::commit();
             toast()->success('Berhasil', 'Pengajuan berhasil disimpan.');
@@ -110,8 +114,6 @@ class PengajuanController extends Controller
             toast()->warning('Tidak dapat diedit', 'Pengajuan ini tidak dapat diedit.');
             return redirect()->route('pengajuan.show', $pengajuan);
         }
-
-        $pengajuan->load('details');
 
         $jenisUser = auth()->user()->jenis_user?->value ?? null;
         $jenisOptions = match ($jenisUser) {
@@ -159,7 +161,11 @@ class PengajuanController extends Controller
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
             $pengajuan->save();
 
-            $pengajuan->details()->delete();
+            if ($request->hasFile('file_pengajuan')) {
+                $pengajuan->clearMediaCollection('pengajuan');
+                $pengajuan->addMediaFromRequest('file_pengajuan')->toMediaCollection('pengajuan');
+            }
+
             $this->logPengajuan($pengajuan, 'updated', $pengajuan->status->value, $pengajuan->status->value);
             DB::commit();
             toast()->success('Berhasil', 'Pengajuan berhasil diperbarui.');
@@ -206,13 +212,13 @@ class PengajuanController extends Controller
     private function validatePengajuan(Request $request): array
     {
         $rules = [
-            'jenis' => 'required|in:' . implode(',', array_column(JenisPengajuan::cases(), 'value')),
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',
             'opd_id' => 'required|exists:opd,id',
             'organisasi_id' => 'required|exists:organisasi,id',
             'lokasi' => 'nullable|string|max:255',
             'nilai' => 'required|numeric|min:0',
+            'file_pengajuan' => 'nullable|file|mimes:pdf|max:5120',
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
         ];
 
