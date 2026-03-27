@@ -16,10 +16,13 @@ class VerifikasiPenggunaController extends Controller
         $data = User::query()
             ->with('userDetail')
             ->where('is_active', false)
+            ->whereHas('userDetail', function ($q) {
+                $q->where('opd_id', auth()->user()->opd_id ?? null);
+            })
             ->latest();
 
         return DataTables::of($data)
-            ->addColumn('desc_role', fn ($row) => $row->role->getDescription())
+            ->addColumn('desc_role', fn($row) => $row->role->getDescription())
             ->addColumn('status_detail', function ($row) {
                 return $row->userDetail
                     ? '<span class="badge bg-success">Sudah isi detail</span>'
