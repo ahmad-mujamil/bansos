@@ -114,7 +114,7 @@
     </div>
 
     @if ($pengajuan->logs->isNotEmpty())
-    <div class="card mb-4">
+    <!-- <div class="card mb-4">
         <div class="card-body">
             <h2 class="small-title mb-4">Riwayat Aksi</h2>
             <div class="timeline">
@@ -264,7 +264,7 @@
                 @endforeach
             </div>
         </div>
-    </div>
+    </div> -->
     @endif
 </div>
 @endsection
