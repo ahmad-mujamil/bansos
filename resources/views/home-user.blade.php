@@ -182,7 +182,7 @@
                                 <span class="text-muted text-small text-uppercase">Jumlah Pengajuan</span>
                                 <i data-acorn-icon="file-text" class="text-primary"></i>
                             </div>
-                            <div class="cta-1 text-primary">{{ number_format(24) }}</div>
+                            <div class="cta-1 text-primary">{{ number_format($totalPengajuan ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
@@ -193,7 +193,7 @@
                                 <span class="text-muted text-small text-uppercase">Verifikasi</span>
                                 <i data-acorn-icon="check-circle" class="text-success"></i>
                             </div>
-                            <div class="cta-1 text-success">{{ number_format(18) }}</div>
+                            <div class="cta-1 text-success">{{ number_format($totalVerifikasi ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
                                 <span class="text-muted text-small text-uppercase">Belum Verifikasi</span>
                                 <i data-acorn-icon="clock" class="text-warning"></i>
                             </div>
-                            <div class="cta-1 text-warning">{{ number_format(6) }}</div>
+                            <div class="cta-1 text-warning">{{ number_format($totalBelumVerifikasi ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
@@ -215,14 +215,13 @@
                                 <span class="text-muted text-small text-uppercase">Realisasi</span>
                                 <i data-acorn-icon="notebook-1" class="text-info"></i>
                             </div>
-                            <div class="cta-1 text-info">{{ number_format(12) }}</div>
+                            <div class="cta-1 text-info">{{ number_format($totalRealisasi ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Dashboard Stats End -->
-
         <!-- Menu Bantuan Start -->
         @php
             $jenisUser = auth()->user()->jenis_user?->value ?? null;

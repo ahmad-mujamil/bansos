@@ -66,7 +66,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     });
 
     // MASTER DATA
-    Route::middleware(['role:super,admin'])->group(function () {
+    Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
         Route::resource('desa', App\Http\Controllers\DesaController::class);
         Route::resource('penduduk', App\Http\Controllers\PendudukController::class);

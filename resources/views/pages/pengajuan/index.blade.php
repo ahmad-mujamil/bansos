@@ -53,8 +53,8 @@
                             <thead>
                                 <tr>
                                     <th class="text-muted text-small text-uppercase">Kode</th>
-                                    <th class="text-muted text-small text-uppercase">Jenis Bantuan</th>
                                     <th class="text-muted text-small text-uppercase">Judul Usulan</th>
+                                    <th class="text-muted text-small text-uppercase">Lokasi</th>
                                     <th class="text-muted text-small text-uppercase">Status</th>
                                     <th class="text-muted text-small text-uppercase">Tanggal</th>
                                     <th class="text-muted text-small text-uppercase w-10">Aksi</th>
@@ -65,8 +65,8 @@
                                     @php $detail = $p->first(); @endphp
                                     <tr data-status="{{ $p->status->value }}">
                                         <td>{{ $p->kode_pengajuan }}</td>
-                                        <td>{{ $p->jenisBantuan?->nama ?? '-' }}</td>
-                                        <td>{{ $detail?->judul_usulan ?? '-' }}</td>
+                                        <td>{{ $detail?->judul ?? '-' }}</td>
+                                        <td>{{ $detail?->lokasi ?? '-' }}</td>
                                         <td>
                                             @php
                                                 $status = $p->status;
