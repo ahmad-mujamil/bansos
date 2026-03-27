@@ -17,9 +17,7 @@ class KelompokMasyarakatController extends Controller
         return Organisasi::query()
             ->with(['kecamatan', 'desa', 'opd'])
             ->withCount(['organisasiDetail', 'organisasiDokumen'])
-            ->when(!auth()->user()->is_opd(), function ($query) {
-                return $query->where('opd_id', auth()->user()->opd_id);
-            })
+            ->where('opd_id', auth()->user()->opd_id ?? null)
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->latest();
     }
