@@ -32,7 +32,7 @@ enum RoleUser: string
             ],
             self::OPD => [
                 'SIDE_MASTER_DATA', 'KELOMPOK_MASYARAKAT',
-                'SIDE_VERIFIKASI', 'VERIFY_PENGAJUAN',
+                'SIDE_VERIFIKASI', 'VERIFY_PENGAJUAN', 'VERIFY_PENGGUNA',
                 'PENGAJUAN_DAN_BAST', 'PENGAJUAN_ANGGARAN', 'BAST',
                 'MONITORING_DAN_REALISASI', 'MONITORING', 'REALISASI_BANTUAN', 'BLACKLIST',
             ],
