@@ -98,20 +98,9 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-4 col-sm-12" id="wrap-jenis-bantuan" >
-                            <label class="form-label text-small text-uppercase">Jenis Bantuan <span class="text-danger">*</span></label>
-                            <select name="jenis_bantuan_id" id="jenis_bantuan_id" class="form-select @error('jenis_bantuan_id') is-invalid @enderror">
-                                <option value="">Pilih Jenis Bantuan</option>
-                                @foreach($jenisBantuanKelompokList as $jb)
-                                    <option value="{{ $jb->id }}" {{ old('jenis_bantuan_id', $pengajuan?->jenis_bantuan_id ?? '') == $jb->id ? 'selected' : '' }}>{{ $jb->nama }}@if($jb->keterangan) - {{ $jb->keterangan }}@endif</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @error('jenis_bantuan_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        
 
-                        <div class="col-lg-8 col-md-8 col-sm-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
                             <label class="form-label text-small text-uppercase">Judul Usulan <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('judul') is-invalid @enderror" name="judul" required
                                    value="{{ old('judul', $detail?->judul ?? '') }}" placeholder="Judul usulan bantuan" />
