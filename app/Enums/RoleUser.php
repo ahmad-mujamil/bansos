@@ -31,7 +31,7 @@ enum RoleUser: string
                 'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
             ],
             self::OPD => [
-                'SIDE_MASTER_DATA', 'PENDUDUK', 'KELOMPOK_MASYARAKAT',
+                'SIDE_MASTER_DATA', 'KELOMPOK_MASYARAKAT',
                 'SIDE_VERIFIKASI', 'VERIFY_PENGAJUAN',
                 'PENGAJUAN_DAN_BAST', 'PENGAJUAN_ANGGARAN', 'BAST',
                 'MONITORING_DAN_REALISASI', 'MONITORING', 'REALISASI_BANTUAN', 'BLACKLIST',
