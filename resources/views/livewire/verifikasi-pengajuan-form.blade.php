@@ -47,7 +47,7 @@
                     <div class="row">
                         <div class="col-12 col-lg-6 mt-3">
                             <label class="form-label text-muted text-small text-uppercase">Nilai Rekomendasi</label>
-                            <input type="number" step="0.01" min="0" class="form-control" wire:model="nilai_rekomendasi" placeholder="Opsional">
+                            <input type="number" step="0.01" min="0" class="form-control" wire:model="nilai_rekomendasi" placeholder="niai rekomendasi">
                             @error('nilai_rekomendasi') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
 
