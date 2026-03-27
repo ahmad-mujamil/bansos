@@ -222,7 +222,7 @@ class VerifikasiPengajuanForm extends Component
 
             toast()->success('Berhasil', 'Pengajuan berhasil diverifikasi.');
 
-            $this->redirectRoute('verifikasi-pengajuan.index', navigate: true);
+            $this->redirectRoute('verifikasi-pengajuan.index');
         } catch (\Throwable $e) {
             DB::rollBack();
             toast()->error('Gagal', $e->getMessage());
