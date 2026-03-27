@@ -52,7 +52,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="text-small text-uppercase text-muted">Nilai Usulan</span>
-                    <div class="fw-semibold">{{ $pengajuan->nilai }}</div>
+                    <div class="fw-semibold">{{ number_format($pengajuan->nilai, 0, ',', '.') }}</div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="text-small text-uppercase text-muted">Status</span>
