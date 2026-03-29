@@ -46,6 +46,11 @@ class VerifikasiPengajuanRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
+
+            'pemeriksa' => ['required', 'array', 'size:3'],
+            'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
+            'pemeriksa.*.nip' => ['required', 'string', 'max:50'],
+            'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
         ];
     }
 

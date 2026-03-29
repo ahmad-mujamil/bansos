@@ -64,6 +64,35 @@
                     </div>
                 </div>
 
+                <div class="col-12 mt-4">
+                    <h3 class="small-title mb-3">Data Pemeriksa (3 orang)</h3>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach ($pemeriksa as $index => $row)
+                            <div class="border rounded p-3" wire:key="pemeriksa-{{ $index }}">
+                                <div class="small-title text-muted mb-3">Pemeriksa {{ $index + 1 }}</div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-nama">Nama</label>
+                                        <input type="text" id="pemeriksa-{{ $index }}-nama" class="form-control" wire:model="pemeriksa.{{ $index }}.nama" autocomplete="name">
+                                        @error("pemeriksa.$index.nama") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-nip">NIP</label>
+                                        <input type="text" id="pemeriksa-{{ $index }}-nip" class="form-control" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off">
+                                        @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-jabatan">Jabatan</label>
+                                        <input type="text" id="pemeriksa-{{ $index }}-jabatan" class="form-control" wire:model="pemeriksa.{{ $index }}.jabatan" autocomplete="organization-title">
+                                        @error("pemeriksa.$index.jabatan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('pemeriksa') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                </div>
+
                 <div class="col-12 mt-3">
                     <label class="form-label text-muted text-small text-uppercase">Catatan</label>
                     <textarea class="form-control" wire:model="catatan" rows="4" placeholder="Tuliskan catatan/verifikasi untuk pengaju"></textarea>
