@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PengajuanStatus;
 use App\Http\Requests\BastRequest;
 use App\Models\Bast;
 use App\Models\Pengajuan;
@@ -15,21 +16,22 @@ class BastController extends Controller
         $data = Bast::query()->with(['pengajuan.verifikasiPengajuan', 'user'])->latest();
 
         return DataTables::of($data)
-            ->editColumn('tanggal', fn($row) => $row->tanggal->format('d-m-Y'))
-            ->addColumn('kode_pengajuan', fn($row) => $row->pengajuan?->kode_pengajuan ?? '-')
+            ->editColumn('tanggal', fn ($row) => $row->tanggal->format('d-m-Y'))
+            ->addColumn('kode_pengajuan', fn ($row) => $row->pengajuan?->kode_pengajuan ?? '-')
             ->addColumn('nilai_rekomendasi', function ($row) {
                 $nilai = $row->pengajuan?->verifikasiPengajuan?->nilai_rekomendasi;
-                return $nilai !== null ? 'Rp ' . number_format($nilai, 0, ',', '.') : '-';
+
+                return $nilai !== null ? 'Rp '.number_format($nilai, 0, ',', '.') : '-';
             })
             ->addColumn('action', function ($row) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
-                $navActionEnd   = '</ul></nav>';
+                $navActionEnd = '</ul></nav>';
 
-                $show   = "<li class='breadcrumb-item'><a href='" . route('bast.show', $row->id) . "' title='Detail Data' class='fw-bold text-primary'>Detail</a></li>";
-                $edit   = "<li class='breadcrumb-item'><a href='" . route('bast.edit', $row->id) . "' title='Edit Data' class='fw-bold text-success'>Edit</a></li>";
-                $delete = "<li class='breadcrumb-item'><a href='" . route('bast.destroy', $row->id) . "' data-confirm-delete='true' title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
+                $show = "<li class='breadcrumb-item'><a href='".route('bast.show', $row->id)."' title='Detail Data' class='fw-bold text-primary'>Detail</a></li>";
+                $edit = "<li class='breadcrumb-item'><a href='".route('bast.edit', $row->id)."' title='Edit Data' class='fw-bold text-success'>Edit</a></li>";
+                $delete = "<li class='breadcrumb-item'><a href='".route('bast.destroy', $row->id)."' data-confirm-delete='true' title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
 
-                return $navActionStart . $show . $edit . $delete . $navActionEnd;
+                return $navActionStart.$show.$edit.$delete.$navActionEnd;
             })
             ->rawColumns(['action'])
             ->toJson();
@@ -48,9 +50,11 @@ class BastController extends Controller
     public function create()
     {
         $pengajuan = Pengajuan::query()
-            ->whereRelation('verifikasiPengajuan', ["status"=>'disetujui'])
+            ->whereHas('verifikasiPengajuan')
+            ->where('status', PengajuanStatus::DISETUJUI->value)
             ->latest()
             ->get();
+
         return view('pages.bast.create', compact('pengajuan'));
     }
 
@@ -62,10 +66,10 @@ class BastController extends Controller
 
             $bast = Bast::query()->create([
                 'pengajuan_id' => $validated['pengajuan_id'],
-                'nomor'        => $validated['nomor'],
-                'tanggal'      => \Carbon\Carbon::createFromFormat('d-m-Y', $validated['tanggal'])->format('Y-m-d'),
-                'penerima'     => $validated['penerima'],
-                'user_id'      => auth()->id(),
+                'nomor' => $validated['nomor'],
+                'tanggal' => \Carbon\Carbon::createFromFormat('d-m-Y', $validated['tanggal'])->format('Y-m-d'),
+                'penerima' => $validated['penerima'],
+                'user_id' => auth()->id(),
             ]);
 
             if ($request->hasFile('dokumen')) {
@@ -80,10 +84,12 @@ class BastController extends Controller
 
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
+
             return redirect()->route('bast.index');
         } catch (\Throwable $th) {
             DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -91,15 +97,17 @@ class BastController extends Controller
     public function show(Bast $bast)
     {
         $bast->load(['pengajuan.verifikasiPengajuan', 'user']);
+
         return view('pages.bast.show', compact('bast'));
     }
 
     public function edit(Bast $bast)
     {
         $pengajuan = Pengajuan::query()
-            ->whereRelation('verifikasiPengajuan', ["status"=>'disetujui'])
+            ->whereRelation('verifikasiPengajuan', ['status' => 'disetujui'])
             ->latest()
             ->get();
+
         return view('pages.bast.create', compact('bast', 'pengajuan'));
     }
 
@@ -111,9 +119,9 @@ class BastController extends Controller
 
             $bast->update([
                 'pengajuan_id' => $validated['pengajuan_id'],
-                'nomor'        => $validated['nomor'],
-                'tanggal'      => \Carbon\Carbon::createFromFormat('d-m-Y', $validated['tanggal'])->format('Y-m-d'),
-                'penerima'     => $validated['penerima'],
+                'nomor' => $validated['nomor'],
+                'tanggal' => \Carbon\Carbon::createFromFormat('d-m-Y', $validated['tanggal'])->format('Y-m-d'),
+                'penerima' => $validated['penerima'],
             ]);
 
             if ($request->hasFile('dokumen')) {
@@ -129,10 +137,12 @@ class BastController extends Controller
 
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
+
             return redirect()->route('bast.index');
         } catch (\Throwable $th) {
             DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -146,9 +156,11 @@ class BastController extends Controller
             $bast->delete();
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil dihapus');
+
             return redirect()->route('bast.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
+
             return redirect()->route('bast.index');
         }
     }

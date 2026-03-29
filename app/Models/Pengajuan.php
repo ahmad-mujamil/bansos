@@ -94,4 +94,14 @@ class Pengajuan extends Model implements HasMedia
     {
         return $this->hasOne(VerifikasiPengajuan::class);
     }
+
+    public function bast(): HasOne
+    {
+        return $this->hasOne(Bast::class);
+    }
+
+    public function realisasi(): HasOne
+    {
+        return $this->hasOne(PengajuanRealisasi::class);
+    }
 }
