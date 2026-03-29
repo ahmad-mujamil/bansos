@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JabatanOrganisasi;
+use App\Enums\JenisKelamin;
 use App\Enums\JenisOrganisasi;
 use App\Http\Requests\KelompokMasyarakatRequest;
 use App\Models\Kecamatan;
@@ -10,11 +11,70 @@ use App\Models\Organisasi;
 use App\Models\OrganisasiDetail;
 use App\Models\OrganisasiDokumen;
 use App\Models\Penduduk;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class KelompokMasyarakatController extends Controller
 {
+    /**
+     * Pencarian penduduk berdasarkan NIK (16 digit) untuk pengisian otomatis form anggota.
+     */
+    public function lookupPendudukByNik(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'nik' => ['required', 'string', 'regex:/^[0-9]{16}$/'],
+        ]);
+        $nik = $validated['nik'];
+        $penduduk = Penduduk::query()->where('nik', $nik)->first();
+        if (! $penduduk) {
+            return response()->json(['found' => false]);
+        }
+
+        $jk = $penduduk->jk instanceof JenisKelamin ? $penduduk->jk->value : $penduduk->jk;
+
+        return response()->json([
+            'found' => true,
+            'penduduk' => [
+                'id' => $penduduk->id,
+                'nik' => $penduduk->nik,
+                'nama' => $penduduk->nama,
+                'jk' => $jk,
+                'kecamatan_id' => $penduduk->kecamatan_id,
+                'desa_id' => $penduduk->desa_id,
+            ],
+        ]);
+    }
+
+    /**
+     * Menentukan penduduk untuk satu baris anggota sebelum menyimpan organisasi_detail:
+     *
+     * 1. Jika NIK sudah terdaftar di tabel penduduk → gunakan record tersebut (penduduk_id yang sudah ada).
+     * 2. Jika NIK belum ada → simpan penduduk baru sesuai data form (nama, jk, kecamatan_id, desa_id, dll.),
+     *    lalu gunakan penduduk_id hasil insert tersebut.
+     *
+     * OrganisasiDetail selalu memakai `$penduduk->id` dari salah satu jalur di atas.
+     *
+     * @param  array<string, mixed>  $row  Baris tervalidasi dari `anggota.*` (boleh berisi organisasi_detail_id, jabatan; tidak dipakai di sini).
+     */
+    private function resolveOrCreatePendudukForAnggota(array $row): Penduduk
+    {
+        $pendudukByNik = Penduduk::query()->where('nik', $row['nik'])->first();
+
+        if ($pendudukByNik !== null) {
+            return $pendudukByNik;
+        }
+
+        return Penduduk::query()->create([
+            'nik' => $row['nik'],
+            'nama' => $row['nama'],
+            'jk' => $row['jk'],
+            'kecamatan_id' => $row['kecamatan_id'],
+            'desa_id' => $row['desa_id'],
+            'alamat' => '-',
+        ]);
+    }
+
     private function getQuery()
     {
         return Organisasi::query()
@@ -74,7 +134,6 @@ class KelompokMasyarakatController extends Controller
     {
         $organisasi = null;
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
-        $penduduks = Penduduk::query()->orderBy('nama')->get();
         $anggotaInitial = old('anggota');
         if ($anggotaInitial === null) {
             $anggotaInitial = [];
@@ -84,7 +143,7 @@ class KelompokMasyarakatController extends Controller
             $dokumenInitial = [];
         }
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'penduduks', 'anggotaInitial', 'dokumenInitial'));
+        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial'));
     }
 
     public function store(KelompokMasyarakatRequest $request): ?\Illuminate\Http\RedirectResponse
@@ -110,9 +169,10 @@ class KelompokMasyarakatController extends Controller
             ]);
 
             foreach ($anggotaRows as $row) {
+                $penduduk = $this->resolveOrCreatePendudukForAnggota($row);
                 OrganisasiDetail::query()->create([
                     'organisasi_id' => $organisasi->id,
-                    'penduduk_id' => $row['penduduk_id'],
+                    'penduduk_id' => $penduduk->id,
                     'jabatan' => $row['jabatan'],
                 ]);
             }
@@ -144,21 +204,40 @@ class KelompokMasyarakatController extends Controller
     public function edit(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->with(['kecamatan.desa', 'organisasiDetail', 'organisasiDokumen.media'])
+            ->with(['kecamatan.desa', 'organisasiDetail.penduduk', 'organisasiDokumen.media'])
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->findOrFail($kelompok_masyarakat);
 
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
-        $penduduks = Penduduk::query()->orderBy('nama')->get();
 
         $anggotaInitial = old('anggota');
         if ($anggotaInitial === null) {
             $anggotaInitial = $organisasi->organisasiDetail->map(function ($d) {
+                $p = $d->penduduk;
+                $jabatan = $d->jabatan instanceof JabatanOrganisasi
+                    ? $d->jabatan->value
+                    : $d->jabatan;
+                if (! $p) {
+                    return [
+                        'organisasi_detail_id' => $d->id,
+                        'nik' => '',
+                        'nama' => '',
+                        'jk' => '',
+                        'kecamatan_id' => '',
+                        'desa_id' => '',
+                        'jabatan' => $jabatan,
+                    ];
+                }
+                $jk = $p->jk instanceof JenisKelamin ? $p->jk->value : ($p->jk ?? '');
+
                 return [
-                    'penduduk_id' => $d->penduduk_id,
-                    'jabatan' => $d->jabatan instanceof JabatanOrganisasi
-                        ? $d->jabatan->value
-                        : $d->jabatan,
+                    'organisasi_detail_id' => $d->id,
+                    'nik' => $p->nik ?? '',
+                    'nama' => $p->nama ?? '',
+                    'jk' => $jk,
+                    'kecamatan_id' => $p->kecamatan_id ?? '',
+                    'desa_id' => $p->desa_id ?? '',
+                    'jabatan' => $jabatan,
                 ];
             })->values()->all();
         }
@@ -178,7 +257,7 @@ class KelompokMasyarakatController extends Controller
             })->values()->all();
         }
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'penduduks', 'anggotaInitial', 'dokumenInitial'));
+        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial'));
     }
 
     public function update(KelompokMasyarakatRequest $request, string $kelompok_masyarakat): ?\Illuminate\Http\RedirectResponse
@@ -208,9 +287,10 @@ class KelompokMasyarakatController extends Controller
 
             OrganisasiDetail::query()->where('organisasi_id', $organisasi->id)->delete();
             foreach ($anggotaRows as $row) {
+                $penduduk = $this->resolveOrCreatePendudukForAnggota($row);
                 OrganisasiDetail::query()->create([
                     'organisasi_id' => $organisasi->id,
-                    'penduduk_id' => $row['penduduk_id'],
+                    'penduduk_id' => $penduduk->id,
                     'jabatan' => $row['jabatan'],
                 ]);
             }

@@ -434,7 +434,7 @@
                         @endif
 
                         <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">{{ $isLocked ? 'Dokumen Surat Kuasa' : 'Upload Surat Kuasa' }}@if(!$isLocked)<span class="text-danger">*</span>@endif</label>
+                            <label class="form-label text-small text-uppercase">{{ $isLocked ? 'Dokumen Surat Pernyataan/Kuasa' : 'Upload Surat Pernyataan/Kuasa' }}@if(!$isLocked)<span class="text-danger">*</span>@endif</label>
                             @if(!$isLocked)
                                 <input type="file" class="form-control @error('file_surat_kuasa') is-invalid @enderror" name="file_surat_kuasa" accept="image/jpeg,image/png,image/jpg,application/pdf"/>
                             @endif

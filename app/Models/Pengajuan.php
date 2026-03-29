@@ -43,6 +43,11 @@ class Pengajuan extends Model implements HasMedia
         return $this->belongsTo(Organisasi::class);
     }
 
+    public function desa(): BelongsTo
+    {
+        return $this->belongsTo(Desa::class);
+    }
+
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');

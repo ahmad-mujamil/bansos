@@ -77,6 +77,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::resource('penduduk', App\Http\Controllers\PendudukController::class);
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
+        Route::get('kelompok-masyarakat/penduduk-by-nik', [App\Http\Controllers\KelompokMasyarakatController::class, 'lookupPendudukByNik'])->name('kelompok-masyarakat.penduduk-by-nik');
         Route::resource('kelompok-masyarakat', App\Http\Controllers\KelompokMasyarakatController::class);
         Route::resource('kelompok-masyarakat.anggota', App\Http\Controllers\KelompokMasyarakatAnggotaController::class)->except(['show']);
         Route::resource('kelompok-masyarakat.dokumen', App\Http\Controllers\KelompokMasyarakatDokumenController::class)->except(['show']);
