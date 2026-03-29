@@ -29,8 +29,6 @@ return new class extends Migration
             $table->foreignUuid('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
             $table->tinyInteger('level_desil')->nullable();
             $table->timestamps();
-
-            $table->unique(['nik']);
         });
     }
 

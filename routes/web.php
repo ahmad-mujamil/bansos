@@ -53,7 +53,8 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
 
     // USERS KELOMPOK
     Route::middleware(['role:super,opd'])->group(function () {
-        Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class);
+        Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class)
+        ->parameters(["user-kelompok" => "userKelompok"]);
     });
 
     // Verifikasi Pengguna (user belum aktif)

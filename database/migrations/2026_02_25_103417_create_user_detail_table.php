@@ -19,6 +19,7 @@ return new class extends Migration
             // DATA UMUM
             $table->string('nama_user')->nullable();
             $table->text('alamat')->nullable();
+            $table->foreignUuid('kecamatan_id')->nullable()->constrained('kecamatan')->nullOnDelete();
             $table->foreignUuid('desa_id')->nullable()->constrained('desa')->nullOnDelete();
             $table->string('phone', 20)->nullable();
             $table->foreignUuid('organisasi_id')->nullable()->constrained('organisasi');
