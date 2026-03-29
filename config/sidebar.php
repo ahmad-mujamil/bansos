@@ -68,10 +68,10 @@ return [
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'PENDUDUK',
+                'id' => 'USER-KELOMPOK',
                 'icon' => 'user',
-                'url' => '/penduduk',
-                'title' => 'Penduduk'
+                'url' => '/user-kelompok',
+                'title' => 'User Kelompok'
             ],
             [
                 'id' => 'KELOMPOK_MASYARAKAT',

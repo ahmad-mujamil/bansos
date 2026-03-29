@@ -51,6 +51,11 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::resource('pengguna', App\Http\Controllers\PenggunaController::class);
     });
 
+    // USERS KELOMPOK
+    Route::middleware(['role:super,opd'])->group(function () {
+        Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class);
+    });
+
     // Verifikasi Pengguna (user belum aktif)
     Route::middleware(['role:super,admin'])->group(function () {
         Route::get('verifikasi-pengguna', [App\Http\Controllers\VerifikasiPenggunaController::class, 'index'])->name('verifikasi-pengguna.index');
