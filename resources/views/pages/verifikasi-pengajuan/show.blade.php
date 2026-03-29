@@ -41,7 +41,7 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="small-title mb-4">Informasi Pengajuan</h2>
+            <h2 class="small-title mb-4">Informasi Pengajuan {{ $pengajuan->kode_pengajuan }}</h2>
             <div class="row">
 
                 <div class="col-md-4 mb-3">
@@ -66,7 +66,15 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="text-small text-uppercase text-muted">Pengaju</span>
-                    <div>{{ $pengajuan->user?->nama ?? ($pengajuan->user?->email ?? '-') }}</div>
+                    <div>{{ $pengajuan->user?->nama ?? ($pengajuan->user ?? '-') }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="text-small text-uppercase text-muted">Kelompok</span>
+                    <div class="fw-semibold">{{ $pengajuan->organisasi?->nama ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="text-small text-uppercase text-muted">Lokasi Kegiatan</span>
+                    <div class="fw-semibold">{{ $pengajuan->lokasi ?? '—' }}, {{ $pengajuan->desa?->nama ?? '—' }}, {{ $pengajuan->desa?->kecamatan?->nama ?? '—' }}</div>
                 </div>
                 @if ($pengajuan->verified_at)
                 <div class="col-md-4 mb-3">
