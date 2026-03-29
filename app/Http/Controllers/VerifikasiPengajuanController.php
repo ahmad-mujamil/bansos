@@ -87,12 +87,17 @@ class VerifikasiPengajuanController extends Controller
             return $this->data();
         }
 
+    //    return $query = Pengajuan::query()
+    //         ->with(['user', 'verifiedBy', 'logs'])
+    //         ->where('opd_id', Auth::user()->opd_id)
+    //         ->latest()->get();
+
         return view('pages.verifikasi-pengajuan.index');
     }
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa']);
+        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa', 'organisasi', 'desa.kecamatan']);
 
         $verifikasiIds = $pengajuan->logs
             ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
