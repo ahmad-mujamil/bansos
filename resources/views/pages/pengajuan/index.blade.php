@@ -38,8 +38,8 @@
                     <div class="row mb-3">
                         <div class="col-12 col-md-4 mb-3">
                             <label for="filter-status" class="form-label text-muted text-small text-uppercase">Filter Status</label>
-                            <select id="filter-status" class="form-select">
-                                <option value="">Semua</option>
+                            <select id="filter-status" class="form-select form-select-sm">
+                                <option value="all" selected>Semua</option>
                                 <option value="{{ \App\Enums\PengajuanStatus::DRAFT->value }}">Draft</option>
                                 <option value="{{ \App\Enums\PengajuanStatus::DIAJUKAN->value }}">Diajukan</option>
                                 <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}">Disetujui</option>
@@ -107,45 +107,71 @@
     <!-- Page Content End -->
 @endsection
 
+@if(!$pengajuan->isEmpty())
+@push('css')
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <style>
+        #filter-status + .select2-container--bootstrap4 .select2-selection--single {
+            height: 31px;
+        }
+        #filter-status + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            line-height: 31px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    </style>
+@endpush
+@endif
+
 @push('js_vendor')
     <script src="{{ $cdn ?? asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+    @if(!$pengajuan->isEmpty())
+        <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+        <script>
+            $(function () {
+                var $filter = $('#filter-status');
+                $filter.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    minimumResultsForSearch: Infinity
+                });
+
+                function applyFilter() {
+                    var value = $filter.val();
+                    var showAll = !value || value === 'all';
+                    $('table.table tbody tr[data-status]').each(function () {
+                        var rowStatus = $(this).attr('data-status') || '';
+                        $(this).toggle(showAll || rowStatus === value);
+                    });
+                }
+
+                $filter.on('change', applyFilter);
+                applyFilter();
+            });
+        </script>
+    @endif
 @endpush
 
 @push('js_page')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const filter = document.getElementById('filter-status');
-            const rows = document.querySelectorAll('table.table tbody tr[data-status]');
-
-            if (!filter || rows.length === 0) return;
-
-            function applyFilter() {
-                const value = filter.value;
-                rows.forEach(function (row) {
-                    const rowStatus = row.getAttribute('data-status') || '';
-                    row.style.display = !value || rowStatus === value ? '' : 'none';
-                });
-            }
-
-            filter.addEventListener('change', applyFilter);
-            applyFilter();
-        });
-
-        document.querySelectorAll('form.form-ajukan-pengajuan').forEach(function (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var f = this;
-                Swal.fire({
-                    title: 'Ajukan Pengajuan',
-                    text: 'Apakah Anda yakin ingin mengajukan pengajuan ini?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, ajukan',
-                    cancelButtonText: 'Batal'
-                }).then(function (result) {
-                    if (result.isConfirmed) f.submit();
+        (function () {
+            document.querySelectorAll('form.form-ajukan-pengajuan').forEach(function (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var f = this;
+                    Swal.fire({
+                        title: 'Ajukan Pengajuan',
+                        text: 'Apakah Anda yakin ingin mengajukan pengajuan ini?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, ajukan',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) f.submit();
+                    });
                 });
             });
-        });
+        })();
     </script>
 @endpush

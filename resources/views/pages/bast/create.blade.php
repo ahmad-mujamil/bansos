@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Penerima</label>
                             <input type="text" class="form-control @error('penerima') is-invalid @enderror" name="penerima"
                                    value="{{ old('penerima', $bast->penerima ?? '') }}" required />
@@ -79,7 +79,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Pengajuan</label>
                             <select name="pengajuan_id" id="pengajuan_id"
                                     class="form-control @error('pengajuan_id') is-invalid @enderror" required>
@@ -87,7 +87,7 @@
                                 @foreach($pengajuan as $p)
                                     <option value="{{ $p->id }}"
                                         {{ old('pengajuan_id', $bast->pengajuan_id ?? '') === $p->id ? 'selected' : '' }}>
-                                        {{ $p->kode_pengajuan }}
+                                        {{ $p->kode_pengajuan." - ".$p->judul }}
                                     </option>
                                 @endforeach
                             </select>
