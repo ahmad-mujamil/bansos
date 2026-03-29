@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row mb-3">
     <div class="col-lg-6 col-md-6 col-sm-12">
         <label class="block text-sm font-medium mb-1 text-small text-uppercase">Kecamatan</label>
         <div>

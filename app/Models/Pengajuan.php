@@ -83,4 +83,9 @@ class Pengajuan extends Model implements HasMedia
     {
         return $this->status === PengajuanStatus::DRAFT;
     }
+
+    public function pemeriksa(): HasMany
+    {
+        return $this->hasMany(PengajuanPemeriksa::class);
+    }
 }

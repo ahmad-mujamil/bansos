@@ -9,6 +9,7 @@ use App\Models\BantuanBarangJasa;
 use App\Models\BantuanUang;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
+use App\Models\PengajuanPemeriksa;
 use App\Models\VerifikasiPengajuan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -91,7 +92,7 @@ class VerifikasiPengajuanController extends Controller
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk']);
+        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa']);
 
         $verifikasiIds = $pengajuan->logs
             ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
@@ -144,6 +145,15 @@ class VerifikasiPengajuanController extends Controller
                 'lulus_kesesuaian' => (bool) $request->validated('lulus_kesesuaian'),
                 'sesuai_program_pemda' => (bool) $request->validated('sesuai_program_pemda'),
             ]);
+
+            foreach ($request->validated('pemeriksa') as $pemeriksaRow) {
+                PengajuanPemeriksa::create([
+                    'pengajuan_id' => $pengajuan->id,
+                    'nama' => $pemeriksaRow['nama'],
+                    'nip' => $pemeriksaRow['nip'],
+                    'jabatan' => $pemeriksaRow['jabatan'],
+                ]);
+            }
 
             $pengajuan->verified_at = now();
             $pengajuan->verified_by = Auth::id();

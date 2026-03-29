@@ -39,6 +39,14 @@
                     });
                 });
             }
+
+            document.querySelectorAll('.number-only').forEach(element => {
+                IMask(element, {
+                    mask: Number,
+                    thousandsSeparator: '',
+                    min : 0,
+                });
+            });
         }
     </script>
 @endpush
