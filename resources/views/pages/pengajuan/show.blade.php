@@ -299,6 +299,67 @@
                                 </div>
                                 @endif
 
+                                @php
+                                $updateChanges = data_get($log->metadata, 'changes');
+                                @endphp
+                                @if ($log->action === 'updated' && is_array($updateChanges) && $updateChanges !== [])
+                                @php
+                                $fmtUpdateVal = function (string $field, $value) use ($desaNamaById) {
+                                    if ($value === null || $value === '') {
+                                        return '—';
+                                    }
+                                    if ($field === 'desa_id') {
+                                        return $desaNamaById[$value] ?? $value;
+                                    }
+                                    if ($field === 'nilai') {
+                                        return number_format((float) $value, 2, ',', '.');
+                                    }
+                                    if ($field === 'file_pengajuan') {
+                                        return match ($value) {
+                                            'berkas_ada' => 'Berkas ada',
+                                            'berkas_diunggah' => 'Berkas diunggah',
+                                            default => (string) $value,
+                                        };
+                                    }
+
+                                    return (string) $value;
+                                };
+                                $labelUpdateField = fn (string $field) => match ($field) {
+                                    'judul' => 'Judul',
+                                    'lokasi' => 'Lokasi',
+                                    'desa_id' => 'Desa',
+                                    'nilai' => 'Nilai',
+                                    'file_pengajuan' => 'Berkas pengajuan',
+                                    default => $field,
+                                };
+                                @endphp
+                                <div class="mt-3 pt-3 border-top border-separator">
+                                    <div class="text-muted text-small text-uppercase mb-2">Perubahan data</div>
+                                    <div class="table-responsive rounded-3 border border-separator">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3">Data</th>
+                                                    <th>Sebelum</th>
+                                                    <th class="pe-3">Sesudah</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($updateChanges as $field => $pair)
+                                                @if (is_array($pair) && array_key_exists('from', $pair) && array_key_exists('to', $pair))
+                                                <tr>
+                                                    <td class="ps-3 text-body small fw-medium">{{ $labelUpdateField($field) }}</td>
+                                                    <td class="text-muted small">{{ $fmtUpdateVal($field, $pair['from']) }}</td>
+                                                    <td class="pe-3 text-body small">{{ $fmtUpdateVal($field, $pair['to']) }}</td>
+                                                </tr>
+                                                @endif
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                @endif
+
                                 @php($verifikasiId = $log->metadata['verifikasi_pengajuan_id'] ?? null)
                                 @if ($verifikasiId)
                                 @php($bantuanUang = $bantuanUangByVerifikasi[$verifikasiId] ?? collect())
