@@ -161,7 +161,7 @@
 
                     <div class="wizard-pane d-none" data-pane="2">
                         <h2 class="small-title mb-3">Anggota kelompok</h2>
-                        <p class="text-small text-muted mb-3">Kelola anggota (opsional). Satu penduduk hanya dapat dipilih sekali. Menyimpan formulir ini akan mengganti daftar anggota sesuai isian di bawah.</p>
+                        <p class="text-small text-muted mb-3">Kelola data anggota. Isi NIK 16 digit; gunakan <strong>Cek</strong> atau lanjutkan mengisi — jika NIK sudah ada di data penduduk, nama, jenis kelamin, kecamatan, dan desa terisi otomatis. Pilih kecamatan dulu, lalu desa, kemudian jabatan. Satu NIK hanya boleh satu baris. Menyimpan formulir akan mengganti daftar anggota sesuai isian di bawah.</p>
                         <div id="anggota-rows" class="mb-3"></div>
                         <button type="button" class="btn btn-outline-primary btn-sm mb-4" id="btn-add-anggota">
                             <i data-acorn-icon="plus"></i> Tambah anggota
@@ -174,7 +174,7 @@
 
                     <div class="wizard-pane d-none" data-pane="3">
                         <h2 class="small-title mb-3">Dokumen pendukung</h2>
-                        <p class="text-small text-muted mb-3">Kelola dokumen (opsional). Format PDF, JPG, PNG, WebP — maks. 10 MB per file. Untuk dokumen yang sudah ada, unggah berkas baru hanya jika ingin mengganti.</p>
+                        <p class="text-small text-muted mb-3">Kelola data dokumen. Format PDF, JPG, PNG, WebP — maks. 10 MB per file. Untuk dokumen yang sudah ada, unggah berkas baru hanya jika ingin mengganti.</p>
                         @if ($errors->any())
                             <p class="text-small text-warning mb-3">Jika penyimpanan gagal sebelumnya, pilih ulang file dokumen untuk entri baru.</p>
                         @endif
@@ -192,19 +192,54 @@
         </form>
 
         <template id="tpl-anggota-row">
-            <div class="card mb-3 anggota-row-item border">
+            <div class="card mb-3 anggota-row-item border" data-locked="0" data-existing-anggota="0">
                 <div class="card-body py-3">
+                    <input type="hidden" class="anggota-organisasi-detail-id-field" name="anggota[__IDX__][organisasi_detail_id]" value="">
                     <div class="row align-items-end">
-                        <div class="col-lg-6 mb-3 mb-lg-0">
-                            <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
-                            <select class="form-control anggota-penduduk" name="anggota[__IDX__][penduduk_id]" required>
-                                <option value="">Pilih Penduduk</option>
-                                @foreach($penduduks as $p)
-                                    <option value="{{ $p->id }}">{{ $p->nama }} — {{ $p->nik }}</option>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <label class="form-label text-small text-uppercase">NIK <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control anggota-nik" name="anggota[__IDX__][nik]"
+                                       maxlength="16" minlength="16" inputmode="numeric" autocomplete="off"
+                                       placeholder="16 digit angka" pattern="[0-9]{16}" required>
+                                <button type="button" class="btn btn-outline-secondary btn-cek-nik" title="Cek NIK di data penduduk">Cek</button>
+                            </div>
+                           
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <label class="form-label text-small text-uppercase">Nama <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control anggota-nama" name="anggota[__IDX__][nama]" required maxlength="255">
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <label class="form-label text-small text-uppercase">Jenis kelamin <span class="text-danger">*</span></label>
+                            <select class="form-control anggota-jk" name="anggota[__IDX__][jk]" required>
+                                <option value="">Pilih</option>
+                                @foreach(\App\Enums\JenisKelamin::cases() as $jkOpt)
+                                    <option value="{{ $jkOpt->value }}">{{ $jkOpt->getDescription() }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-5 mb-3 mb-lg-0">
+                        <div class="col-lg-12 col-md-12 mb-3">
+                            <small class="text-muted d-none anggota-existing-hint">Anggota sudah terdaftar — hanya <strong>jabatan</strong> yang dapat diubah. Hapus baris ini jika ingin mengeluarkan dari daftar.</small>
+                            <small class="text-success d-none anggota-nik-found-msg">NIK ditemukan di data penduduk; identitas diisi otomatis.</small>
+                            <small class="text-warning d-none anggota-nik-not-found-msg">NIK tidak ditemukan. Lengkapi nama, jenis kelamin, kecamatan, dan desa secara manual.</small>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <label class="form-label text-small text-uppercase">Kecamatan <span class="text-danger">*</span></label>
+                            <select class="form-control anggota-kecamatan" name="anggota[__IDX__][kecamatan_id]" required>
+                                <option value="">Pilih Kecamatan</option>
+                                @foreach($kecamatans as $kecamatan)
+                                    <option value="{{ $kecamatan->id }}">{{ $kecamatan->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <label class="form-label text-small text-uppercase">Desa <span class="text-danger">*</span></label>
+                            <select class="form-control anggota-desa" name="anggota[__IDX__][desa_id]" required>
+                                <option value="">Pilih Desa</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
                             <label class="form-label text-small text-uppercase">Jabatan <span class="text-danger">*</span></label>
                             <select class="form-control anggota-jabatan" name="anggota[__IDX__][jabatan]" required>
                                 <option value="">Pilih Jabatan</option>
@@ -213,7 +248,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-1 text-lg-end">
+                        <div class="col-lg-1 text-lg-end mb-3">
                             <button type="button" class="btn btn-sm btn-outline-danger btn-remove-anggota" title="Hapus baris">&times;</button>
                         </div>
                     </div>
@@ -325,6 +360,7 @@
             (function () {
                 var anggotaIndex = {{ count($anggotaInitial) }};
                 var dokumenIndex = {{ count($dokumenInitial) }};
+                var lookupNikUrl = @json(route('kelompok-masyarakat.penduduk-by-nik'));
 
                 function setStep(step) {
                     $('.wizard-pane').addClass('d-none');
@@ -341,9 +377,144 @@
                     });
                 }
 
-                function bindSelect2Anggota($root) {
-                    $root.find('.anggota-penduduk').select2({ theme: 'bootstrap4', placeholder: 'Pilih Penduduk', allowClear: true, width: '100%' });
-                    $root.find('.anggota-jabatan').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jabatan', allowClear: false, width: '100%' });
+                function loadDesaForAnggotaRow($row, kecamatanId, selectedDesaId) {
+                    var $desa = $row.find('.anggota-desa');
+                    if ($desa.data('select2')) {
+                        $desa.select2('destroy');
+                    }
+                    $desa.empty().append('<option value="">Pilih Desa</option>');
+                    if (kecamatanId) {
+                        var selectedKecamatan = kecamatansData.find(function (k) { return String(k.id) === String(kecamatanId); });
+                        if (selectedKecamatan && selectedKecamatan.desa) {
+                            selectedKecamatan.desa.forEach(function (desa) {
+                                var sel = selectedDesaId && String(selectedDesaId) === String(desa.id) ? ' selected' : '';
+                                $desa.append('<option value="' + desa.id + '"' + sel + '>' + desa.nama + '</option>');
+                            });
+                        }
+                    }
+                    $desa.select2({ theme: 'bootstrap4', placeholder: 'Pilih Desa', allowClear: true, width: '100%' });
+                    if (selectedDesaId) {
+                        $desa.val(String(selectedDesaId)).trigger('change');
+                    }
+                }
+
+                function bindSelect2Anggota($row) {
+                    $row.find('.anggota-kecamatan').select2({ theme: 'bootstrap4', placeholder: 'Pilih Kecamatan', allowClear: true, width: '100%' });
+                    $row.find('.anggota-jk').select2({ theme: 'bootstrap4', placeholder: 'Pilih', allowClear: true, width: '100%' });
+                    $row.find('.anggota-jabatan').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jabatan', allowClear: false, width: '100%' });
+                    loadDesaForAnggotaRow($row, $row.find('.anggota-kecamatan').val() || null, null);
+                }
+
+                /** Baris anggota dari database (mode edit): NIK–desa terkunci; hanya jabatan yang dapat diedit; tombol Cek disembunyikan. */
+                function applyExistingAnggotaReadOnly($row) {
+                    $row.attr('data-existing-anggota', '1');
+                    $row.find('.anggota-existing-hint').removeClass('d-none');
+                    $row.find('.anggota-nik').prop('disabled', true);
+                    $row.find('.btn-cek-nik').addClass('d-none');
+                    $row.find('.anggota-nama').prop('disabled', true);
+                    $row.find('.anggota-jk').prop('disabled', true);
+                    $row.find('.anggota-kecamatan').prop('disabled', true);
+                    $row.find('.anggota-desa').prop('disabled', true);
+                }
+
+                function unlockAnggotaIdentity($row) {
+                    $row.attr('data-locked', '0');
+                    $row.removeData('skipDesaReset');
+                    $row.find('.anggota-nama').prop('readonly', false);
+                    $row.find('.anggota-jk').prop('disabled', false);
+                    $row.find('.anggota-kecamatan').prop('disabled', false);
+                    $row.find('.anggota-desa').prop('disabled', false);
+                }
+
+                /** Kosongkan field selain NIK sebelum cek ulang (tombol Cek). */
+                function resetAnggotaRowIdentityFields($row) {
+                    unlockAnggotaIdentity($row);
+                    $row.find('.anggota-nama').val('');
+                    $row.find('.anggota-jk').val('').trigger('change');
+                    $row.data('skipDesaReset', true);
+                    $row.find('.anggota-kecamatan').val('').trigger('change');
+                    loadDesaForAnggotaRow($row, null, null);
+                    $row.removeData('skipDesaReset');
+                    $row.find('.anggota-jabatan').val('').trigger('change');
+                    $row.find('.anggota-nik-found-msg').addClass('d-none');
+                    $row.find('.anggota-nik-not-found-msg').addClass('d-none');
+                }
+
+                function applyPendudukLookup($row, p) {
+                    $row.attr('data-locked', '1');
+                    $row.find('.anggota-nik-not-found-msg').addClass('d-none');
+                    $row.find('.anggota-nama').val(p.nama).prop('readonly', true);
+                    $row.data('skipDesaReset', true);
+                    $row.find('.anggota-kecamatan').val(p.kecamatan_id).trigger('change');
+                    loadDesaForAnggotaRow($row, p.kecamatan_id, p.desa_id);
+                    $row.removeData('skipDesaReset');
+                    $row.find('.anggota-jk').val(p.jk).trigger('change');
+                    $row.find('.anggota-jk').prop('disabled', true);
+                    $row.find('.anggota-kecamatan').prop('disabled', true);
+                    $row.find('.anggota-desa').prop('disabled', true);
+                    $row.find('.anggota-nik-found-msg').removeClass('d-none');
+                }
+
+                function fetchNikLookup($row) {
+                    var $nik = $row.find('.anggota-nik');
+                    var raw = ($nik.val() || '').replace(/\D/g, '');
+                    $nik.val(raw);
+                    if (raw.length !== 16) {
+                        $row.find('.anggota-nik-found-msg').addClass('d-none');
+                        $row.find('.anggota-nik-not-found-msg').addClass('d-none');
+                        return;
+                    }
+                    $.getJSON(lookupNikUrl, { nik: raw })
+                        .done(function (res) {
+                            if (res.found && res.penduduk) {
+                                applyPendudukLookup($row, res.penduduk);
+                            } else {
+                                unlockAnggotaIdentity($row);
+                                $row.find('.anggota-nik-found-msg').addClass('d-none');
+                                $row.find('.anggota-nik-not-found-msg').removeClass('d-none');
+                            }
+                        });
+                }
+
+                function wireAnggotaRow($el) {
+                    bindSelect2Anggota($el);
+                    $el.find('.anggota-kecamatan').on('change', function () {
+                        if ($el.attr('data-existing-anggota') === '1') {
+                            return;
+                        }
+                        if ($el.data('skipDesaReset')) {
+                            return;
+                        }
+                        loadDesaForAnggotaRow($el, $(this).val(), null);
+                    });
+                    $el.find('.anggota-nik').on('input', function () {
+                        if ($el.attr('data-existing-anggota') === '1') {
+                            return;
+                        }
+                        var v = $(this).val().replace(/\D/g, '').slice(0, 16);
+                        $(this).val(v);
+                        $el.find('.anggota-nik-found-msg').addClass('d-none');
+                        $el.find('.anggota-nik-not-found-msg').addClass('d-none');
+                        if ($el.attr('data-locked') === '1') {
+                            unlockAnggotaIdentity($el);
+                        }
+                    });
+                    $el.find('.btn-cek-nik').on('click', function () {
+                        if ($el.attr('data-existing-anggota') === '1') {
+                            return;
+                        }
+                        resetAnggotaRowIdentityFields($el);
+                        fetchNikLookup($el);
+                    });
+                    $el.find('.anggota-nik').on('blur', function () {
+                        if ($el.attr('data-existing-anggota') === '1') {
+                            return;
+                        }
+                        var v = ($(this).val() || '').replace(/\D/g, '');
+                        if (v.length === 16 && $el.attr('data-locked') !== '1') {
+                            fetchNikLookup($el);
+                        }
+                    });
                 }
 
                 function bindSelect2Dokumen($root) {
@@ -356,12 +527,30 @@
                     var html = tpl.innerHTML.replace(/__IDX__/g, String(anggotaIndex));
                     var $el = $(html);
                     $('#anggota-rows').append($el);
-                    bindSelect2Anggota($el);
-                    if (values.penduduk_id) {
-                        $el.find('.anggota-penduduk').val(values.penduduk_id).trigger('change');
+                    wireAnggotaRow($el);
+                    if (values.organisasi_detail_id) {
+                        $el.find('.anggota-organisasi-detail-id-field').val(values.organisasi_detail_id);
+                    }
+                    if (values.nik) {
+                        $el.find('.anggota-nik').val(values.nik);
+                    }
+                    if (values.nama) {
+                        $el.find('.anggota-nama').val(values.nama);
+                    }
+                    if (values.kecamatan_id) {
+                        $el.data('skipDesaReset', true);
+                        $el.find('.anggota-kecamatan').val(values.kecamatan_id).trigger('change');
+                        loadDesaForAnggotaRow($el, values.kecamatan_id, values.desa_id || null);
+                        $el.removeData('skipDesaReset');
+                    }
+                    if (values.jk) {
+                        $el.find('.anggota-jk').val(values.jk).trigger('change');
                     }
                     if (values.jabatan) {
                         $el.find('.anggota-jabatan').val(values.jabatan).trigger('change');
+                    }
+                    if (values.organisasi_detail_id) {
+                        applyExistingAnggotaReadOnly($el);
                     }
                     anggotaIndex++;
                 }
@@ -403,10 +592,21 @@
 
                 $(document).on('click', '.btn-remove-anggota', function () {
                     var $card = $(this).closest('.anggota-row-item');
-                    $card.find('.anggota-penduduk, .anggota-jabatan').each(function () {
-                        if ($(this).data('select2')) $(this).select2('destroy');
+                    $card.find('.anggota-kecamatan, .anggota-desa, .anggota-jk, .anggota-jabatan').each(function () {
+                        if ($(this).data('select2')) {
+                            $(this).select2('destroy');
+                        }
                     });
                     $card.remove();
+                });
+
+                $('#formKelompokWizard').on('submit', function () {
+                    $('.anggota-row-item[data-locked="1"]').each(function () {
+                        $(this).find('.anggota-jk, .anggota-kecamatan, .anggota-desa').prop('disabled', false);
+                    });
+                    $('.anggota-row-item[data-existing-anggota="1"]').each(function () {
+                        $(this).find('.anggota-nik, .anggota-nama, .anggota-jk, .anggota-kecamatan, .anggota-desa').prop('disabled', false);
+                    });
                 });
 
                 $(document).on('click', '.btn-remove-dokumen', function () {
@@ -437,7 +637,15 @@
                 });
 
                 @foreach($anggotaInitial as $i => $a)
-                addAnggotaRow({ penduduk_id: @json($a['penduduk_id'] ?? null), jabatan: @json($a['jabatan'] ?? null) });
+                addAnggotaRow({
+                    organisasi_detail_id: @json($a['organisasi_detail_id'] ?? ''),
+                    nik: @json($a['nik'] ?? ''),
+                    nama: @json($a['nama'] ?? ''),
+                    jk: @json($a['jk'] ?? ''),
+                    kecamatan_id: @json($a['kecamatan_id'] ?? ''),
+                    desa_id: @json($a['desa_id'] ?? ''),
+                    jabatan: @json($a['jabatan'] ?? null)
+                });
                 @endforeach
 
                 @foreach($dokumenInitial as $i => $d)
