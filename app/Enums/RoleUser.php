@@ -25,6 +25,7 @@ enum RoleUser: string
             self::SUPER => ['*'],
             self::ADMIN => [
                 'ADMIN', 'PENGGUNA',
+                'LANDING-PAGE', 'BERITA', 'SLIDER',
                 'MASTER_DATA', 'PENDUDUK', 'KELOMPOK_MASYARAKAT', 'JENIS_BANTUAN', 'OPD',
                 'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
                 "LANDING_PAGE","BERITA","SLIDER", "GALERI","ALUR_BANTUAN","PROFILE"

@@ -11,9 +11,9 @@ return [
             [
                 'id' => 'PENGGUNA',
                 'url' => '/pengguna',
-                'title' => 'Pengguna'
-            ]
-        ]
+                'title' => 'Pengguna',
+            ],
+        ],
     ],
     [
         'id' => 'LANDING_PAGE',
@@ -24,27 +24,27 @@ return [
         'sub_menu' => [
             [
                 'id' => 'BERITA',
-                'url' => '/berita',
-                'title' => 'Berita'
+                'url' => '/kelola/berita',
+                'title' => 'Berita',
             ],
             [
                 'id' => 'SLIDER',
-                'url' => '/slider',
-                'title' => 'Slider'
-            ],[
+                'url' => '/kelola/slider',
+                'title' => 'Slider',
+            ], [
                 'id' => 'GALERI',
                 'url' => '/gallery',
-                'title' => 'Gallery'
-            ],[
+                'title' => 'Gallery',
+            ], [
                 'id' => 'PROFILE',
                 'url' => '/profile',
                 'title' => 'Profile'
             ],[
-                'id' => 'ALUR_BANTUAN',
+                'id' => 'ALUR-BANTUAN',
                 'url' => '/alur-bantuan',
-                'title' => 'Alur Bantuan'
-            ]
-        ]
+                'title' => 'Alur Bantuan',
+            ],
+        ],
     ],
     [
         'id' => 'MASTER_DATA',
@@ -56,25 +56,25 @@ return [
             [
                 'id' => 'PENDUDUK',
                 'url' => '/penduduk',
-                'title' => 'Penduduk'
+                'title' => 'Penduduk',
             ],
             [
                 'id' => 'KELOMPOK_MASYARAKAT',
                 'url' => '/kelompok-masyarakat',
-                'title' => 'Kelompok Masyarakat'
+                'title' => 'Kelompok Masyarakat',
             ],
             [
                 'id' => 'JENIS_BANTUAN',
                 'url' => '/jenis-bantuan',
-                'title' => 'Jenis Bantuan'
+                'title' => 'Jenis Bantuan',
             ],
             [
                 'id' => 'OPD',
                 'url' => '/opd',
-                'title' => 'OPD'
+                'title' => 'OPD',
             ],
 
-        ]
+        ],
     ],
     [
         'id' => 'WILAYAH_ADMINISTRASI',
@@ -87,16 +87,16 @@ return [
                 'id' => 'KECAMATAN',
                 'icon' => 'pin',
                 'url' => '/kecamatan',
-                'title' => 'Kecamatan'
+                'title' => 'Kecamatan',
             ],
             [
                 'id' => 'DESA',
                 'icon' => 'destination',
                 'url' => '/desa',
-                'title' => 'Desa/Kelurahan'
+                'title' => 'Desa/Kelurahan',
             ],
 
-        ]
+        ],
     ],
     [
         'id' => 'LAPORAN',
@@ -108,14 +108,14 @@ return [
             [
                 'id' => 'LAP_PENGAJUAN',
                 'url' => '/laporan-pengajuan',
-                'title' => 'Pengajuan Bansos'
+                'title' => 'Pengajuan Bansos',
             ],
             [
                 'id' => 'LAP_REALISASI',
                 'url' => '/laporan-realisasi',
-                'title' => 'Realisasi'
+                'title' => 'Realisasi',
             ],
-        ]
+        ],
     ],
 
 ];
