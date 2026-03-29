@@ -105,6 +105,34 @@
         </div>
     </div>
 
+    @if ($pengajuan->pemeriksa->isNotEmpty())
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="small-title mb-4">Pemeriksa</h2>
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>NIP</th>
+                            <th>Jabatan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pengajuan->pemeriksa as $pemeriksa)
+                        <tr>
+                            <td class="fw-semibold">{{ $pemeriksa->nama }}</td>
+                            <td>{{ $pemeriksa->nip }}</td>
+                            <td>{{ $pemeriksa->jabatan }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-body">
             <h2 class="small-title mb-4">Verifikasi</h2>
