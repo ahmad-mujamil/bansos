@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Enums\PengajuanStatus;
 use App\Enums\RupaBantuan;
+use App\Enums\SatuanBarang;
 use App\Models\BantuanBarangJasa;
 use App\Models\BantuanUang;
 use App\Models\Pengajuan;
@@ -27,7 +28,7 @@ class VerifikasiPengajuanForm extends Component
 
     public bool $sesuai_program_pemda = false;
 
-    public ?float $nilai_rekomendasi = null;
+    public null|float|string $nilai_rekomendasi = null;
 
     public ?string $rupa_bantuan = null;
 
@@ -115,7 +116,7 @@ class VerifikasiPengajuanForm extends Component
             if (in_array($this->rupa_bantuan, [RupaBantuan::BARANG->value, RupaBantuan::JASA->value], true)) {
                 $rules['items'] = ['required', 'array', 'min:1'];
                 $rules['items.*.nama_barang'] = ['required', 'string', 'max:255'];
-                $rules['items.*.satuan'] = ['required', 'string', 'max:50'];
+                $rules['items.*.satuan'] = ['required', Rule::in(array_map(fn (SatuanBarang $e) => $e->value, SatuanBarang::cases()))];
                 $rules['items.*.spesifikasi'] = ['required', 'string', 'max:2000'];
                 $rules['items.*.harga_satuan'] = ['required', 'numeric', 'min:0'];
                 $rules['items.*.qty'] = ['required', 'integer', 'min:1'];
@@ -177,6 +178,54 @@ class VerifikasiPengajuanForm extends Component
         $this->items = array_values($this->items);
     }
 
+    private function sanitizeItemsHargaSatuanFromInput(): void
+    {
+        foreach ($this->items as $index => $row) {
+            if (! array_key_exists('harga_satuan', $row)) {
+                continue;
+            }
+
+            $value = $row['harga_satuan'];
+
+            if ($value === null || $value === '') {
+                $this->items[$index]['harga_satuan'] = null;
+
+                continue;
+            }
+
+            if (is_string($value)) {
+                $clean = str_replace(',', '', $value);
+                $this->items[$index]['harga_satuan'] = is_numeric($clean) ? (float) $clean : null;
+
+                continue;
+            }
+
+            if (is_numeric($value)) {
+                $this->items[$index]['harga_satuan'] = (float) $value;
+            }
+        }
+    }
+
+    public function updatedNilaiRekomendasi(mixed $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->nilai_rekomendasi = null;
+
+            return;
+        }
+
+        if (is_string($value)) {
+            $clean = str_replace(',', '', $value);
+            $this->nilai_rekomendasi = is_numeric($clean) ? (float) $clean : null;
+
+            return;
+        }
+
+        if (is_numeric($value)) {
+            $this->nilai_rekomendasi = (float) $value;
+        }
+    }
+
     public function submit(): void
     {
         if ($this->pengajuan->status !== PengajuanStatus::DIAJUKAN) {
@@ -184,6 +233,8 @@ class VerifikasiPengajuanForm extends Component
 
             return;
         }
+
+        $this->sanitizeItemsHargaSatuanFromInput();
 
         $validated = $this->validate();
 
@@ -273,6 +324,7 @@ class VerifikasiPengajuanForm extends Component
         return view('livewire.verifikasi-pengajuan-form', [
             'canVerify' => $this->pengajuan->status === PengajuanStatus::DIAJUKAN,
             'rupaOptions' => RupaBantuan::cases(),
+            'satuanOptions' => SatuanBarang::cases(),
         ]);
     }
 }

@@ -27,13 +27,15 @@
                         class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-teal-900 dark:text-teal-100 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
                         Dashboard
                     </a>
-                    {{-- @else
-                    <a href="{{ route('login') }}" class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-teal-900 dark:text-teal-100 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
+                @else
+                    <a href="{{ route('login') }}"
+                        class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-teal-900 dark:text-teal-100 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all">
                         Masuk
                     </a>
-                    <a href="{{ route('register') }}" class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold bg-primary-container text-white rounded-lg hover:bg-primary transition-all">
+                    <a href="{{ route('register') }}"
+                        class="hidden sm:inline-flex px-4 py-2 text-sm font-semibold bg-primary-container text-white rounded-lg hover:bg-primary transition-all">
                         Daftar
-                    </a> --}}
+                    </a>
                 @endauth
                 {{-- <a href="{{ route('login') }}" class="p-2 text-teal-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all" title="Notifikasi" aria-label="Notifikasi">
                     <span class="material-symbols-outlined" data-icon="notifications">notifications</span>

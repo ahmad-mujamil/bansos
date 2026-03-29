@@ -308,3 +308,5 @@
 @push('js_vendor')
 <script src="{{ $cdn ?? asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
 @endpush
+
+@include('components.number-format')

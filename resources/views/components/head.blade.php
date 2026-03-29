@@ -30,3 +30,4 @@
 
 <script src="{{ asset('/js/base/loader.js') }}"></script>
 @stack('css')
+<link rel="stylesheet" href="{{ asset('/css/vendor/select2-bansos-theme.css') }}" />
