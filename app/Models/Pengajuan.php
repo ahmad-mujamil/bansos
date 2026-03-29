@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -87,5 +88,10 @@ class Pengajuan extends Model implements HasMedia
     public function pemeriksa(): HasMany
     {
         return $this->hasMany(PengajuanPemeriksa::class);
+    }
+
+    public function verifikasiPengajuan(): HasOne
+    {
+        return $this->hasOne(VerifikasiPengajuan::class);
     }
 }

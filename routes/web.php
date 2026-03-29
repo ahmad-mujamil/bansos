@@ -96,6 +96,11 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
     });
 
+    // BAST
+    Route::middleware(['role:super,opd'])->group(function () {
+        Route::resource('bast', App\Http\Controllers\BastController::class);
+    });
+
     // MASTER DATA
     Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
