@@ -512,16 +512,7 @@
             color: #212529 !important;
         }
 
-        /* Teks option saat cursor/hover di list dropdown — warna hitam */
-        .select2-container--bootstrap4 .select2-results__option--highlighted,
-        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected],
-        .select2-container--bootstrap4 .select2-results__option[aria-selected=true] {
-            color: #212529 !important;
-        }
-
-        .select2-results__option--highlighted {
-            color: #212529 !important;
-        }
+        /* Sorotan dropdown: global css/vendor/select2-bansos-theme.css */
 
         /* Tombol info bulat di samping select organisasi */
         .btn-icon-only {

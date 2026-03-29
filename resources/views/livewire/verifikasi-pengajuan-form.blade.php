@@ -46,49 +46,71 @@
 
                     <div class="row">
                         <div class="col-12 col-lg-6 mt-3">
-                            <label class="form-label text-muted text-small text-uppercase">Nilai Rekomendasi</label>
-                            <input type="number" step="0.01" min="0" class="form-control" wire:model="nilai_rekomendasi" placeholder="niai rekomendasi">
+                            <label class="form-label text-muted text-small text-uppercase" for="nilai-rekomendasi-verifikasi">Nilai Rekomendasi</label>
+                            <div wire:ignore.self>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    id="nilai-rekomendasi-verifikasi"
+                                    class="form-control formatRupiah"
+                                    wire:model.lazy="nilai_rekomendasi"
+                                    placeholder="Nilai rekomendasi"
+                                    autocomplete="off"
+                                >
+                            </div>
                             @error('nilai_rekomendasi') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-12 col-lg-6 mt-3">
-                            <label class="form-label text-muted text-small text-uppercase">Rupa Bantuan</label>
-                            <select class="form-select" wire:model.live="rupa_bantuan">
-                                <option value="">- Pilih -</option>
-                                @foreach($rupaOptions as $rupa)
-                                    <option value="{{ $rupa->value }}">{{ $rupa->getDescription() }}</option>
-                                @endforeach
-                            </select>
+                            <label class="form-label text-muted text-small text-uppercase" for="select-rupa-bantuan">Rupa Bantuan</label>
+                            <div wire:ignore>
+                                <select class="form-select" id="select-rupa-bantuan" data-placeholder="- Pilih -">
+                                    <option value="">- Pilih -</option>
+                                    @foreach($rupaOptions as $rupa)
+                                        <option value="{{ $rupa->value }}" @selected($rupa_bantuan === $rupa->value)>{{ $rupa->getDescription() }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @error('rupa_bantuan') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 mt-4">
-                    <h3 class="small-title mb-3">Data Pemeriksa (3 orang)</h3>
-                    <div class="d-flex flex-column gap-3">
-                        @foreach ($pemeriksa as $index => $row)
-                            <div class="border rounded p-3" wire:key="pemeriksa-{{ $index }}">
-                                <div class="small-title text-muted mb-3">Pemeriksa {{ $index + 1 }}</div>
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-4">
-                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-nama">Nama</label>
-                                        <input type="text" id="pemeriksa-{{ $index }}-nama" class="form-control" wire:model="pemeriksa.{{ $index }}.nama" autocomplete="name">
-                                        @error("pemeriksa.$index.nama") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-nip">NIP</label>
-                                        <input type="text" id="pemeriksa-{{ $index }}-nip" class="form-control" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off">
-                                        @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label class="form-label text-muted text-small text-uppercase" for="pemeriksa-{{ $index }}-jabatan">Jabatan</label>
-                                        <input type="text" id="pemeriksa-{{ $index }}-jabatan" class="form-control" wire:model="pemeriksa.{{ $index }}.jabatan" autocomplete="organization-title">
-                                        @error("pemeriksa.$index.jabatan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                <div class="col-12 mt-3">
+                    <h3 class="small-title mb-2">Data Pemeriksa (3 orang)</h3>
+                    <div class="table-responsive border rounded">
+                        <table class="table table-sm table-borderless align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted text-small text-uppercase border-bottom">
+                                    <th class="ps-3 py-2" style="width: 2.5rem;">#</th>
+                                    <th class="py-2">Nama</th>
+                                    <th class="py-2" style="width: 11rem;">NIP</th>
+                                    <th class="pe-3 py-2">Jabatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($pemeriksa as $index => $row)
+                                    <tr wire:key="pemeriksa-row-{{ $index }}" @class(['border-bottom border-light' => ! $loop->last])>
+                                        <td class="ps-3 py-2 text-muted small">{{ $index + 1 }}</td>
+                                        <td class="py-2">
+                                            <label class="visually-hidden" for="pemeriksa-{{ $index }}-nama">Nama pemeriksa {{ $index + 1 }}</label>
+                                            <input type="text" id="pemeriksa-{{ $index }}-nama" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.nama" autocomplete="name">
+                                            @error("pemeriksa.$index.nama") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                        </td>
+                                        <td class="py-2">
+                                            <label class="visually-hidden" for="pemeriksa-{{ $index }}-nip">NIP pemeriksa {{ $index + 1 }}</label>
+                                            <input type="text" id="pemeriksa-{{ $index }}-nip" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off">
+                                            @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                        </td>
+                                        <td class="pe-3 py-2">
+                                            <label class="visually-hidden" for="pemeriksa-{{ $index }}-jabatan">Jabatan pemeriksa {{ $index + 1 }}</label>
+                                            <input type="text" id="pemeriksa-{{ $index }}-jabatan" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.jabatan" autocomplete="organization-title">
+                                            @error("pemeriksa.$index.jabatan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                     @error('pemeriksa') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
@@ -140,14 +162,14 @@
                             </button>
                         </div>
 
-                        <div class="d-flex flex-column gap-3">
+                        <div class="d-flex flex-column gap-2">
                             @foreach($items as $index => $item)
-                                <div class="border rounded p-3">
-                                    <div class="d-flex justify-content-between align-items-start gap-2">
-                                        <div class="small-title mb-0">Item #{{ $index + 1 }}</div>
+                                <div class="border rounded p-2" wire:key="verifikasi-item-{{ $index }}">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                        <div class="small text-muted fw-semibold mb-0">Item #{{ $index + 1 }}</div>
                                         <button
                                             type="button"
-                                            class="btn btn-outline-danger btn-sm"
+                                            class="btn btn-outline-danger btn-sm py-0 px-2"
                                             wire:click="removeItem({{ $index }})"
                                             @disabled(count($items) === 1)
                                         >
@@ -155,30 +177,51 @@
                                         </button>
                                     </div>
 
-                                    <div class="row mt-2">
-                                        <div class="col-12 col-lg-3 mb-3">
-                                            <label class="form-label text-muted text-small text-uppercase">Nama Barang / Jasa</label>
-                                            <input type="text" class="form-control" wire:model="items.{{ $index }}.nama_barang">
+                                    <div class="row g-2">
+                                        <div class="col-12 col-lg-3">
+                                            <label class="form-label text-muted text-small text-uppercase mb-0">Nama Barang / Jasa</label>
+                                            <input type="text" class="form-control form-control-sm mt-1" wire:model="items.{{ $index }}.nama_barang">
                                             @error("items.$index.nama_barang") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
-                                        <div class="col-12 col-lg-2 mb-3">
-                                            <label class="form-label text-muted text-small text-uppercase">Satuan</label>
-                                            <input type="text" class="form-control" wire:model="items.{{ $index }}.satuan" placeholder="pcs / paket / hari">
+                                        <div class="col-12 col-lg-2">
+                                            <label class="form-label text-muted text-small text-uppercase mb-0" for="select-satuan-item-{{ $index }}">Satuan</label>
+                                            <div wire:ignore class="mt-1">
+                                                <select
+                                                    class="form-select form-select-sm select-satuan-item"
+                                                    id="select-satuan-item-{{ $index }}"
+                                                    data-item-index="{{ $index }}"
+                                                    data-placeholder="Pilih satuan"
+                                                >
+                                                    <option value="">- Pilih -</option>
+                                                    @foreach($satuanOptions as $satuan)
+                                                        <option value="{{ $satuan->value }}" @selected(($item['satuan'] ?? null) === $satuan->value)>{{ $satuan->getDescription() }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             @error("items.$index.satuan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
-                                        <div class="col-12 col-lg-1 mb-3">
-                                            <label class="form-label text-muted text-small text-uppercase">Qty</label>
-                                            <input type="number" min="1" step="1" class="form-control" wire:model="items.{{ $index }}.qty">
+                                        <div class="col-6 col-lg-1">
+                                            <label class="form-label text-muted text-small text-uppercase mb-0">Qty</label>
+                                            <input type="number" min="1" step="1" class="form-control form-control-sm mt-1" wire:model="items.{{ $index }}.qty">
                                             @error("items.$index.qty") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
-                                        <div class="col-12 col-lg-2 mb-3">
-                                            <label class="form-label text-muted text-small text-uppercase">Harga Satuan</label>
-                                            <input type="number" min="0" step="0.01" class="form-control" wire:model="items.{{ $index }}.harga_satuan">
+                                        <div class="col-12 col-lg-2">
+                                            <label class="form-label text-muted text-small text-uppercase mb-0">Harga Satuan</label>
+                                            <div wire:ignore class="mt-1">
+                                                <input
+                                                    type="text"
+                                                    inputmode="decimal"
+                                                    class="form-control form-control-sm formatRupiah item-harga-satuan"
+                                                    wire:model.lazy="items.{{ $index }}.harga_satuan"
+                                                    placeholder="0,00"
+                                                    autocomplete="off"
+                                                >
+                                            </div>
                                             @error("items.$index.harga_satuan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
-                                        <div class="col-12 col-lg-4 mb-0">
-                                            <label class="form-label text-muted text-small text-uppercase">Spesifikasi</label>
-                                            <textarea class="form-control" wire:model="items.{{ $index }}.spesifikasi" rows="3"></textarea>
+                                        <div class="col-12 col-lg-4">
+                                            <label class="form-label text-muted text-small text-uppercase mb-0">Spesifikasi</label>
+                                            <textarea class="form-control form-control-sm mt-1" wire:model="items.{{ $index }}.spesifikasi" rows="2"></textarea>
                                             @error("items.$index.spesifikasi") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -201,3 +244,108 @@
     @endif
 </div>
 
+@push('css')
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}" />
+@endpush
+
+@push('js_vendor')
+    <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+@endpush
+
+@script
+<script>
+    const initRupaBantuanSelect2 = () => {
+        const $sel = $('#select-rupa-bantuan');
+        if (!$sel.length || $sel.data('select2')) {
+            return;
+        }
+
+        $sel.select2({
+            theme: 'bootstrap4',
+            placeholder: $sel.data('placeholder') || '- Pilih -',
+            allowClear: true,
+            width: '100%',
+        });
+
+        $sel.on('change.rupaBantuan', function () {
+            const v = $(this).val();
+
+            $wire.set('rupa_bantuan', v && v !== '' ? v : null);
+        });
+    };
+
+    const initItemSatuanSelect2s = () => {
+        document.querySelectorAll('select.select-satuan-item').forEach(function (el) {
+            const $el = $(el);
+            if ($el.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+
+            const idx = $el.data('item-index');
+            if (idx === undefined) {
+                return;
+            }
+
+            $el.select2({
+                theme: 'bootstrap4',
+                placeholder: $el.data('placeholder') || 'Pilih satuan',
+                allowClear: true,
+                width: '100%',
+            });
+
+            $el.on('change.satuanItem', function () {
+                const v = $(this).val();
+
+                $wire.set('items.' + idx + '.satuan', v && v !== '' ? v : null);
+            });
+        });
+    };
+
+    const initItemHargaMasks = () => {
+        if (typeof IMask === 'undefined') {
+            return;
+        }
+
+        document.querySelectorAll('input.item-harga-satuan.formatRupiah').forEach(function (el) {
+            if (el._lwImask) {
+                el._lwImask.destroy();
+                el._lwImask = null;
+            }
+
+            el._lwImask = IMask(el, {
+                mask: Number,
+                scale: 2,
+                thousandsSeparator: ',',
+                min: 0,
+                radix: '.',
+            });
+        });
+    };
+
+    const initVerifikasiFormUi = () => {
+        if (typeof $ === 'undefined' || !$.fn.select2) {
+            setTimeout(initVerifikasiFormUi, 50);
+
+            return;
+        }
+
+        initRupaBantuanSelect2();
+        initItemSatuanSelect2s();
+
+        if (typeof IMask === 'undefined') {
+            setTimeout(initVerifikasiFormUi, 50);
+
+            return;
+        }
+
+        initItemHargaMasks();
+    };
+
+    initVerifikasiFormUi();
+
+    Livewire.hook('morph.updated', () => {
+        setTimeout(initVerifikasiFormUi, 10);
+    });
+</script>
+@endscript
