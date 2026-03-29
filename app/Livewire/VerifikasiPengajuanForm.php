@@ -8,6 +8,7 @@ use App\Models\BantuanBarangJasa;
 use App\Models\BantuanUang;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
+use App\Models\PengajuanPemeriksa;
 use App\Models\VerifikasiPengajuan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,13 @@ class VerifikasiPengajuanForm extends Component
     public ?string $rupa_bantuan = null;
 
     public ?string $catatan = null;
+
+    /**
+     * Tiga pemeriksa wajib diisi (nama, NIP, jabatan per orang).
+     *
+     * @var array<int, array{nama: string, nip: string, jabatan: string}>
+     */
+    public array $pemeriksa = [];
 
     /** @var array<string, array{penduduk_id:string, nilai:float|int|string|null}> */
     public array $detail = [];
@@ -60,6 +68,24 @@ class VerifikasiPengajuanForm extends Component
         $this->items = [
             $this->blankItem(),
         ];
+
+        $this->pemeriksa = [
+            $this->blankPemeriksa(),
+            $this->blankPemeriksa(),
+            $this->blankPemeriksa(),
+        ];
+    }
+
+    /**
+     * @return array{nama: string, nip: string, jabatan: string}
+     */
+    private function blankPemeriksa(): array
+    {
+        return [
+            'nama' => '',
+            'nip' => '',
+            'jabatan' => '',
+        ];
     }
 
     public function rules(): array
@@ -71,6 +97,10 @@ class VerifikasiPengajuanForm extends Component
             'sesuai_program_pemda' => ['required', 'boolean'],
             'nilai_rekomendasi' => ['nullable', 'numeric', 'min:0'],
             'catatan' => ['nullable', 'string', 'max:1000'],
+            'pemeriksa' => ['required', 'array', 'size:3'],
+            'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
+            'pemeriksa.*.nip' => ['required', 'string', 'max:50'],
+            'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
         ];
 
         if ($this->allPassed()) {
@@ -174,6 +204,15 @@ class VerifikasiPengajuanForm extends Component
                 'lulus_kesesuaian' => (bool) $validated['lulus_kesesuaian'],
                 'sesuai_program_pemda' => (bool) $validated['sesuai_program_pemda'],
             ]);
+
+            foreach ($validated['pemeriksa'] as $pemeriksaRow) {
+                PengajuanPemeriksa::create([
+                    'pengajuan_id' => $this->pengajuan->id,
+                    'nama' => $pemeriksaRow['nama'],
+                    'nip' => $pemeriksaRow['nip'],
+                    'jabatan' => $pemeriksaRow['jabatan'],
+                ]);
+            }
 
             $this->pengajuan->forceFill([
                 'verified_at' => now(),
