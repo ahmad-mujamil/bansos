@@ -62,7 +62,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     // USERS KELOMPOK
     Route::middleware(['role:super,opd'])->group(function () {
         Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class)
-        ->parameters(["user-kelompok" => "userKelompok"]);
+            ->parameters(['user-kelompok' => 'userKelompok']);
     });
 
     // Kelola konten landing (berita)
@@ -95,6 +95,13 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
     });
+
+    // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)
+    Route::permanentRedirect('realisasi-bantuan', '/realisasi');
+    Route::get('realisasi', [App\Http\Controllers\RealisasiController::class, 'index'])->name('realisasi.index');
+    Route::get('realisasi/{pengajuan}/create', [App\Http\Controllers\RealisasiController::class, 'create'])->name('realisasi.create');
+    Route::post('realisasi/{pengajuan}', [App\Http\Controllers\RealisasiController::class, 'store'])->name('realisasi.store');
+    Route::put('realisasi/{pengajuan}', [App\Http\Controllers\RealisasiController::class, 'update'])->name('realisasi.update');
 
     // BAST
     Route::middleware(['role:super,opd'])->group(function () {
