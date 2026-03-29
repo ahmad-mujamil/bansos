@@ -6,6 +6,7 @@ use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPengajuan;
 use App\Enums\JenisUser;
 use App\Enums\PengajuanStatus;
+use App\Models\Desa;
 use App\Models\JenisBantuan;
 use App\Models\Kecamatan;
 use App\Models\Organisasi;
@@ -119,10 +120,33 @@ class PengajuanController extends Controller
         $bantuanUangByVerifikasi = collect();
         $bantuanBarangJasaByVerifikasi = collect();
 
+        $desaIdsForLogLabels = collect();
+        foreach ($pengajuan->logs as $log) {
+            $changes = data_get($log->metadata, 'changes');
+            if (! is_array($changes)) {
+                continue;
+            }
+            foreach ($changes as $field => $pair) {
+                if ($field !== 'desa_id' || ! is_array($pair)) {
+                    continue;
+                }
+                foreach (['from', 'to'] as $dir) {
+                    $v = $pair[$dir] ?? null;
+                    if ($v) {
+                        $desaIdsForLogLabels->push($v);
+                    }
+                }
+            }
+        }
+        $desaNamaById = $desaIdsForLogLabels->isNotEmpty()
+            ? Desa::query()->whereIn('id', $desaIdsForLogLabels->unique()->all())->pluck('nama', 'id')
+            : collect();
+
         return view('pages.pengajuan.show', compact(
             'pengajuan',
             'bantuanUangByVerifikasi',
-            'bantuanBarangJasaByVerifikasi'
+            'bantuanBarangJasaByVerifikasi',
+            'desaNamaById'
         ));
     }
 
@@ -186,7 +210,18 @@ class PengajuanController extends Controller
 
         try {
             DB::beginTransaction();
+            $hadFileBefore = $pengajuan->hasMedia('pengajuan');
+            $trackedKeys = ['judul', 'lokasi', 'desa_id', 'nilai'];
+            $before = [
+                'judul' => $pengajuan->judul,
+                'lokasi' => $pengajuan->lokasi,
+                'desa_id' => $pengajuan->desa_id,
+                'nilai' => $pengajuan->nilai,
+            ];
+
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->judul = $validated['judul'];
+            $pengajuan->nilai = $validated['nilai'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->save();
@@ -196,7 +231,26 @@ class PengajuanController extends Controller
                 $pengajuan->addMediaFromRequest('file_pengajuan')->toMediaCollection('pengajuan');
             }
 
-            $this->logPengajuan($pengajuan, 'updated', $pengajuan->status->value, $pengajuan->status->value);
+            $changes = [];
+            foreach ($trackedKeys as $key) {
+                $from = $before[$key];
+                $to = $pengajuan->getAttribute($key);
+                $changed = $key === 'nilai'
+                    ? (float) $from != (float) $to
+                    : $from !== $to;
+                if ($changed) {
+                    $changes[$key] = ['from' => $from, 'to' => $to];
+                }
+            }
+            if ($request->hasFile('file_pengajuan')) {
+                $changes['file_pengajuan'] = [
+                    'from' => $hadFileBefore ? 'berkas_ada' : null,
+                    'to' => 'berkas_diunggah',
+                ];
+            }
+
+            $metadata = $changes !== [] ? ['changes' => $changes] : null;
+            $this->logPengajuan($pengajuan, 'updated', $pengajuan->status->value, $pengajuan->status->value, null, $metadata);
             DB::commit();
             toast()->success('Berhasil', 'Pengajuan berhasil diperbarui.');
 
