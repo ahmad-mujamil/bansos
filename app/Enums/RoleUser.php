@@ -8,7 +8,6 @@ enum RoleUser: string
     case ADMIN = 'admin';
     case OPD = 'opd';
     case USER = 'user';
-    case BUD = 'bud';
 
     public function getDescription(): string
     {
@@ -16,8 +15,7 @@ enum RoleUser: string
             self::SUPER => 'Super Admin',
             self::ADMIN => 'Administrator',
             self::OPD => 'OPD',
-            self::USER => 'User',
-            self::BUD => 'BUD',
+            self::USER => 'User/Masyarakat',
         };
     }
 
@@ -40,9 +38,6 @@ enum RoleUser: string
                 'BANTUAN', 'PENGAJUAN', 'REALISASI',
                 'PROFILE_USER', 'PROFILE_USER_DETAIL',
             ],
-            self::BUD => [
-                'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
-            ]
         };
     }
 }

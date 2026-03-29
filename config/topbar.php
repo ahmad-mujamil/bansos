@@ -12,9 +12,41 @@ return [
                 'id' => 'PENGGUNA',
                 'url' => '/pengguna',
                 'title' => 'Pengguna'
-            ],
+            ]
         ]
-    ],[
+    ],
+    [
+        'id' => 'LANDING-PAGE',
+        'url' => 'javascript:;',
+        'icon' => 'shield-check',
+        'title' => 'Landing Page',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'BERITA',
+                'url' => '/berita',
+                'title' => 'Berita'
+            ],
+            [
+                'id' => 'SLIDER',
+                'url' => '/slider',
+                'title' => 'Slider'
+            ],[
+                'id' => 'GALERI',
+                'url' => '/gallery',
+                'title' => 'Gallery'
+            ],[
+                'id' => 'PROFILE',
+                'url' => '/profile',
+                'title' => 'Profile'
+            ],[
+                'id' => 'ALUR-BANTUAN',
+                'url' => '/alur-bantuan',
+                'title' => 'Alur Bantuan'
+            ]
+        ]
+    ],
+    [
         'id' => 'MASTER_DATA',
         'icon' => 'gear',
         'title' => 'Master Data',
