@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Enums\RoleUser;
-use App\Http\Requests\PenggunaRequest;
-use App\Models\Opd;
+use App\Http\Requests\UserKelompokRequest;
+use App\Models\Organisasi;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -16,7 +16,8 @@ class UserKelompokController extends Controller
     private function data()
     {
         $data =  User::query()
-            ->where('opd_id',auth()->user()->opd_id)
+            ->where('opd_id',auth()->user()->opd_id??'-')
+            ->whereRole(RoleUser::USER)
             ->latest();
 
         return DataTables::of($data)
@@ -51,56 +52,40 @@ class UserKelompokController extends Controller
 
     public function create()
     {
-        $members = User::query()
-            ->where('role',RoleUser::USER)
-            ->where('is_active',true)
+        $organisasi = Organisasi::query()
+            ->where("opd_id",auth()->user()->opd_id??'-')
             ->get();
-        $opds = Opd::query()->orderBy('nama')->get();
-        return view('pages.user-kelompok.create',compact('members', 'opds'));
+        return view('pages.user-kelompok.create',compact('organisasi'));
     }
-    public function store(PenggunaRequest $request)
+    public function store(UserKelompokRequest $request)
     {
         try {
+            $validated = $request->validated();
             DB::beginTransaction();
-            User::query()->create($request->validated());
+            $user = User::query()->create(Arr::only($validated,["nama","email","username","opd_id","role","password","is_active"]));
+            $user->userDetail()->create(Arr::except($validated,["nama","email","username","opd_id","role","password","is_active"]));
             DB::commit();
             toast()->success('Yeeayy !!','Data berhasil disimpan');
             return redirect()->route('user-kelompok.index');
         } catch (\Throwable $th) {
+            dd($th);
             toast()->error('Oppss !!',$th->getMessage());
-            return back()->withInput();
+            return back()->withInput()->withErrors($th->getMessage());
         }
     }
 
-    public function edit(User $pengguna)
+    public function edit(User $userKelompok)
     {
-
-        // $members = User::query()
-        //     ->where('role',RoleUser::USER)
-        //     ->where('is_active',true)
-        //     ->get();
-        $opds = Opd::query()->orderBy('nama')->get();
-        return view('pages.user-kelompok.create', compact('pengguna', 'opds'));
+        $organisasi = Organisasi::query()->where("opd_id",auth()->user()->opd_id??'-')->get();
+        return view('pages.user-kelompok.create', compact('userKelompok', 'organisasi'));
     }
-    public function update(PenggunaRequest $request, User $pengguna)
+    public function update(UserKelompokRequest $request, User $userKelompok)
     {
         try {
             DB::beginTransaction();
             $validated = $request->validated();
-
-            if ($pengguna->email == $validated['email']) {
-                unset($validated['email']);
-            }
-            if ($pengguna->username == $validated['username']) {
-                unset($validated['username']);
-            }
-            if (empty($validated['password'])) {
-                unset($validated['password']);
-            } else {
-                $validated['password'] = bcrypt($validated['password']);
-            }
-
-            $pengguna->update($validated);
+            $userKelompok->update(Arr::only($validated,["nama","email","username","opd_id","role","password","is_active"]));
+            $userKelompok->userDetail()->update(Arr::except($validated,["nama","email","username","opd_id","role","password","is_active"]));
             DB::commit();
             toast()->success('Yeeayy !!','Data berhasil disimpan');
             return redirect()->route('user-kelompok.index');
@@ -109,11 +94,11 @@ class UserKelompokController extends Controller
             return back()->withInput();
         }
     }
-    public function destroy(User $pengguna)
+    public function destroy(User $userKelompok)
     {
         try {
             DB::beginTransaction();
-            $pengguna->delete();
+            $userKelompok->delete();
             DB::commit();
             toast()->success('Yeeayy !!','Data berhasil dihapus');
             return redirect()->route('user-kelompok.index');

@@ -16,7 +16,7 @@ return [
         ]
     ],
     [
-        'id' => 'LANDING-PAGE',
+        'id' => 'LANDING_PAGE',
         'url' => 'javascript:;',
         'icon' => 'shield-check',
         'title' => 'Landing Page',
@@ -40,7 +40,7 @@ return [
                 'url' => '/profile',
                 'title' => 'Profile'
             ],[
-                'id' => 'ALUR-BANTUAN',
+                'id' => 'ALUR_BANTUAN',
                 'url' => '/alur-bantuan',
                 'title' => 'Alur Bantuan'
             ]

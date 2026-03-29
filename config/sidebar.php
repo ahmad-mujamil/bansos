@@ -68,7 +68,7 @@ return [
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'USER-KELOMPOK',
+                'id' => 'USER_KELOMPOK',
                 'icon' => 'user',
                 'url' => '/user-kelompok',
                 'title' => 'User Kelompok'
