@@ -1,9 +1,17 @@
 <?php
 
+use App\Http\Controllers\BeritaPublikController;
+use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
+use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
+use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-route::redirect('/', '/login');
+Route::get('/', LandingController::class)->name('landing');
+
+Route::get('/berita', [BeritaPublikController::class, 'index'])->name('berita.publik.index');
+Route::get('/berita/{berita:slug}', [BeritaPublikController::class, 'show'])->name('berita.publik.show');
+
 Auth::routes([
     'register' => false,
     'confirm' => false,
@@ -55,6 +63,23 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::middleware(['role:super,opd'])->group(function () {
         Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class)
         ->parameters(["user-kelompok" => "userKelompok"]);
+    });
+
+    // Kelola konten landing (berita)
+    Route::middleware(['role:super,admin'])->prefix('kelola')->name('kelola.')->group(function () {
+        Route::get('berita', [KelolaBeritaController::class, 'index'])->name('berita.index');
+        Route::get('berita/create', [KelolaBeritaController::class, 'create'])->name('berita.create');
+        Route::post('berita', [KelolaBeritaController::class, 'store'])->name('berita.store');
+        Route::get('berita/{berita}/edit', [KelolaBeritaController::class, 'edit'])->name('berita.edit');
+        Route::put('berita/{berita}', [KelolaBeritaController::class, 'update'])->name('berita.update');
+        Route::delete('berita/{berita}', [KelolaBeritaController::class, 'destroy'])->name('berita.destroy');
+
+        Route::get('slider', [KelolaHeroSlideController::class, 'index'])->name('slider.index');
+        Route::get('slider/create', [KelolaHeroSlideController::class, 'create'])->name('slider.create');
+        Route::post('slider', [KelolaHeroSlideController::class, 'store'])->name('slider.store');
+        Route::get('slider/{heroSlide}/edit', [KelolaHeroSlideController::class, 'edit'])->name('slider.edit');
+        Route::put('slider/{heroSlide}', [KelolaHeroSlideController::class, 'update'])->name('slider.update');
+        Route::delete('slider/{heroSlide}', [KelolaHeroSlideController::class, 'destroy'])->name('slider.destroy');
     });
 
     // Verifikasi Pengguna (user belum aktif)
