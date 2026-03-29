@@ -106,25 +106,24 @@ return [
     ],
 
     [
-        'id' => 'PENGAJUAN_DAN_BAST',
+        'id' => 'BAST_DAN_BLACKLIST',
         'url' => 'javascript:;',
-        'title' => 'Pengajuan & BAST',
+        'title' => 'BA Serah Terima',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
-            [
-                'id' => 'PENGAJUAN_ANGGARAN',
-                'icon' => 'box',
-                'url' => '/pengajuan-anggaran',
-                'title' => 'Pengajuan Anggaran'
-            ],
-
             [
                 'id' => 'BAST',
                 'icon' => 'book',
                 'url' => '/bast',
                 'title' => 'BA Serah Terima'
             ],
+            [
+                'id' => 'BLACKLIST',
+                'icon' => 'close-circle',
+                'url' => '/blacklist',
+                'title' => 'Blacklist Pengguna'
+            ]
         ]
     ],
 
@@ -135,12 +134,6 @@ return [
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
-            [
-                'id' => 'BLACKLIST',
-                'icon' => 'close-circle',
-                'url' => '/blacklist',
-                'title' => 'Blacklist Pengguna'
-            ],
             [
                 'id' => 'MONITORING',
                 'icon' => 'activity',

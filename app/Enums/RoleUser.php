@@ -32,8 +32,8 @@ enum RoleUser: string
             self::OPD => [
                 'SIDE_MASTER_DATA', 'KELOMPOK_MASYARAKAT',"USER_KELOMPOK",
                 'SIDE_VERIFIKASI', 'VERIFY_PENGAJUAN', 'VERIFY_PENGGUNA',
-                'PENGAJUAN_DAN_BAST', 'PENGAJUAN_ANGGARAN', 'BAST',
-                'MONITORING_DAN_REALISASI', 'MONITORING', 'REALISASI_BANTUAN', 'BLACKLIST',
+                'BAST_DAN_BLACKLIST', 'BLACKLIST', 'BAST',
+                'MONITORING_DAN_REALISASI', 'MONITORING', 'REALISASI_BANTUAN',
             ],
             self::USER => [
                 'BANTUAN', 'PENGAJUAN', 'REALISASI',
