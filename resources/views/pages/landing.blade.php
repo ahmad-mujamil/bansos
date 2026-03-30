@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Bantu-In | Portal Bantuan Sosial Resmi</title>
+    <title>Bantu-In</title>
     <link rel="icon" href="{{ asset('img/logo-only.png') }}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -137,45 +137,134 @@
         <div class="max-w-7xl mx-auto px-8">
             <div class="text-center max-w-3xl mx-auto mb-20 space-y-4">
                 <h2 class="text-4xl font-bold text-primary">Alur Bantuan</h2>
-                <p class="text-on-surface-variant text-lg">Proses transparan dan mudah untuk mendapatkan dukungan sosial dari pemerintah.</p>
+                <p class="text-on-surface-variant text-lg">Alur per kategori bantuan yang dikelola dari panel admin untuk memastikan informasi selalu terbaru.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
-                <div class="hidden md:block absolute top-12 left-[12%] right-[12%] h-0.5 border-t-2 border-dashed border-outline-variant"></div>
-                <div class="relative z-10 flex flex-col items-center text-center space-y-6">
-                    <div class="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center shadow-xl ring-8 ring-surface-container">
-                        <span class="material-symbols-outlined text-4xl" data-icon="person_search">person_search</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-primary text-lg mb-2">1. Pendataan</h4>
-                        <p class="text-sm text-on-surface-variant leading-relaxed px-4">Petugas melakukan verifikasi data lapangan di lingkungan RT/RW setempat.</p>
+            <div class="flex flex-wrap justify-center gap-3 mb-10">
+                @foreach(($alurBantuanPublik ?? collect()) as $kategori)
+                    <button
+                        type="button"
+                        data-alur-tab-button="{{ $kategori['key'] }}"
+                        class="rounded-full px-5 py-2 text-sm font-semibold border border-outline-variant transition-all {{ $loop->first ? 'bg-primary text-white border-primary' : 'bg-surface-container-lowest text-primary hover:bg-surface-container' }}"
+                    >
+                        {{ $kategori['label'] }}
+                    </button>
+                @endforeach
+            </div>
+            @foreach(($alurBantuanPublik ?? collect()) as $kategori)
+                <div data-alur-panel="{{ $kategori['key'] }}" class="{{ $loop->first ? '' : 'hidden' }}">
+                    <div class="flex flex-col md:flex-row md:flex-nowrap md:items-start gap-10 md:gap-0 overflow-x-auto md:overflow-x-visible">
+                        @foreach($kategori['steps'] as $step)
+                            @php
+                                $icon = (string) ($step['icon'] ?? 'task_alt');
+                            @endphp
+                            <div class="relative z-10 flex-none w-full md:w-64 flex flex-col items-center text-center space-y-6">
+                                <div class="w-24 h-24 {{ $loop->odd ? 'bg-primary' : 'bg-primary-container' }} text-white rounded-full flex items-center justify-center shadow-xl ring-8 ring-surface-container">
+                                    <span class="material-symbols-outlined text-4xl" data-icon="{{ $icon }}">{{ $icon }}</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-primary text-lg mb-2">{{ $step['title'] }}</h4>
+                                    <p class="text-sm text-on-surface-variant leading-relaxed px-4">{{ $step['description'] }}</p>
+                                </div>
+                            </div>
+                            @unless($loop->last)
+                                <div class="hidden md:flex flex-none w-12 lg:w-20 items-start justify-center pt-12" aria-hidden="true">
+                                    <div class="w-full border-t-2 border-dashed border-outline-variant"></div>
+                                </div>
+                            @endunless
+                        @endforeach
                     </div>
                 </div>
-                <div class="relative z-10 flex flex-col items-center text-center space-y-6">
-                    <div class="w-24 h-24 bg-primary-container text-white rounded-full flex items-center justify-center shadow-xl ring-8 ring-surface-container">
-                        <span class="material-symbols-outlined text-4xl" data-icon="fact_check">fact_check</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-primary text-lg mb-2">2. Verifikasi</h4>
-                        <p class="text-sm text-on-surface-variant leading-relaxed px-4">Sistem Bantu-In memvalidasi data dengan basis data kependudukan nasional.</p>
-                    </div>
+            @endforeach
+        </div>
+    </section>
+    <section class="py-24 bg-surface" id="pengajuan">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+                <div class="space-y-2">
+                    <h2 class="text-4xl font-bold text-primary">Pengajuan Bantuan</h2>
+                    <p class="text-on-surface-variant">Ringkasan dan daftar pengajuan terbaru untuk transparansi layanan.</p>
                 </div>
-                <div class="relative z-10 flex flex-col items-center text-center space-y-6">
-                    <div class="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center shadow-xl ring-8 ring-surface-container">
-                        <span class="material-symbols-outlined text-4xl" data-icon="notifications_active">notifications_active</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-primary text-lg mb-2">3. Penetapan</h4>
-                        <p class="text-sm text-on-surface-variant leading-relaxed px-4">Pengumuman daftar penerima manfaat melalui portal dan aplikasi seluler.</p>
-                    </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary/90 transition-all">
+                        Masuk untuk pantau detail
+                    </a>
+                    <a href="#assistance" class="inline-flex items-center justify-center px-5 py-3 bg-surface-container text-primary rounded-xl font-semibold hover:bg-surface-container-high transition-all">
+                        Lihat alur bantuan
+                    </a>
                 </div>
-                <div class="relative z-10 flex flex-col items-center text-center space-y-6">
-                    <div class="w-24 h-24 bg-primary-container text-white rounded-full flex items-center justify-center shadow-xl ring-8 ring-surface-container">
-                        <span class="material-symbols-outlined text-4xl" data-icon="payments">payments</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-primary text-lg mb-2">4. Penyaluran</h4>
-                        <p class="text-sm text-on-surface-variant leading-relaxed px-4">Bantuan disalurkan langsung melalui rekening bank atau kantor pos terdekat.</p>
-                    </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+                <div class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6">
+                    <div class="text-sm text-on-surface-variant">Total pengajuan (publik)</div>
+                    <div class="mt-2 text-3xl font-extrabold text-primary">{{ number_format($totalPengajuanPublik ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6">
+                    <div class="text-sm text-on-surface-variant">Diajukan</div>
+                    <div class="mt-2 text-3xl font-extrabold text-primary">{{ number_format($totalDiajukan ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6">
+                    <div class="text-sm text-on-surface-variant">Disetujui</div>
+                    <div class="mt-2 text-3xl font-extrabold text-primary">{{ number_format($totalDisetujui ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="rounded-2xl border border-outline-variant bg-surface-container-lowest p-6">
+                    <div class="text-sm text-on-surface-variant">Ditolak</div>
+                    <div class="mt-2 text-3xl font-extrabold text-primary">{{ number_format($totalDitolak ?? 0, 0, ',', '.') }}</div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-outline-variant bg-surface-container-lowest overflow-hidden">
+                <div class="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
+                    <div class="font-bold text-primary">Pengajuan terbaru</div>
+                    <div class="text-xs text-on-surface-variant">Data ringkas tanpa informasi pribadi</div>
+                </div>
+                <div class="divide-y divide-outline-variant">
+                    @forelse(($pengajuanTerbaru ?? collect()) as $pengajuan)
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                            <div class="md:col-span-3">
+                                <div class="text-xs text-on-surface-variant">Kode</div>
+                                <div class="font-semibold text-on-surface break-all">{{ $pengajuan->kode_pengajuan }}</div>
+                            </div>
+                            <div class="md:col-span-5">
+                                <div class="text-xs text-on-surface-variant">Judul</div>
+                                <div class="font-semibold text-on-surface line-clamp-2">{{ $pengajuan->judul }}</div>
+                                @if(($pengajuan->lokasi ?? '') !== '')
+                                    <div class="mt-1 text-xs text-on-surface-variant line-clamp-1">
+                                        <span class="material-symbols-outlined text-sm align-[-0.2em]" data-icon="location_on">location_on</span>
+                                        {{ $pengajuan->lokasi }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="text-xs text-on-surface-variant">Status</div>
+                                <div class="mt-1">
+                                    @php
+                                        $statusValue = $pengajuan->status?->value ?? (string) $pengajuan->status;
+                                        $badgeClass = match ($statusValue) {
+                                            'disetujui' => 'bg-emerald-600 text-white',
+                                            'ditolak' => 'bg-rose-600 text-white',
+                                            'diajukan' => 'bg-amber-500 text-white',
+                                            default => 'bg-surface-container text-on-surface-variant',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold {{ $badgeClass }}">
+                                        {{ $pengajuan->status?->getDescription() ?? (string) $pengajuan->status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="text-xs text-on-surface-variant">Tanggal</div>
+                                <div class="mt-1 text-sm text-on-surface">{{ $pengajuan->created_at?->translatedFormat('d M Y') ?? '—' }}</div>
+                                <div class="mt-1 text-xs text-on-surface-variant">
+                                    Nilai: Rp {{ number_format((float) ($pengajuan->nilai ?? 0), 0, ',', '.') }}
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-10 text-center text-on-surface-variant">
+                            Belum ada pengajuan yang dapat ditampilkan.
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -223,9 +312,9 @@
             <div class="relative">
                 <div class="absolute -top-12 -left-12 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl"></div>
                 <div class="relative z-10 bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl shadow-2xl">
-                    <h2 class="text-3xl font-bold text-white mb-6">Misi Kami</h2>
+                    <h2 class="text-3xl font-bold text-white mb-6">Tentang Bantu-In</h2>
                     <p class="text-on-primary-container text-lg leading-relaxed mb-8">
-                        "Menjamin tidak ada satu pun warga negara yang tertinggal dalam jaring pengaman sosial melalui inovasi teknologi dan ketepatan data."
+                        "Bantu-In merupakan aplikasi yang dibuat oleh BKAD Lombok Barat untuk mendukung pengelolaan dan penyaluran bantuan sosial yang tepat sasaran, transparan, dan akuntabel."
                     </p>
                     <div class="space-y-6">
                         <div class="flex items-start gap-4">
@@ -233,8 +322,8 @@
                                 <span class="material-symbols-outlined" data-icon="verified">verified</span>
                             </div>
                             <div>
-                                <h5 class="text-white font-bold">Data Terintegrasi</h5>
-                                <p class="text-slate-400 text-sm">Sinkronisasi data real-time dengan Dukcapil dan Kemendagri.</p>
+                                <h5 class="text-white font-bold">Dikembangkan BKAD Lombok Barat</h5>
+                                <p class="text-slate-400 text-sm">Inisiatif digital pemerintah daerah untuk meningkatkan kualitas layanan bantuan sosial.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -242,30 +331,40 @@
                                 <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
                             </div>
                             <div>
-                                <h5 class="text-white font-bold">Transparansi Publik</h5>
-                                <p class="text-slate-400 text-sm">Laporan penyaluran yang dapat dipantau oleh siapa pun.</p>
+                                <h5 class="text-white font-bold">Informasi Resmi BKAD</h5>
+                                <p class="text-slate-400 text-sm">
+                                    Kunjungi situs resmi:
+                                    <a
+                                        href="https://bpkad.lombokbaratkab.go.id/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-white underline decoration-white/60 underline-offset-4 hover:decoration-white"
+                                    >
+                                        bpkad.lombokbaratkab.go.id
+                                    </a>
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="space-y-8">
-                <h2 class="text-4xl font-bold text-white tracking-tight">Menjangkau yang Tak Terjangkau, Memberi yang Membutuhkan.</h2>
+                <h2 class="text-4xl font-bold text-white tracking-tight">Layanan Bansos Terintegrasi untuk Masyarakat Lombok Barat.</h2>
                 <p class="text-on-primary-container text-xl font-light">
-                    Bantu-In bukan sekadar aplikasi, melainkan jembatan kebaikan antara pemerintah dan rakyat untuk menciptakan Indonesia yang lebih adil dan sejahtera.
+                    Bantu-In menjadi media kolaborasi antara Pemerintah Kabupaten Lombok Barat dan masyarakat dalam proses pengajuan, verifikasi, hingga pemantauan bantuan sosial.
                 </p>
                 <div class="flex flex-wrap gap-8 md:gap-12 border-t border-white/10 pt-12 justify-center md:justify-start">
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">45jt+</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Penerima Aktif</div>
+                        <div class="text-4xl font-extrabold text-white">BKAD</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Inisiator Aplikasi</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">99%</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Tingkat Akurasi</div>
+                        <div class="text-4xl font-extrabold text-white">Lobar</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Fokus Wilayah</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">514</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Kota/Kabupaten</div>
+                        <div class="text-4xl font-extrabold text-white">Resmi</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Informasi Terverifikasi</div>
                     </div>
                 </div>
                 <div class="pt-4">
@@ -302,6 +401,32 @@
                 slides[i].classList.add('opacity-100', 'z-10');
                 slides[i].setAttribute('aria-current', 'true');
             }, ms);
+        })();
+
+        (function () {
+            var buttons = document.querySelectorAll('[data-alur-tab-button]');
+            var panels = document.querySelectorAll('[data-alur-panel]');
+            if (!buttons.length || !panels.length) {
+                return;
+            }
+            buttons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var key = button.getAttribute('data-alur-tab-button');
+                    buttons.forEach(function (otherButton) {
+                        otherButton.classList.remove('bg-primary', 'text-white', 'border-primary');
+                        otherButton.classList.add('bg-surface-container-lowest', 'text-primary');
+                    });
+                    button.classList.add('bg-primary', 'text-white', 'border-primary');
+                    button.classList.remove('bg-surface-container-lowest');
+                    panels.forEach(function (panel) {
+                        if (panel.getAttribute('data-alur-panel') === key) {
+                            panel.classList.remove('hidden');
+                            return;
+                        }
+                        panel.classList.add('hidden');
+                    });
+                });
+            });
         })();
     </script>
 </body>

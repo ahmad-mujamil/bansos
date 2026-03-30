@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BeritaPublikController;
+use App\Http\Controllers\Kelola\AlurBantuanController as KelolaAlurBantuanController;
 use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
 use App\Http\Controllers\LandingController;
@@ -80,6 +81,8 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('slider/{heroSlide}/edit', [KelolaHeroSlideController::class, 'edit'])->name('slider.edit');
         Route::put('slider/{heroSlide}', [KelolaHeroSlideController::class, 'update'])->name('slider.update');
         Route::delete('slider/{heroSlide}', [KelolaHeroSlideController::class, 'destroy'])->name('slider.destroy');
+
+        Route::get('alur-bantuan', [KelolaAlurBantuanController::class, 'edit'])->name('alur-bantuan.edit');
     });
 
     // Verifikasi Pengguna (user belum aktif)
