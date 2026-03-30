@@ -2,72 +2,207 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JenisUser;
+use App\Enums\PengajuanStatus;
+use App\Models\Organisasi;
+use App\Models\Pengajuan;
+use App\Models\PengajuanRealisasi;
+use App\Models\UserDetail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
-use App\Models\Pengajuan;
 
 class HomeController extends Controller
 {
     public function index()
     {
-
-        if (URL::previous() === route('login'))
+        if (URL::previous() === route('login')) {
             toast()->success('Success !!', 'Berhasil masuk ke sistem.');
-
-        $totalPerorangan = random_int(100, 1000);
-        $totalOrganisasi = random_int(100, 1000);
-        $totalPengajuan = Pengajuan::where('user_id', auth()->id())->count();
-        $totalVerifikasi = Pengajuan::where('user_id', auth()->id())->whereNotNull('verified_at')->count();
-        $totalBelumVerifikasi = Pengajuan::where('user_id', auth()->id())->whereNull('verified_at')->count();
-        $totalRealisasi = 0;
-        $totalBansos = random_int(1000000, 100000000);
-
-        $dataLabel = array_map(fn($month) => Carbon::create(null, $month)->format('F'), range(1, 12));
-
-        $dataChartPengajuan = ["labels" => [], "data" => []];
-        $dataChartBansos = ["labels" => [], "data" => []];
-        foreach ($dataLabel as $bulan) {
-            $dataChartPengajuan["labels"][] = $bulan;
-            $dataChartBansos["labels"][] = $bulan;
-            foreach (range(1, count($dataLabel)) as $index) {
-                $dataChartPengajuan["data"]["Jumlah"][] = random_int(50, 200);
-                $dataChartBansos["data"]["Rupiah"][] = random_int(2000000, 10000000);
-            }
         }
 
-        if (auth()->user()->is_user()) {
-            auth()->user()->load('userDetail.desa');
+        $user = auth()->user();
+        $year = (int) now()->year;
+
+        if ($user->is_user()) {
+            $user->load('userDetail.desa');
+
+            $totalPengajuan = Pengajuan::query()->where('user_id', $user->id)->count();
+            $totalVerifikasi = Pengajuan::query()->where('user_id', $user->id)->whereNotNull('verified_at')->count();
+            $totalBelumVerifikasi = Pengajuan::query()->where('user_id', $user->id)->whereNull('verified_at')->count();
+            $totalRealisasi = Pengajuan::query()
+                ->where('user_id', $user->id)
+                ->whereHas('realisasi')
+                ->count();
+
             return view('home-user', compact(
-                'totalPerorangan',
-                'totalOrganisasi',
+                'totalPengajuan',
                 'totalVerifikasi',
                 'totalBelumVerifikasi',
                 'totalRealisasi',
-                'totalBansos',
-                'totalPengajuan',
-                'dataLabel',
-                'dataChartPengajuan',
-                'dataChartBansos'
             ));
         }
 
-        if (auth()->user()->is_opd()) {
+        if ($user->is_opd()) {
+            $opdId = $user->opd_id;
+
+            $totalOrganisasi = $opdId
+                ? Organisasi::query()->where('opd_id', $opdId)->count()
+                : 0;
+            $totalPengajuan = $opdId
+                ? Pengajuan::query()->where('opd_id', $opdId)->count()
+                : 0;
+            $totalBansos = (float) ($opdId
+                ? Pengajuan::query()
+                ->where('opd_id', $opdId)
+                ->whereHas('realisasi')
+                ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
+                ->get()
+                ->sum(fn(Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0))
+                : 0.0);
+            $totalBlacklist = 0;
+
             return view('home-opd', compact(
-                'totalPerorangan',
+                'totalBlacklist',
                 'totalOrganisasi',
                 'totalBansos',
-                'totalPengajuan'
+                'totalPengajuan',
             ));
         }
 
-        return view('home', compact(
+        $charts = $this->dashboardChartsForYear($year, null);
+
+        $totalPerorangan = UserDetail::query()->where('type', JenisUser::INDIVIDUAL)->count();
+        $totalOrganisasi = Organisasi::query()->count();
+        $totalPengajuan = Pengajuan::query()->count();
+
+
+        $totalBansos = (float) Pengajuan::query()
+            ->whereHas('realisasi')
+            ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
+            ->get()
+            ->sum(fn(Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0));
+
+        return view('home', array_merge(compact(
             'totalPerorangan',
             'totalOrganisasi',
             'totalBansos',
             'totalPengajuan',
-            'dataLabel',
-            'dataChartPengajuan',
-            'dataChartBansos'
-        ));
+        ), $charts));
+    }
+
+    /**
+     * @return array{dataLabel: list<string>, dataChartPengajuan: array{labels: list<string>, data: array<string, list<int>>}, dataChartBansos: array{labels: list<string>, data: array<string, list<float>>}}
+     */
+    private function dashboardChartsForYear(int $year, ?string $opdId): array
+    {
+        $labels = $this->monthLabels($year);
+
+        return [
+            'dataLabel' => $labels,
+            'dataChartPengajuan' => [
+                'labels' => $labels,
+                'data' => [
+                    'Jumlah' => $this->pengajuanCountsPerMonth($year, $opdId),
+                ],
+            ],
+            'dataChartBansos' => [
+                'labels' => $labels,
+                'data' => [
+                    'Rupiah' => $this->realisasiNilaiPerMonth($year, $opdId),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function monthLabels(int $year): array
+    {
+        return collect(range(1, 12))
+            ->map(fn(int $month) => Carbon::create($year, $month, 1)->translatedFormat('F'))
+            ->all();
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function pengajuanCountsPerMonth(int $year, ?string $opdId): array
+    {
+        $query = Pengajuan::query()
+            ->whereYear('created_at', $year)
+            ->when($opdId !== null, fn($q) => $q->where('opd_id', $opdId));
+
+        $byMonth = [];
+        foreach ($query->get(['created_at']) as $pengajuan) {
+            $month = (int) $pengajuan->created_at->format('n');
+            $byMonth[$month] = ($byMonth[$month] ?? 0) + 1;
+        }
+
+        return $this->twelveMonthSeriesInt($byMonth);
+    }
+
+    /**
+     * @return list<float>
+     */
+    private function realisasiNilaiPerMonth(int $year, ?string $opdId): array
+    {
+        $query = PengajuanRealisasi::query()
+            ->whereYear('tanggal_laporan', $year)
+            ->with([
+                'pengajuan' => fn($pengajuanQuery) => $pengajuanQuery
+                    ->select(['id', 'opd_id'])
+                    ->with([
+                        'verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi',
+                    ]),
+            ]);
+
+        $byMonth = [];
+        foreach ($query->get() as $realisasi) {
+            $pengajuan = $realisasi->pengajuan;
+            if ($pengajuan === null) {
+                continue;
+            }
+            if ($opdId !== null && (string) $pengajuan->opd_id !== (string) $opdId) {
+                continue;
+            }
+
+            $nilaiRekomendasi = $pengajuan->verifikasiPengajuan?->nilai_rekomendasi;
+            if ($nilaiRekomendasi === null) {
+                continue;
+            }
+
+            $month = (int) $realisasi->tanggal_laporan->format('n');
+            $byMonth[$month] = ($byMonth[$month] ?? 0.0) + (float) $nilaiRekomendasi;
+        }
+
+        return $this->twelveMonthSeriesFloat($byMonth);
+    }
+
+    /**
+     * @param  array<int, int>  $byMonth
+     * @return list<int>
+     */
+    private function twelveMonthSeriesInt(array $byMonth): array
+    {
+        $out = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $out[] = (int) ($byMonth[$m] ?? 0);
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<int, float>  $byMonth
+     * @return list<float>
+     */
+    private function twelveMonthSeriesFloat(array $byMonth): array
+    {
+        $out = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $out[] = (float) ($byMonth[$m] ?? 0.0);
+        }
+
+        return $out;
     }
 }
