@@ -72,11 +72,7 @@
                                 <span>Total <b>Blacklist</b></span>
                                 <i data-acorn-icon="user" class="text-primary"></i>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+18.4%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalPerorangan) }}</div>
+                            <div class="cta-1 text-primary">{{ number_format($totalBlacklist) }}</div>
                         </div>
                     </div>
                 </div>
