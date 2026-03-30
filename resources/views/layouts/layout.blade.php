@@ -41,6 +41,7 @@
 @livewireScripts
 @include('components.scripts')
 @include('sweetalert::alert')
+@include('components.livewire-swal-listener')
 </body>
 
 </html>

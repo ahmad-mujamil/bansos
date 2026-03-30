@@ -38,10 +38,10 @@ return [
             ], [
                 'id' => 'PROFILE',
                 'url' => '/profile',
-                'title' => 'Profile'
-            ],[
+                'title' => 'Profile',
+            ], [
                 'id' => 'ALUR-BANTUAN',
-                'url' => '/alur-bantuan',
+                'url' => '/kelola/alur-bantuan',
                 'title' => 'Alur Bantuan',
             ],
         ],

@@ -32,5 +32,6 @@
 {{--@include('components.modal_settings')--}}
 @include('components.scripts')
 @include('sweetalert::alert')
+@include('components.livewire-swal-listener')
 </body>
 </html>
