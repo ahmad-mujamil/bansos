@@ -48,7 +48,7 @@ class LoginController extends Controller
         $pengajuanTerbaru = Pengajuan::query()
             ->where('status', '!=', PengajuanStatus::DRAFT->value)
             ->latest()
-            ->simplePaginate(8, [
+            ->simplePaginate(15, [
                 'kode_pengajuan',
                 'judul',
                 'lokasi',
