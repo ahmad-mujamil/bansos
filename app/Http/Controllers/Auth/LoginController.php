@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\PengajuanStatus;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Services\UserSystemInfoHelper;
+use App\Models\Pengajuan;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class LoginController extends Controller
 {
@@ -42,9 +43,37 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    public function showLoginForm()
+    public function showLoginForm(): View
     {
-        return view('auth.login',['title'=>'Login','description'=>'Login to your account']);
+        $pengajuanTerbaru = Pengajuan::query()
+            ->where('status', '!=', PengajuanStatus::DRAFT->value)
+            ->latest()
+            ->simplePaginate(8, [
+                'kode_pengajuan',
+                'judul',
+                'lokasi',
+                'nilai',
+                'status',
+                'created_at',
+            ])
+            ->withQueryString();
+
+        $totalPengajuanPublik = Pengajuan::query()
+            ->where('status', '!=', PengajuanStatus::DRAFT->value)
+            ->count();
+        $totalDiajukan = Pengajuan::query()->where('status', PengajuanStatus::DIAJUKAN->value)->count();
+        $totalDisetujui = Pengajuan::query()->where('status', PengajuanStatus::DISETUJUI->value)->count();
+        $totalDitolak = Pengajuan::query()->where('status', PengajuanStatus::DITOLAK->value)->count();
+
+        return view('auth.login', [
+            'title' => 'Login',
+            'description' => 'Login to your account',
+            'pengajuanTerbaru' => $pengajuanTerbaru,
+            'totalPengajuanPublik' => $totalPengajuanPublik,
+            'totalDiajukan' => $totalDiajukan,
+            'totalDisetujui' => $totalDisetujui,
+            'totalDitolak' => $totalDitolak,
+        ]);
     }
 
     public function username()
@@ -54,9 +83,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        if(auth()->check()){
+        if (Auth::check()) {
             $this->guard()->logout();
-
         }
 
         $request->session()->invalidate();
