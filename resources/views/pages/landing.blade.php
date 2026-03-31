@@ -93,6 +93,7 @@
     @include('partials.public.header', ['extendedNav' => true])
 <main class="pt-20">
     @include('partials.public.hero-slider', ['heroSlides' => $heroSlides])
+    @include('partials.public.profil-kantor-section')
     <section class="py-24 bg-surface" id="news">
         <div class="max-w-7xl mx-auto px-8">
             <div class="flex justify-between items-end mb-12">
@@ -316,7 +317,7 @@
                     <p class="text-on-primary-container text-lg leading-relaxed mb-8">
                         "Bantu-In merupakan aplikasi yang dibuat oleh BKAD Lombok Barat untuk mendukung pengelolaan dan penyaluran bantuan sosial yang tepat sasaran, transparan, dan akuntabel."
                     </p>
-                    <div class="space-y-6">
+                    {{-- <div class="space-y-6">
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-on-primary-container">
                                 <span class="material-symbols-outlined" data-icon="verified">verified</span>
@@ -345,7 +346,7 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <div class="space-y-8">
@@ -354,19 +355,22 @@
                     Bantu-In menjadi media kolaborasi antara Pemerintah Kabupaten Lombok Barat dan masyarakat dalam proses pengajuan, verifikasi, hingga pemantauan bantuan sosial.
                 </p>
                 <div class="flex flex-wrap gap-8 md:gap-12 border-t border-white/10 pt-12 justify-center md:justify-start">
-                    <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">BKAD</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Inisiator Aplikasi</div>
+                    <div class="text-center md:text-left min-w-[8rem]">
+                        <div class="text-4xl font-extrabold text-white tabular-nums">{{ number_format($totalPenggunaIndividuAktif ?? 0, 0, ',', '.') }}</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Individu aktif</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">Lobar</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Fokus Wilayah</div>
+                    <div class="text-center md:text-left min-w-[8rem]">
+                        <div class="text-4xl font-extrabold text-white tabular-nums">{{ number_format($totalKelompokTerdaftar ?? 0, 0, ',', '.') }}</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Kelompok masyarakat</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-4xl font-extrabold text-white">Resmi</div>
-                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Informasi Terverifikasi</div>
+                    <div class="text-center md:text-left min-w-[8rem]">
+                        <div class="text-4xl font-extrabold text-white tabular-nums">{{ number_format($totalOrganisasiTerdaftar ?? 0, 0, ',', '.') }}</div>
+                        <div class="text-on-primary-container text-sm uppercase tracking-widest mt-2">Organisasi &amp; lembaga</div>
                     </div>
                 </div>
+                <p class="text-on-primary-container/80 text-sm max-w-xl">
+                    Ringkasan entitas terdaftar dan aktif di sistem (individu: akun perorangan terverifikasi; kelompok: data kelompok masyarakat; organisasi &amp; lembaga: organisasi, yayasan, tempat ibadah, dan instansi).
+                </p>
                 <div class="pt-4">
                     <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary-container text-white rounded-xl font-semibold hover:bg-white/10 transition-all">
                         Mulai ajukan atau pantau bantuan

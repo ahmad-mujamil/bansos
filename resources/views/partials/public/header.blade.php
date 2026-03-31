@@ -17,6 +17,8 @@
                 <a class="{{ request()->routeIs('berita.publik.*') ? 'text-teal-900 dark:text-teal-50 border-b-2 border-teal-800 dark:border-teal-400 pb-1 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-200' }} transition-colors"
                     href="{{ route('berita.publik.index') }}">Berita</a>
                 <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-200 transition-colors"
+                    href="{{ url('/#profil-kantor') }}">Profil Kantor</a>
+                <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-200 transition-colors"
                     href="{{ url('/#gallery') }}">Galeri</a>
                 <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-200 transition-colors"
                     href="{{ url('/#assistance') }}">Alur Bantuan</a>

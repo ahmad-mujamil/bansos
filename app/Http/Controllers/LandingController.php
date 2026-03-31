@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JenisOrganisasi;
+use App\Enums\JenisUser;
 use App\Enums\KategoriBantuan;
 use App\Enums\PengajuanStatus;
+use App\Enums\RoleUser;
 use App\Models\AlurBantuan;
 use App\Models\Berita;
 use App\Models\HeroSlide;
+use App\Models\Organisasi;
 use App\Models\Pengajuan;
+use App\Models\ProfilKantor;
+use App\Models\User;
+use App\Models\UserDetail;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -54,7 +61,7 @@ class LandingController extends Controller
             $alurBantuanByKategori = AlurBantuan::query()
                 ->with('steps')
                 ->get()
-                ->keyBy(fn (AlurBantuan $alur) => $alur->kategori?->value ?? '');
+                ->keyBy(fn(AlurBantuan $alur) => $alur->kategori?->value ?? '');
         }
 
         $alurBantuanPublik = collect(KategoriBantuan::cases())
@@ -69,6 +76,35 @@ class LandingController extends Controller
                 ];
             });
 
+        $profilKantor = null;
+        if (Schema::hasTable('profil_kantor')) {
+            $profilKantor = ProfilKantor::query()->first();
+        }
+
+        $totalPenggunaIndividuAktif = 0;
+        if (Schema::hasTable('users')) {
+            $totalPenggunaIndividuAktif =  UserDetail::query()->where('type', JenisUser::INDIVIDUAL)->count();
+        }
+
+        $totalKelompokTerdaftar = 0;
+        $totalOrganisasiTerdaftar = 0;
+        if (Schema::hasTable('organisasi')) {
+            $totalKelompokTerdaftar = Organisasi::query()
+                ->where('jenis', JenisOrganisasi::KELOMPOK->value)
+                ->where('is_active', true)
+                ->count();
+
+            $totalOrganisasiTerdaftar = Organisasi::query()
+                ->whereIn('jenis', [
+                    JenisOrganisasi::ORGANISASI->value,
+                    JenisOrganisasi::YAYASAN->value,
+                    JenisOrganisasi::TEMPAT_IBADAH->value,
+                    JenisOrganisasi::INSTANSI->value,
+                ])
+                ->where('is_active', true)
+                ->count();
+        }
+
         return view('pages.landing', compact(
             'beritaTerbaru',
             'heroSlides',
@@ -78,6 +114,10 @@ class LandingController extends Controller
             'totalDisetujui',
             'totalDitolak',
             'alurBantuanPublik',
+            'profilKantor',
+            'totalPenggunaIndividuAktif',
+            'totalKelompokTerdaftar',
+            'totalOrganisasiTerdaftar',
         ));
     }
 
@@ -97,7 +137,7 @@ class LandingController extends Controller
 
         if ($alur->steps->isNotEmpty()) {
             return $alur->steps
-                ->map(fn ($step): array => [
+                ->map(fn($step): array => [
                     'title' => $step->judul,
                     'description' => $step->deskripsi,
                     'icon' => $this->resolveStepIcon($step->judul, $step->deskripsi, $step->icon),
@@ -114,7 +154,7 @@ class LandingController extends Controller
             return (string) $icon;
         }
 
-        $text = mb_strtolower($title.' '.$description);
+        $text = mb_strtolower($title . ' ' . $description);
 
         return match (true) {
             str_contains($text, 'data'), str_contains($text, 'daftar'), str_contains($text, 'registrasi'), str_contains($text, 'pendataan') => 'person_search',

@@ -4,6 +4,7 @@ use App\Http\Controllers\BeritaPublikController;
 use App\Http\Controllers\Kelola\AlurBantuanController as KelolaAlurBantuanController;
 use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
+use App\Http\Controllers\Kelola\ProfilKantorController as KelolaProfilKantorController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -48,9 +49,16 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::get('/pengajuan/{pengajuan}/edit', [App\Http\Controllers\PengajuanController::class, 'edit'])->name('pengajuan.edit');
     Route::put('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'update'])->name('pengajuan.update');
     Route::post('/pengajuan/{pengajuan}/submit', [App\Http\Controllers\PengajuanController::class, 'submit'])->name('pengajuan.submit');
-    // PROFILE
+    // PROFILE (user)
     Route::get('/my-profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::put('/my-profile', [App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
+
+    // Profil kantor / instansi (admin & super)
+    Route::middleware(['role:super,admin'])->group(function () {
+        Route::get('/profile', [KelolaProfilKantorController::class, 'edit'])->name('profil-kantor.edit');
+        Route::put('/profile', [KelolaProfilKantorController::class, 'update'])->name('profil-kantor.update');
+    });
+
     // SECURITY
     Route::get('/my-profile/security', [App\Http\Controllers\ProfileController::class, 'security'])->name('security.index');
     Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
