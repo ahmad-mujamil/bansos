@@ -61,9 +61,8 @@
         }
     </style>
 
-    <div class="w-100 h-100 d-flex justify-content-center align-items-center py-4 ps-4 pe-2">
-        <div class="w-100 login-glossy-card shadow-deep rounded-xl overflow-hidden d-flex flex-column"
-            style="max-width: 1120px;">
+    <div class="w-100 h-100 d-flex justify-content-center align-items-stretch p-2">
+        <div class="w-100 login-glossy-card shadow-deep rounded-xl overflow-hidden d-flex flex-column">
             <div class="px-3 py-3 border-bottom border-separator">
                 <h5 class="text-primary mb-1">Pengajuan Bantuan</h5>
                 <p class="text-muted mb-0 text-small">Ringkasan data pengajuan.</p>

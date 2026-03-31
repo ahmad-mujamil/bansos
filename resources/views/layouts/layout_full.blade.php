@@ -10,13 +10,13 @@
 <body class="h-100">
 <div id="root" class="h-100">
     <!-- Background Start -->
-    <div class="fixed-background"></div>
+    {{-- <div class="fixed-background"></div> --}}
     <!-- Background End -->
 
     <div class="container-fluid p-0 h-100 position-relative">
         <div class="row g-0 h-100">
             <!-- Left Side Start -->
-            <div class="offset-0 col-12 d-none d-lg-flex offset-md-1 col-lg h-lg-100">
+            <div class="offset-0 col-12 d-none d-lg-flex col-lg h-lg-100">
                 @yield('content_left')
             </div>
             <!-- Left Side End -->
