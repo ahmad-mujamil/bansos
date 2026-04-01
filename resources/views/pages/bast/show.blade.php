@@ -59,13 +59,7 @@
         @php
             $pengajuan    = $bast->pengajuan;
             $verifikasi   = $pengajuan?->verifikasiPengajuan;
-            $statusBadge  = match($pengajuan?->status) {
-                \App\Enums\PengajuanStatus::DRAFT     => 'secondary',
-                \App\Enums\PengajuanStatus::DIAJUKAN  => 'info',
-                \App\Enums\PengajuanStatus::DISETUJUI => 'success',
-                \App\Enums\PengajuanStatus::DITOLAK   => 'danger',
-                default => 'secondary',
-            };
+            $statusBadge = $pengajuan?->status?->badgeColor() ?? 'secondary';
         @endphp
 
         <div class="row mb-3">

@@ -12,6 +12,7 @@ use App\Models\PengajuanLog;
 use App\Models\PengajuanPemeriksa;
 use App\Models\VerifikasiPengajuan;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -19,17 +20,6 @@ use Yajra\DataTables\Facades\DataTables;
 
 class VerifikasiPengajuanController extends Controller
 {
-    public function badgeColor(?PengajuanStatus $status): string
-    {
-        return match ($status) {
-            PengajuanStatus::DRAFT => 'secondary',
-            PengajuanStatus::DIAJUKAN => 'info',
-            PengajuanStatus::DISETUJUI => 'success',
-            PengajuanStatus::DITOLAK => 'danger',
-            default => 'secondary',
-        };
-    }
-
     private function getCatatanAttribute(): string
     {
         // Beberapa skema versi sebelumnya menggunakan `catatan_verifikator`.
@@ -47,7 +37,7 @@ class VerifikasiPengajuanController extends Controller
         ];
 
         $query = Pengajuan::query()
-            ->with(['user', 'verifiedBy', 'logs'])
+            ->with(['user', 'verifiedBy', 'logs', 'verifikasiPengajuan.media'])
             ->where('opd_id', Auth::user()->opd_id)
             ->latest();
 
@@ -56,7 +46,7 @@ class VerifikasiPengajuanController extends Controller
         } elseif ($statusRequest !== 'all') {
             // Default to `diajukan` if filter value invalid.
             $query->where('status', PengajuanStatus::DIAJUKAN->value);
-        } elseif ($statusRequest == 'all') {
+        } elseif ($statusRequest === 'all') {
             $query->whereIn('status', [PengajuanStatus::DIAJUKAN->value, PengajuanStatus::DISETUJUI->value, PengajuanStatus::DITOLAK->value]);
         }
 
@@ -66,7 +56,7 @@ class VerifikasiPengajuanController extends Controller
             ->addColumn('judul', fn ($row) => $row->judul ?? '-')
             ->addColumn('status', function ($row) {
                 $status = $row->status;
-                $badge = $this->badgeColor($status);
+                $badge = $status?->badgeColor() ?? 'secondary';
 
                 return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
             })
@@ -74,8 +64,25 @@ class VerifikasiPengajuanController extends Controller
             ->addColumn('user', fn ($row) => $row->user?->nama ?? $row->user?->email ?? '-')
             ->addColumn('action', function ($row) {
                 $lihat = route('verifikasi-pengajuan.show', $row->id);
+                $action = "<a href='{$lihat}' class='btn btn-sm btn-outline-primary' title='Lihat detail'>Lihat</a>";
 
-                return "<a href='{$lihat}' class='btn btn-sm btn-outline-primary' title='Lihat detail'>Lihat</a>";
+                $processed = in_array($row->status, [
+                    PengajuanStatus::DISETUJUI,
+                    PengajuanStatus::DITOLAK,
+                ], true);
+
+                if ($processed) {
+                    $baMedia = $row->verifikasiPengajuan?->getFirstMedia('ba-verifikasi');
+
+                    if ($baMedia) {
+                        $baUrl = $baMedia->getUrl();
+                        $action .= " <a href='{$baUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Lihat File BA'>Lihat BA</a>";
+                    } else {
+                        $action .= " <button type='button' class='btn btn-sm btn-outline-warning ms-1 btn-upload-ba' data-id='{$row->id}' title='Upload BA Verifikasi'>Upload BA</button>";
+                    }
+                }
+
+                return $action;
             })
             ->rawColumns(['status', 'action'])
             ->toJson();
@@ -97,7 +104,7 @@ class VerifikasiPengajuanController extends Controller
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa', 'organisasi', 'desa.kecamatan']);
+        $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa', 'organisasi', 'desa.kecamatan', 'verifikasiPengajuan.media']);
 
         $verifikasiIds = $pengajuan->logs
             ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
@@ -247,5 +254,37 @@ class VerifikasiPengajuanController extends Controller
 
             return redirect()->back()->withInput();
         }
+    }
+
+    public function uploadBa(Request $request, Pengajuan $pengajuan): RedirectResponse
+    {
+        $request->validate([
+            'tgl_pengesahan' => ['required', 'date'],
+            'dokumen'        => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $verifikasi = $pengajuan->verifikasiPengajuan;
+
+        if (! $verifikasi) {
+            toast()->error('Gagal', 'Data verifikasi tidak ditemukan untuk pengajuan ini.');
+            return redirect()->route('verifikasi-pengajuan.index');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $verifikasi->update(['tgl_disahkan' => $request->tgl_pengesahan]);
+
+            $verifikasi->addMediaFromRequest('dokumen')
+                ->toMediaCollection('ba-verifikasi');
+
+            DB::commit();
+
+            toast()->success('Berhasil', 'Dokumen BA berhasil diunggah.');
+        } catch (\Throwable $e) {
+            toast()->error('Gagal', $e->getMessage());
+        }
+
+        return redirect()->route('verifikasi-pengajuan.index');
     }
 }

@@ -16,6 +16,9 @@ class OpdController extends Controller
             ->latest();
 
         return DataTables::of($data)
+            ->addColumn('kepala_opd', fn ($row) => $row->kepala_opd ?? '-')
+            ->addColumn('no_telp', fn ($row) => $row->no_telp ?? '-')
+            ->addColumn('email', fn ($row) => $row->email ?? '-')
             ->addColumn('action', function ($data) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
                 $navActionEnd = "</ul></nav>";
