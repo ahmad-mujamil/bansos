@@ -52,9 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role->value==='opd';
     }
 
-    public function is_bud() : bool
+    public function is_dukcapil() : bool
     {
-        return $this->role->value==='bud';
+        return $this->role->value==='dukcapil';
     }
 
     public function opd(): BelongsTo
