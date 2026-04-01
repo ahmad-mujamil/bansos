@@ -34,6 +34,7 @@ class HomeController extends Controller
                 ->whereHas('realisasi')
                 ->count();
 
+            
             return view('home-user', compact(
                 'totalPengajuan',
                 'totalVerifikasi',
@@ -69,7 +70,7 @@ class HomeController extends Controller
             ));
         }
 
-        if($user->is_dukcapil()) {
+        if ($user->is_dukcapil()) {
             $totalPenduduk = Penduduk::query()->count();
             $totalPendudukTerverifikasi = Penduduk::query()
                 ->whereNotNull('validated_at')

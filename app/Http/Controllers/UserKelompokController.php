@@ -62,7 +62,10 @@ class UserKelompokController extends Controller
         try {
             $validated = $request->validated();
             DB::beginTransaction();
-            $user = User::query()->create(Arr::only($validated,["nama","email","username","opd_id","role","password","is_active"]));
+            $user = User::query()->create(array_merge(
+                Arr::only($validated,["nama","email","username","opd_id","role","password","is_active"]),
+                ['jenis_user' => 'KLP']
+            ));
             $user->userDetail()->create(Arr::except($validated,["nama","email","username","opd_id","role","password","is_active"]));
             DB::commit();
             toast()->success('Yeeayy !!','Data berhasil disimpan');
