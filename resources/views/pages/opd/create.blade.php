@@ -55,11 +55,54 @@
                 @method($method)
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Nama OPD</label>
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Nama OPD <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama"
                                    name="nama" required
-                                   value="{{ old('nama',$opd->nama??'') }}"/>
+                                   value="{{ old('nama', $opd->nama ?? '') }}"/>
+                            @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Kepala OPD <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('kepala_opd') is-invalid @enderror" id="kepala_opd"
+                                   name="kepala_opd" required
+                                   value="{{ old('kepala_opd', $opd->kepala_opd ?? '') }}"/>
+                            @error('kepala_opd')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Alamat <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('alamat') is-invalid @enderror" id="alamat"
+                                      name="alamat" required value="{{ old('alamat', $opd->alamat ?? '') }}"/>
+                            @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">No. Telepon <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('no_telp') is-invalid @enderror" id="no_telp"
+                                   name="no_telp" required
+                                   value="{{ old('no_telp', $opd->no_telp ?? '') }}"/>
+                            @error('no_telp')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Fax</label>
+                            <input type="text" class="form-control @error('fax') is-invalid @enderror" id="fax"
+                                   name="fax"
+                                   value="{{ old('fax', $opd->fax ?? '') }}"/>
+                            @error('fax')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
+                                   name="email" required
+                                   value="{{ old('email', $opd->email ?? '') }}"/>
+                            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Website</label>
+                            <input type="text" class="form-control @error('website') is-invalid @enderror" id="website"
+                                   name="website"
+                                   placeholder="https://..."
+                                   value="{{ old('website', $opd->website ?? '') }}"/>
+                            @error('website')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
 
