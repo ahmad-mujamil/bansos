@@ -747,6 +747,10 @@
                         </div>
                         <button type="submit" class="btn btn-lg btn-primary w-100">Masuk</button>
                     </form>
+                    <a href="{{ route('landing') }}" class="btn btn-lg btn-outline-primary w-100 mt-2 btn-icon btn-icon-start">
+                        <i data-acorn-icon="home" data-acorn-size="16"></i>
+                        <span>Beranda</span>
+                    </a>
                     <br>
                     <div class="text-center">
                         <p class="text-small">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></p>
