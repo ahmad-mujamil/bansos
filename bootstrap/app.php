@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'check.perorangan.detail' => \App\Http\Middleware\CheckPeroranganDetail::class,
             'ensure.user.active' => \App\Http\Middleware\EnsureUserActive::class,
+            'ensure.organisasi.not_blacklisted' => \App\Http\Middleware\EnsureOrganisasiNotBlacklisted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

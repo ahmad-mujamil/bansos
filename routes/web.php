@@ -5,6 +5,7 @@ use App\Http\Controllers\Kelola\AlurBantuanController as KelolaAlurBantuanContro
 use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
 use App\Http\Controllers\Kelola\ProfilKantorController as KelolaProfilKantorController;
+use App\Http\Controllers\BlacklistInfoController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -41,14 +42,19 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::post('/user-detail/kelompok/{organisasi}/dokumen', [App\Http\Controllers\UserDetailKelompokController::class, 'storeDokumen'])->name('user-detail.kelompok.dokumen.store');
     Route::match(['DELETE'], '/user-detail/kelompok/{organisasi}/dokumen/{dokumen}', [App\Http\Controllers\UserDetailKelompokController::class, 'destroyDokumen'])->name('user-detail.kelompok.dokumen.destroy');
 
+    // Info Blacklist (user)
+    Route::get('/blacklist-info', BlacklistInfoController::class)->name('blacklist.info');
+
     // Pengajuan (user)
-    Route::get('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'index'])->name('pengajuan.index');
-    Route::get('/pengajuan/create', [App\Http\Controllers\PengajuanController::class, 'create'])->name('pengajuan.create');
-    Route::post('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'store'])->name('pengajuan.store');
-    Route::get('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'show'])->name('pengajuan.show');
-    Route::get('/pengajuan/{pengajuan}/edit', [App\Http\Controllers\PengajuanController::class, 'edit'])->name('pengajuan.edit');
-    Route::put('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'update'])->name('pengajuan.update');
-    Route::post('/pengajuan/{pengajuan}/submit', [App\Http\Controllers\PengajuanController::class, 'submit'])->name('pengajuan.submit');
+    Route::middleware(['ensure.organisasi.not_blacklisted'])->group(function () {
+        Route::get('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'index'])->name('pengajuan.index');
+        Route::get('/pengajuan/create', [App\Http\Controllers\PengajuanController::class, 'create'])->name('pengajuan.create');
+        Route::post('/pengajuan', [App\Http\Controllers\PengajuanController::class, 'store'])->name('pengajuan.store');
+        Route::get('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'show'])->name('pengajuan.show');
+        Route::get('/pengajuan/{pengajuan}/edit', [App\Http\Controllers\PengajuanController::class, 'edit'])->name('pengajuan.edit');
+        Route::put('/pengajuan/{pengajuan}', [App\Http\Controllers\PengajuanController::class, 'update'])->name('pengajuan.update');
+        Route::post('/pengajuan/{pengajuan}/submit', [App\Http\Controllers\PengajuanController::class, 'submit'])->name('pengajuan.submit');
+    });
     // PROFILE (user)
     Route::get('/my-profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::put('/my-profile', [App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update');
@@ -113,6 +119,12 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
         Route::post('verifikasi-pengajuan/{pengajuan}/upload-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'uploadBa'])->name('verifikasi-pengajuan.upload-ba');
+    });
+
+    // Blacklist Kelompok/Organisasi (OPD)
+    Route::middleware(['role:opd'])->group(function () {
+        Route::get('blacklist', [App\Http\Controllers\BlacklistOrganisasiOpdController::class, 'index'])->name('blacklist.index');
+        Route::post('blacklist/{organisasi}/toggle', [App\Http\Controllers\BlacklistOrganisasiOpdController::class, 'toggle'])->name('blacklist.toggle');
     });
 
     // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)

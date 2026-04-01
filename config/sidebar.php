@@ -114,7 +114,7 @@ return [
     [
         'id' => 'BAST_DAN_BLACKLIST',
         'url' => 'javascript:;',
-        'title' => 'BA Serah Terima',
+        'title' => 'Realisasi & Blacklist',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
@@ -128,7 +128,7 @@ return [
                 'id' => 'BLACKLIST',
                 'icon' => 'close-circle',
                 'url' => '/blacklist',
-                'title' => 'Blacklist Pengguna'
+                'title' => 'Blacklist Kelompok'
             ]
         ]
     ],

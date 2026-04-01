@@ -20,6 +20,7 @@ class Organisasi extends Model
         return [
             'tgl_pembentukan' => 'date:Y-m-d',
             'is_active' => 'boolean',
+            'is_blacklist' => 'boolean',
         ];
     }
 
@@ -31,6 +32,11 @@ class Organisasi extends Model
     public function organisasiDokumen(): HasMany
     {
         return $this->hasMany(OrganisasiDokumen::class);
+    }
+
+    public function blacklistLogs(): HasMany
+    {
+        return $this->hasMany(LogBlacklistOrganisasi::class);
     }
 
     public function kecamatan(): BelongsTo
