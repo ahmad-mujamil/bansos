@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\RoleUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Enums\JenisUser;
 
 class UserKelompokRequest extends FormRequest
 {
@@ -27,6 +28,7 @@ class UserKelompokRequest extends FormRequest
             "is_active" => ["required", "boolean"],
             "role" => ["required", "string", Rule::in($roles)],
             "opd_id" => ["nullable", "uuid", "exists:opd,id"],
+            "jenis_user" => ["required", "string", Rule::enum(JenisUser::class)],
 
             'alamat' => ["required", "string", "max:255"],
             "phone" => ["required", "string", "max:15"],
@@ -52,7 +54,8 @@ class UserKelompokRequest extends FormRequest
             'verified_by' => auth()->id(),
             'verification_status' => 'approved',
             'verification_note' => 'Diinput oleh opd',
-            'type' => 'KLP'
+            'type' => 'KLP',
+            'jenis_user' => 'KLP',
         ]);
     }
 }
