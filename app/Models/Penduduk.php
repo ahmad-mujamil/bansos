@@ -8,6 +8,7 @@ use App\Enums\StatusPerkawinan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\User;
 
 class Penduduk extends Model
 {
@@ -24,6 +25,8 @@ class Penduduk extends Model
             'status_perkawinan' => StatusPerkawinan::class,
             'level_desil' => LevelDesil::class,
             'jk' => JenisKelamin::class,
+            'is_valid' => 'boolean',
+            'validated_at' => 'datetime',
         ];
     }
 
@@ -35,5 +38,10 @@ class Penduduk extends Model
     public function kecamatan(): BelongsTo
     {
         return $this->belongsTo(Kecamatan::class);
+    }
+
+    public function validatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'validated_by');
     }
 }

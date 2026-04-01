@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\JenisUser;
 use App\Enums\PengajuanStatus;
 use App\Models\Organisasi;
+use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanRealisasi;
 use App\Models\UserDetail;
@@ -65,6 +66,17 @@ class HomeController extends Controller
                 'totalOrganisasi',
                 'totalBansos',
                 'totalPengajuan',
+            ));
+        }
+
+        if($user->is_dukcapil()) {
+            $totalPenduduk = Penduduk::query()->count();
+            $totalPendudukTerverifikasi = Penduduk::query()
+                ->whereNotNull('validated_at')
+                ->count();
+            return view('home-dukcapil', compact(
+                'totalPenduduk',
+                'totalPendudukTerverifikasi'
             ));
         }
 

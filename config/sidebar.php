@@ -95,6 +95,12 @@ return [
                 'url' => '/verifikasi-pengguna',
                 'title' => 'Verifikasi Pengguna'
             ],
+            [
+                'id' => 'VERIFY_PENDUDUK',
+                'icon' => 'check-square',
+                'url' => '/verifikasi-penduduk',
+                'title' => 'Verifikasi Penduduk'
+            ],
 
             [
                 'id' => 'VERIFY_PENGAJUAN',

@@ -100,6 +100,13 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengguna/{user}', [App\Http\Controllers\VerifikasiPenggunaController::class, 'show'])->name('verifikasi-pengguna.show');
     });
 
+    // Verifikasi Penduduk
+    Route::middleware(['role:dukcapil,admin'])->group(function () {
+        Route::get('verifikasi-penduduk', [App\Http\Controllers\VerifikasiPendudukController::class, 'index'])->name('verifikasi-penduduk.index');
+        Route::get('verifikasi-penduduk/{penduduk}', [App\Http\Controllers\VerifikasiPendudukController::class, 'show'])->name('verifikasi-penduduk.show');
+        Route::post('verifikasi-penduduk/{penduduk}/verifikasi', [App\Http\Controllers\VerifikasiPendudukController::class, 'verifikasi'])->name('verifikasi-penduduk.verifikasi');
+    });
+
     // Verifikasi Pengajuan
     Route::middleware(['role:opd'])->group(function () {
         Route::get('verifikasi-pengajuan', [App\Http\Controllers\VerifikasiPengajuanController::class, 'index'])->name('verifikasi-pengajuan.index');
