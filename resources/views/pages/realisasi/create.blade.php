@@ -3,13 +3,7 @@
 @section('content')
     @php
         $status = $pengajuan->status;
-        $badge = match ($status) {
-            \App\Enums\PengajuanStatus::DRAFT => 'secondary',
-            \App\Enums\PengajuanStatus::DIAJUKAN => 'info',
-            \App\Enums\PengajuanStatus::DISETUJUI => 'success',
-            \App\Enums\PengajuanStatus::DITOLAK => 'danger',
-            default => 'secondary',
-        };
+        $badge  = $status?->badgeColor() ?? 'secondary';
         $catatan = $pengajuan->catatan_verifikator ?? $pengajuan->catatan;
         $realisasi = $pengajuan->realisasi;
         $routeForm = $realisasi ? route('realisasi.update', $pengajuan) : route('realisasi.store', $pengajuan);

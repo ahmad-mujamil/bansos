@@ -6,10 +6,12 @@ use App\Enums\RupaBantuan;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class VerifikasiPengajuan extends Model
+class VerifikasiPengajuan extends Model implements HasMedia
 {
-    use HasUuids;
+    use HasUuids, InteractsWithMedia;
 
     protected $table = 'verifikasi_pengajuan';
 
@@ -20,13 +22,20 @@ class VerifikasiPengajuan extends Model
     protected function casts(): array
     {
         return [
-            'lulus_kriteria' => 'boolean',
+            'lulus_kriteria'    => 'boolean',
             'lulus_administrasi' => 'boolean',
-            'lulus_kesesuaian' => 'boolean',
+            'lulus_kesesuaian'  => 'boolean',
             'sesuai_program_pemda' => 'boolean',
-            'rupa_bantuan' => RupaBantuan::class,
-
+            'rupa_bantuan'      => RupaBantuan::class,
+            'tgl_disahkan'      => 'date',
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('ba-verifikasi')
+            ->singleFile()
+            ->acceptsMimeTypes(['application/pdf']);
     }
 
     public function user(): BelongsTo

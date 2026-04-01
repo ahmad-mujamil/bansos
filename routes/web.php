@@ -112,6 +112,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengajuan', [App\Http\Controllers\VerifikasiPengajuanController::class, 'index'])->name('verifikasi-pengajuan.index');
         Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
+        Route::post('verifikasi-pengajuan/{pengajuan}/upload-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'uploadBa'])->name('verifikasi-pengajuan.upload-ba');
     });
 
     // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)

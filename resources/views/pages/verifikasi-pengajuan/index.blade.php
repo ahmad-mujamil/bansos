@@ -99,12 +99,47 @@
         <!-- Content Start -->
     </div>
     <!-- Page Content End -->
+
+    <!-- Modal Upload BA Verifikasi -->
+    <div class="modal fade" id="modalUploadBa" tabindex="-1" aria-labelledby="modalUploadBaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formUploadBa" method="POST" enctype="multipart/form-data" action="">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalUploadBaLabel">Upload BA Verifikasi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="tgl_pengesahan" class="form-label text-small text-uppercase fw-semibold">Tanggal Pengesahan <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tgl_pengesahan" name="tgl_pengesahan" placeholder="Pilih tanggal..." autocomplete="off" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dokumen_ba" class="form-label text-small text-uppercase fw-semibold">Dokumen BA (PDF) <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="dokumen_ba" name="dokumen" accept=".pdf,application/pdf" required>
+                            <div class="form-text">Maksimal ukuran file 10 MB.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary btn-icon btn-icon-start">
+                            <i data-acorn-icon="upload"></i>
+                            <span>Upload</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal Upload BA Verifikasi -->
 @endsection
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/vendor/bootstrap-datepicker3.standalone.min.css') }}">
     <style>
         /* Samakan tinggi Select2 dengan input/selector ukuran kecil */
         #filter-status-verifikasi + .select2-container--bootstrap4 .select2-selection--single {
@@ -124,13 +159,15 @@
     <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
     <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
     <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/datepicker/locales/bootstrap-datepicker.id.min.js') }}"></script>
     <script>
         $('#filter-status-verifikasi').select2({
             theme: 'bootstrap4',
             width: '100%',
         });
 
-        _extendDatatables()
+        _extendDatatables();
         const table = $('#datatable-serverside').DataTable({
             language: {
                 paginate: {
@@ -157,7 +194,7 @@
                 { data: 'status', name: 'status' },
                 { data: 'tanggal', name: 'tanggal' },
                 { data: 'user', name: 'user' },
-                { data: 'action', name: 'action' }
+                { data: 'action', name: 'action', orderable: false, searchable: false }
             ],
             render: function(data, type, row, meta) {
                 return meta.row + meta.settings._iDisplayStart + 1;
@@ -166,6 +203,29 @@
 
         $('#filter-status-verifikasi').on('change', function() {
             table.ajax.reload();
+        });
+
+        // Bootstrap Datepicker for tgl_pengesahan
+        $('#tgl_pengesahan').datepicker({
+            format: 'yyyy-mm-dd',
+            language: 'id',
+            autoclose: true,
+            todayHighlight: true,
+        });
+
+        // Upload BA Modal
+        const $modalUploadBa = $('#modalUploadBa');
+        const formUploadBa   = document.getElementById('formUploadBa');
+        const baseUploadUrl  = "{!! rtrim(url('verifikasi-pengajuan'), '/') !!}";
+
+        $modalUploadBa.on('hidden.bs.modal', function () {
+            formUploadBa.reset();
+        });
+
+        $('#datatable-serverside tbody').on('click', '.btn-upload-ba', function () {
+            const id = $(this).data('id');
+            formUploadBa.action = baseUploadUrl + '/' + id + '/upload-ba';
+            $modalUploadBa.modal('show');
         });
 
         function _extendDatatables() {

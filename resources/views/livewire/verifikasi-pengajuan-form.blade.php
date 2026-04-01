@@ -115,6 +115,29 @@
                     @error('pemeriksa') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="col-12 col-lg-6 mt-3">
+                    <label class="form-label text-muted text-small text-uppercase" for="disahkan-oleh">Disahkan Oleh</label>
+                    <input
+                        type="text"
+                        id="disahkan-oleh"
+                        class="form-control"
+                        wire:model="disahkan_oleh"
+                        placeholder="Nama kepala OPD"
+                    >
+                    @error('disahkan_oleh') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="col-12 col-lg-6 mt-3">
+                    <label class="form-label text-muted text-small text-uppercase" for="lokasi-pengesahan">Lokasi Pengesahan</label>
+                    <input
+                        type="text"
+                        id="lokasi-pengesahan"
+                        class="form-control"
+                        wire:model="lokasi_pengesahan"
+                    >
+                    @error('lokasi_pengesahan') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                </div>
+
                 <div class="col-12 mt-3">
                     <label class="form-label text-muted text-small text-uppercase">Catatan</label>
                     <textarea class="form-control" wire:model="catatan" rows="4" placeholder="Tuliskan catatan/verifikasi untuk pengaju"></textarea>

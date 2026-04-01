@@ -28,13 +28,7 @@
 
     @php
     $status = $pengajuan->status;
-    $badge = match ($status) {
-    \App\Enums\PengajuanStatus::DRAFT => 'secondary',
-    \App\Enums\PengajuanStatus::DIAJUKAN => 'info',
-    \App\Enums\PengajuanStatus::DISETUJUI => 'success',
-    \App\Enums\PengajuanStatus::DITOLAK => 'danger',
-    default => 'secondary',
-    };
+    $badge = $status?->badgeColor() ?? 'secondary';
     $catatan = $pengajuan->catatan_verifikator ?? $pengajuan->catatan;
     $canVerify = in_array($pengajuan->status, [\App\Enums\PengajuanStatus::DIAJUKAN], true);
     @endphp
@@ -141,13 +135,165 @@
     </div>
     @endif
 
+    @if($canVerify)
     <div class="card mb-4">
         <div class="card-body">
             <h2 class="small-title mb-4">Verifikasi</h2>
-
             <livewire:verifikasi-pengajuan-form :pengajuan="$pengajuan" />
         </div>
     </div>
+    @else
+    @php
+        $verifikasi = $pengajuan->verifikasiPengajuan;
+        $baMedia = $verifikasi?->getFirstMedia('ba-verifikasi');
+        $verifikasiId = $verifikasi?->id;
+        $bantuanUang = $verifikasiId ? ($bantuanUangByVerifikasi[$verifikasiId] ?? collect()) : collect();
+        $bantuanBarangJasa = $verifikasiId ? ($bantuanBarangJasaByVerifikasi[$verifikasiId] ?? collect()) : collect();
+    @endphp
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="small-title mb-4">Hasil Verifikasi</h2>
+            @if($verifikasi)
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Lulus Kriteria</p>
+                        <span class="badge bg-{{ $verifikasi->lulus_kriteria ? 'success' : 'danger' }}">{{ $verifikasi->lulus_kriteria ? 'Ya' : 'Tidak' }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Lulus Administrasi</p>
+                        <span class="badge bg-{{ $verifikasi->lulus_administrasi ? 'success' : 'danger' }}">{{ $verifikasi->lulus_administrasi ? 'Ya' : 'Tidak' }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Lulus Kesesuaian</p>
+                        <span class="badge bg-{{ $verifikasi->lulus_kesesuaian ? 'success' : 'danger' }}">{{ $verifikasi->lulus_kesesuaian ? 'Ya' : 'Tidak' }}</span>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Sesuai Program Pemda</p>
+                        <span class="badge bg-{{ $verifikasi->sesuai_program_pemda ? 'success' : 'danger' }}">{{ $verifikasi->sesuai_program_pemda ? 'Ya' : 'Tidak' }}</span>
+                    </div>
+                    @if($verifikasi->nilai_rekomendasi !== null)
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Nilai Rekomendasi</p>
+                        <p class="fw-semibold mb-0">Rp {{ number_format($verifikasi->nilai_rekomendasi, 0, ',', '.') }}</p>
+                    </div>
+                    @endif
+                    @if($verifikasi->rupa_bantuan)
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Rupa Bantuan</p>
+                        <p class="mb-0">{{ $verifikasi->rupa_bantuan->getDescription() }}</p>
+                    </div>
+                    @endif
+                    @if($verifikasi->disahkan_oleh)
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Disahkan Oleh</p>
+                        <p class="mb-0">{{ $verifikasi->disahkan_oleh }}</p>
+                    </div>
+                    @endif
+                    @if($verifikasi->lokasi_pengesahan)
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Lokasi Pengesahan</p>
+                        <p class="mb-0">{{ $verifikasi->lokasi_pengesahan }}</p>
+                    </div>
+                    @endif
+                    @if($verifikasi->tgl_disahkan)
+                    <div class="col-6 col-md-3">
+                        <p class="text-small text-uppercase text-muted mb-1">Tanggal Pengesahan</p>
+                        <p class="mb-0">{{ $verifikasi->tgl_disahkan->translatedFormat('d F Y') }}</p>
+                    </div>
+                    @endif
+                    @if($verifikasi->catatan)
+                    <div class="col-12">
+                        <p class="text-small text-uppercase text-muted mb-1">Catatan</p>
+                        <div class="alert alert-light border mb-0">{{ $verifikasi->catatan }}</div>
+                    </div>
+                    @endif
+                    @if($baMedia)
+                    <div class="col-12">
+                        <p class="text-small text-uppercase text-muted mb-1">Dokumen BA Verifikasi</p>
+                        <a href="{{ $baMedia->getUrl() }}" target="_blank" class="btn btn-sm btn-outline-danger btn-icon btn-icon-start">
+                            <i data-acorn-icon="file-text"></i>
+                            <span>{{ $baMedia->file_name }}</span>
+                        </a>
+                    </div>
+                    @endif
+                </div>
+
+                @if($bantuanUang->isNotEmpty())
+                <hr>
+                <h3 class="small-title mb-3 mt-4">Detail Bantuan Uang</h3>
+                @php $totalUang = $bantuanUang->sum(fn($r) => (float) $r->nilai); @endphp
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Penduduk</th>
+                                <th class="text-end" style="width: 200px;">Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($bantuanUang as $row)
+                            <tr>
+                                <td>{{ $row->penduduk?->nama ?? $row->penduduk_id }}</td>
+                                <td class="text-end">Rp {{ number_format((float) $row->nilai, 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th class="text-end">Total</th>
+                                <th class="text-end fw-semibold">Rp {{ number_format($totalUang, 0, ',', '.') }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                @endif
+
+                @if($bantuanBarangJasa->isNotEmpty())
+                <hr>
+                <h3 class="small-title mb-3 mt-4">Detail Bantuan Barang / Jasa</h3>
+                @php $totalBarangJasa = $bantuanBarangJasa->sum(fn($r) => (float) $r->harga_satuan * (int) $r->qty); @endphp
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th style="width: 120px;">Satuan</th>
+                                <th class="text-end" style="width: 70px;">Qty</th>
+                                <th class="text-end" style="width: 160px;">Harga Satuan</th>
+                                <th class="text-end" style="width: 180px;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($bantuanBarangJasa as $row)
+                            @php $subtotal = (float) $row->harga_satuan * (int) $row->qty; @endphp
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ $row->nama_barang }}</div>
+                                    <div class="text-muted small">{{ $row->spesifikasi }}</div>
+                                </td>
+                                <td>{{ $row->satuan }}</td>
+                                <td class="text-end">{{ $row->qty }}</td>
+                                <td class="text-end">Rp {{ number_format((float) $row->harga_satuan, 0, ',', '.') }}</td>
+                                <td class="text-end">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Total</th>
+                                <th class="text-end fw-semibold">Rp {{ number_format($totalBarangJasa, 0, ',', '.') }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                @endif
+            @else
+                <p class="text-muted mb-0">Data verifikasi tidak ditemukan.</p>
+            @endif
+        </div>
+    </div>
+    @endif
 
     @if ($pengajuan->logs->isNotEmpty())
     <!-- <div class="card mb-4">
@@ -158,13 +304,7 @@
                 <div class="timeline-item">
                     <div class="timeline-content">
                         @php
-                        $badgeLog = match ($log->status_to) {
-                        \App\Enums\PengajuanStatus::DRAFT->value => 'secondary',
-                        \App\Enums\PengajuanStatus::DIAJUKAN->value => 'info',
-                        \App\Enums\PengajuanStatus::DISETUJUI->value => 'success',
-                        \App\Enums\PengajuanStatus::DITOLAK->value => 'danger',
-                        default => 'secondary',
-                        };
+                        $badgeLog = \App\Enums\PengajuanStatus::tryFrom($log->status_to)?->badgeColor() ?? 'secondary';
                         @endphp
 
                         <div class="d-flex justify-content-between align-items-start gap-2">

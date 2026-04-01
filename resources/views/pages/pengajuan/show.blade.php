@@ -265,13 +265,7 @@
                             <div class="card pengajuan-log-card border border-separator shadow-sm">
                                 <div class="card-body p-3 p-md-4">
                                 @php
-                                $badgeLog = match ($log->status_to) {
-                                    \App\Enums\PengajuanStatus::DRAFT->value => 'secondary',
-                                    \App\Enums\PengajuanStatus::DIAJUKAN->value => 'info',
-                                    \App\Enums\PengajuanStatus::DISETUJUI->value => 'success',
-                                    \App\Enums\PengajuanStatus::DITOLAK->value => 'danger',
-                                    default => 'secondary',
-                                };
+                                $badgeLog = \App\Enums\PengajuanStatus::tryFrom($log->status_to)?->badgeColor() ?? 'secondary';
                                 @endphp
 
                                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">

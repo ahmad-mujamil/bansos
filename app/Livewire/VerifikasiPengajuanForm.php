@@ -34,6 +34,10 @@ class VerifikasiPengajuanForm extends Component
 
     public ?string $catatan = null;
 
+    public ?string $disahkan_oleh = null;
+
+    public string $lokasi_pengesahan = 'Gerung';
+
     /**
      * Tiga pemeriksa wajib diisi (nama, NIP, jabatan per orang).
      *
@@ -58,6 +62,8 @@ class VerifikasiPengajuanForm extends Component
     public function mount(Pengajuan $pengajuan): void
     {
         $this->pengajuan = $pengajuan->loadMissing(['details.penduduk', 'logs', 'user', 'verifiedBy']);
+
+        $this->disahkan_oleh = Auth::user()?->opd?->kepala_opd ?? null;
 
         foreach ($this->pengajuan->details as $row) {
             $this->detail[(string) $row->id] = [
@@ -97,7 +103,9 @@ class VerifikasiPengajuanForm extends Component
             'lulus_kesesuaian' => ['required', 'boolean'],
             'sesuai_program_pemda' => ['required', 'boolean'],
             'nilai_rekomendasi' => ['nullable', 'numeric', 'min:0'],
-            'catatan' => ['nullable', 'string', 'max:1000'],
+            'catatan'            => ['nullable', 'string', 'max:1000'],
+            'disahkan_oleh'      => ['nullable', 'string', 'max:255'],
+            'lokasi_pengesahan'  => ['required', 'string', 'max:255'],
             'pemeriksa' => ['required', 'array', 'size:3'],
             'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
             'pemeriksa.*.nip' => ['required', 'string', 'max:50'],
@@ -245,15 +253,17 @@ class VerifikasiPengajuanForm extends Component
 
         try {
             $verifikasi = VerifikasiPengajuan::create([
-                'pengajuan_id' => $this->pengajuan->id,
-                'user_id' => Auth::id(),
-                'catatan' => $validated['catatan'] ?? null,
+                'pengajuan_id'      => $this->pengajuan->id,
+                'user_id'           => Auth::id(),
+                'catatan'           => $validated['catatan'] ?? null,
                 'nilai_rekomendasi' => $validated['nilai_rekomendasi'] ?? null,
-                'rupa_bantuan' => $validated['rupa_bantuan'] ?? null,
-                'lulus_kriteria' => (bool) $validated['lulus_kriteria'],
+                'rupa_bantuan'      => $validated['rupa_bantuan'] ?? null,
+                'lulus_kriteria'    => (bool) $validated['lulus_kriteria'],
                 'lulus_administrasi' => (bool) $validated['lulus_administrasi'],
-                'lulus_kesesuaian' => (bool) $validated['lulus_kesesuaian'],
+                'lulus_kesesuaian'  => (bool) $validated['lulus_kesesuaian'],
                 'sesuai_program_pemda' => (bool) $validated['sesuai_program_pemda'],
+                'disahkan_oleh'     => $validated['disahkan_oleh'] ?? null,
+                'lokasi_pengesahan' => $validated['lokasi_pengesahan'],
             ]);
 
             foreach ($validated['pemeriksa'] as $pemeriksaRow) {
@@ -315,7 +325,13 @@ class VerifikasiPengajuanForm extends Component
             $this->redirectRoute('verifikasi-pengajuan.index');
         } catch (\Throwable $e) {
             DB::rollBack();
-            toast()->error('Gagal', $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('VerifikasiPengajuan submit error: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            toast()->error('Gagal', $e->getMessage() ?: get_class($e));
         }
     }
 
