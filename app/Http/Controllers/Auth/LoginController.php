@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\PengajuanStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Organisasi;
 use App\Models\Pengajuan;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -45,34 +46,17 @@ class LoginController extends Controller
 
     public function showLoginForm(): View
     {
-        $pengajuanTerbaru = Pengajuan::query()
-            ->where('status', '!=', PengajuanStatus::DRAFT->value)
-            ->latest()
-            ->simplePaginate(15, [
-                'kode_pengajuan',
-                'judul',
-                'lokasi',
-                'nilai',
-                'status',
-                'created_at',
-            ])
-            ->withQueryString();
+        $organisasiAktif = Organisasi::query()
+            ->selectRaw('jenis, COUNT(*) as total')
+            ->where('is_active', true)
+            ->groupBy('jenis')
+            ->get()->pluck('total', 'jenis')->toArray();
 
-        $totalPengajuanPublik = Pengajuan::query()
-            ->where('status', '!=', PengajuanStatus::DRAFT->value)
-            ->count();
-        $totalDiajukan = Pengajuan::query()->where('status', PengajuanStatus::DIAJUKAN->value)->count();
-        $totalDisetujui = Pengajuan::query()->where('status', PengajuanStatus::DISETUJUI->value)->count();
-        $totalDitolak = Pengajuan::query()->where('status', PengajuanStatus::DITOLAK->value)->count();
 
         return view('auth.login', [
-            'title' => 'Login',
-            'description' => 'Login to your account',
-            'pengajuanTerbaru' => $pengajuanTerbaru,
-            'totalPengajuanPublik' => $totalPengajuanPublik,
-            'totalDiajukan' => $totalDiajukan,
-            'totalDisetujui' => $totalDisetujui,
-            'totalDitolak' => $totalDitolak,
+            'title'                => 'Login',
+            'description'          => 'Login to your account',
+            'organisasiAktif' => $organisasiAktif,
         ]);
     }
 

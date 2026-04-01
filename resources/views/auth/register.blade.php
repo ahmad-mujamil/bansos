@@ -1,5 +1,88 @@
 @extends('layouts.layout_full')
+@section('content_left')
+    <div class="d-flex flex-column justify-content-center h-100 px-5 py-5">
 
+        {{-- Page Title --}}
+        <div class="page-title-container mb-4">
+            <h4 class="mb-1">Pengajuan Bantuan Masyarakat</h4>
+            <div class="text-muted font-heading text-small">Ringkasan data pengajuan publik</div>
+        </div>
+
+        {{-- Stats Row --}}
+        <div class="mb-4">
+            <h2 class="small-title mb-3">Organisasi / Kelompok</h2>
+            <div class="row g-3">
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Total Kelompok Aktif</span>
+                                <i data-acorn-icon="file-text" class="text-primary"></i>
+                            </div>
+                            <div class="cta-1 text-primary">{{ number_format(collect($organisasiAktif)->sum()) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Kelompok Masyarakat</span>
+                                <i data-acorn-icon="send" class="text-warning"></i>
+                            </div>
+                            <div class="cta-1 text-warning">{{ number_format($organisasiAktif['KLP'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Yayasan</span>
+                                <i data-acorn-icon="check-circle" class="text-success"></i>
+                            </div>
+                            <div class="cta-1 text-success">{{ number_format($organisasiAktif['YYS'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Tempat Ibadah</span>
+                                <i data-acorn-icon="close-circle" class="text-danger"></i>
+                            </div>
+                            <div class="cta-1 text-danger">{{ number_format($organisasiAktif['TIB'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Organisasi</span>
+                                <i data-acorn-icon="office" class="text-info"></i>
+                            </div>
+                            <div class="cta-1 text-info">{{ number_format($organisasiAktif['ORG'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="text-muted text-small text-uppercase">Instansi</span>
+                                <i data-acorn-icon="building" class="text-secondary"></i>
+                            </div>
+                            <div class="cta-1 text-secondary">{{ number_format($organisasiAktif['INS'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+@endsection
 @section('content_right')
     <!-- Right Side Start -->
     <div class="col-12 col-lg-auto h-100 pb-4 px-4 pt-0 p-lg-0">

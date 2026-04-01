@@ -7,6 +7,7 @@ use App\Enums\StatusUser;
 use App\Enums\JenisUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Models\Organisasi;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,16 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('auth.register', ['title' => 'Registrasi', 'description' => 'Daftar akun baru']);
+        $organisasiAktif = Organisasi::query()
+            ->selectRaw('jenis, COUNT(*) as total')
+            ->where('is_active', true)
+            ->groupBy('jenis')
+            ->get()->pluck('total', 'jenis')->toArray();
+
+        return view('auth.register', [
+            'title' => 'Registrasi',
+            'description' => 'Daftar akun baru',
+            'organisasiAktif' => $organisasiAktif]);
     }
 
     public function register(RegisterRequest $request)
@@ -47,7 +57,6 @@ class RegisterController extends Controller
             toast()->success('Berhasil !!', 'Registrasi berhasil! Silakan login dengan akun Anda.');
             return redirect()->route('login');
         } catch (\Throwable $th) {
-            return $th->getMessage();
             toast()->error('Oppss !!', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
             return back()->withInput();
         }
