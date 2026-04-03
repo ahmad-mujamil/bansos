@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OpdRequest;
 use App\Models\Opd;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -21,15 +20,15 @@ class OpdController extends Controller
             ->addColumn('email', fn ($row) => $row->email ?? '-')
             ->addColumn('action', function ($data) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
-                $navActionEnd = "</ul></nav>";
+                $navActionEnd = '</ul></nav>';
 
-                $delete = "<li class='breadcrumb-item'><a href='" . route('opd.destroy', $data->id) . "' data-confirm-delete='true'
+                $delete = "<li class='breadcrumb-item'><a href='".route('opd.destroy', $data->id)."' data-confirm-delete='true'
                         title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
 
-                $edit = "<li class='breadcrumb-item'><a href='" . route('opd.edit', $data->id) . "'  title='Edit Data'
+                $edit = "<li class='breadcrumb-item'><a href='".route('opd.edit', $data->id)."'  title='Edit Data'
                         class='fw-bold text-success' >Edit</a></li>";
 
-                return $navActionStart . $edit . $delete . $navActionEnd;
+                return $navActionStart.$edit.$delete.$navActionEnd;
             })
             ->rawColumns(['action'])
             ->toJson();
@@ -37,7 +36,7 @@ class OpdController extends Controller
 
     public function index()
     {
-        confirmDelete("Delete Data", "Are you sure you want to delete?");
+        confirmDelete('Delete Data', 'Are you sure you want to delete?');
         if (request()->ajax()) {
             return $this->data();
         }
@@ -57,9 +56,11 @@ class OpdController extends Controller
             Opd::query()->create($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
+
             return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -76,9 +77,11 @@ class OpdController extends Controller
             $opd->update($request->validated());
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
+
             return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -90,11 +93,12 @@ class OpdController extends Controller
             $opd->delete();
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil dihapus');
+
             return redirect()->route('opd.index');
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
+
             return redirect()->route('opd.index');
         }
     }
 }
-

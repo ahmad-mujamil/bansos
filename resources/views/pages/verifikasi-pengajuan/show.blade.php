@@ -216,6 +216,15 @@
                             <span>{{ $baMedia->file_name }}</span>
                         </a>
                     </div>
+                    @else
+                    <div class="col-12">
+                        <p class="text-small text-uppercase text-muted mb-1">Dokumen BA Verifikasi</p>
+                        <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan->id) }}" target="_blank"
+                            class="btn btn-sm btn-outline-success btn-icon btn-icon-start">
+                            <i data-acorn-icon="file-text"></i>
+                            <span>Download BA</span>
+                        </a>
+                    </div>
                     @endif
                 </div>
 
