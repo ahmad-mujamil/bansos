@@ -11,22 +11,15 @@ use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
 use App\Models\PengajuanPemeriksa;
 use App\Models\VerifikasiPengajuan;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\Facades\DataTables;
 
 class VerifikasiPengajuanController extends Controller
 {
-    private function getCatatanAttribute(): string
-    {
-        // Beberapa skema versi sebelumnya menggunakan `catatan_verifikator`.
-        // Kita fallback ke kolom `catatan` yang tersedia.
-        return Schema::hasColumn('pengajuan', 'catatan_verifikator') ? 'catatan_verifikator' : 'catatan';
-    }
-
     private function data()
     {
         $statusRequest = (string) request('status', 'all');
@@ -64,7 +57,8 @@ class VerifikasiPengajuanController extends Controller
             ->addColumn('user', fn ($row) => $row->user?->nama ?? $row->user?->email ?? '-')
             ->addColumn('action', function ($row) {
                 $lihat = route('verifikasi-pengajuan.show', $row->id);
-                $action = "<a href='{$lihat}' class='btn btn-sm btn-outline-primary' title='Lihat detail'>Lihat</a>";
+                $label = $row->status === PengajuanStatus::DIAJUKAN ? 'Verifikasi' : 'Lihat';
+                $action = "<a href='{$lihat}' class='btn btn-sm btn-outline-primary' title='{$label}'>{$label}</a>";
 
                 $processed = in_array($row->status, [
                     PengajuanStatus::DISETUJUI,
@@ -73,12 +67,16 @@ class VerifikasiPengajuanController extends Controller
 
                 if ($processed) {
                     $baMedia = $row->verifikasiPengajuan?->getFirstMedia('ba-verifikasi');
+                    $downloadBaUrl = route('verifikasi-pengajuan.download-ba-verifikasi', $row->id);
+                    $actionUpload = " <button type='button' class='btn btn-sm btn-outline-warning ms-1 btn-upload-ba' data-id='{$row->id}' title='Upload BA Verifikasi (hasil tanda tangan)'>Upload BA</button>";
 
                     if ($baMedia) {
                         $baUrl = $baMedia->getUrl();
                         $action .= " <a href='{$baUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Lihat File BA'>Lihat BA</a>";
+                        $action .= $actionUpload;
                     } else {
-                        $action .= " <button type='button' class='btn btn-sm btn-outline-warning ms-1 btn-upload-ba' data-id='{$row->id}' title='Upload BA Verifikasi'>Upload BA</button>";
+                        $action .= " <a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Download BA Verifikasi (template)'>Download BA</a>";
+                        $action .= $actionUpload;
                     }
                 }
 
@@ -93,11 +91,6 @@ class VerifikasiPengajuanController extends Controller
         if (request()->ajax()) {
             return $this->data();
         }
-
-    //    return $query = Pengajuan::query()
-    //         ->with(['user', 'verifiedBy', 'logs'])
-    //         ->where('opd_id', Auth::user()->opd_id)
-    //         ->latest()->get();
 
         return view('pages.verifikasi-pengajuan.index');
     }
@@ -260,13 +253,14 @@ class VerifikasiPengajuanController extends Controller
     {
         $request->validate([
             'tgl_pengesahan' => ['required', 'date'],
-            'dokumen'        => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'dokumen' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $verifikasi = $pengajuan->verifikasiPengajuan;
 
         if (! $verifikasi) {
             toast()->error('Gagal', 'Data verifikasi tidak ditemukan untuk pengajuan ini.');
+
             return redirect()->route('verifikasi-pengajuan.index');
         }
 
@@ -286,5 +280,148 @@ class VerifikasiPengajuanController extends Controller
         }
 
         return redirect()->route('verifikasi-pengajuan.index');
+    }
+
+    public function downloadBaVerifikasi(Pengajuan $pengajuan): \Symfony\Component\HttpFoundation\Response
+    {
+        $pengajuan->loadMissing([
+            'user.userDetail',
+            'verifiedBy',
+            'pemeriksa',
+            'organisasi',
+            'organisasi.opd',
+            'desa.kecamatan',
+            'details.penduduk',
+            'jenisBantuan',
+            'verifikasiPengajuan',
+        ]);
+
+        $verifikasi = $pengajuan->verifikasiPengajuan;
+
+        abort_unless($verifikasi instanceof VerifikasiPengajuan, 404);
+
+        $pengajuanStatus = $pengajuan->status;
+        abort_unless(in_array($pengajuanStatus, [
+            PengajuanStatus::DISETUJUI,
+            PengajuanStatus::DITOLAK,
+        ], true), 404);
+
+        $baMedia = $verifikasi->getFirstMedia('ba-verifikasi');
+        if ($baMedia) {
+            return response()->download(
+                $baMedia->getPath(),
+                $baMedia->file_name ?: 'BA-Verifikasi.pdf',
+                ['Content-Type' => 'application/pdf'],
+            );
+        }
+
+        $bantuanUang = BantuanUang::query()
+            ->with('penduduk')
+            ->where('verifikasi_pengajuan_id', $verifikasi->id)
+            ->get();
+
+        $bantuanBarangJasa = BantuanBarangJasa::query()
+            ->where('verifikasi_pengajuan_id', $verifikasi->id)
+            ->get();
+
+        $rupaBantuan = $verifikasi->rupa_bantuan;
+
+        $tahunAnggaran = $verifikasi->tgl_disahkan?->format('Y') ?: now()->format('Y');
+
+        $alamat = trim(implode(', ', array_filter([
+            $pengajuan->user?->userDetail?->alamat,
+            $pengajuan->lokasi,
+            $pengajuan->desa?->nama,
+            $pengajuan->desa?->kecamatan?->nama,
+        ])));
+
+        $pemohon = $pengajuan->user?->userDetail?->nama_user
+            ?: $pengajuan->user?->nama
+            ?: $pengajuan->user?->email
+            ?: '-';
+
+        $namaKelompok = $pengajuan->organisasi?->nama ?: '-';
+        $kepalaSkpd = $pengajuan->organisasi?->opd?->kepala_opd ?: ($verifikasi->disahkan_oleh ?: '-');
+        $nipKepalaSkpd = $pengajuan->organisasi?->opd?->nip ?: '-';
+        $jumlahUsulan = 0;
+        $jumlahDisetujui = 0;
+        $satuan = '-';
+        $spesifikasiTeknis = '-';
+        $jenisBarang = $rupaBantuan?->getDescription() ?: '-';
+
+        if ($rupaBantuan === RupaBantuan::UANG) {
+            $jumlahUsulan = (float) $pengajuan->nilai;
+            $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? (float) $verifikasi->nilai_rekomendasi : 0;
+        } elseif ($rupaBantuan) {
+            // $qtySum = (int) $bantuanBarangJasa->sum('qty');
+
+            $jumlahUsulan = $pengajuan->nilai;
+            $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? $verifikasi->nilai_rekomendasi : 0;
+
+            $satuan = $bantuanBarangJasa
+                ->pluck('satuan')
+                ->filter()
+                ->unique()
+                ->values()
+                ->first() ?: '-';
+
+            $spesifikasiTeknis = $bantuanBarangJasa
+                ->pluck('spesifikasi')
+                ->filter()
+                ->unique()
+                ->values()
+                ->implode(', ');
+
+            $jenisBarang = $jenisBarang ?: ($bantuanBarangJasa->first()->nama_barang ?? '-');
+        }
+
+        $pemeriksa = $pengajuan->pemeriksa;
+
+        $nilaiBesarAngka = $verifikasi->nilai_rekomendasi !== null
+            ? (int) round((float) $verifikasi->nilai_rekomendasi)
+            : (int) round((float) $pengajuan->nilai);
+
+        $nilaiBesar = number_format($nilaiBesarAngka, 0, ',', '.');
+        $nilaiBesarTerbilang = trim(terbilang($nilaiBesarAngka).' rupiah');
+
+        $html = view('pages.verifikasi-pengajuan.ba-verifikasi', [
+            'pengajuan' => $pengajuan,
+            'verifikasi' => $verifikasi,
+            'pemeriksa' => $pemeriksa,
+            'tahunAnggaran' => $tahunAnggaran,
+            'alamat' => $alamat,
+            'pemohon' => $pemohon,
+            'namaKelompok' => $namaKelompok,
+            'kepalaSkpd' => $kepalaSkpd,
+            'nipKepalaSkpd' => $nipKepalaSkpd,
+            'jenisBarang' => $jenisBarang,
+            'spesifikasiTeknis' => $spesifikasiTeknis,
+            'satuan' => $satuan,
+            'jumlahUsulan' => $jumlahUsulan,
+            'jumlahDisetujui' => $jumlahDisetujui,
+            'nilaiBesar' => $nilaiBesar,
+            'nilaiBesarTerbilang' => $nilaiBesarTerbilang,
+        ])->render();
+
+        $dompdf = new Dompdf([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+        ]);
+
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $pdfContent = $dompdf->output();
+
+        $fileName = 'BA-Verifikasi-'.($pengajuan->kode_pengajuan ?: $pengajuan->id).'.pdf';
+
+        // $verifikasi->addMediaFromString($pdfContent)
+        //     ->usingFileName($fileName)
+        //     ->toMediaCollection('ba-verifikasi');
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="'.$fileName.'"');
     }
 }

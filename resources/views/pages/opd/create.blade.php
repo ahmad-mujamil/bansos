@@ -62,12 +62,19 @@
                                    value="{{ old('nama', $opd->nama ?? '') }}"/>
                             @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Kepala OPD <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('kepala_opd') is-invalid @enderror" id="kepala_opd"
                                    name="kepala_opd" required
                                    value="{{ old('kepala_opd', $opd->kepala_opd ?? '') }}"/>
                             @error('kepala_opd')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">NIP <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('nip') is-invalid @enderror" id="nip"
+                                   name="nip" required
+                                   value="{{ old('nip', $opd->nip ?? '') }}"/>
+                            @error('nip')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Alamat <span class="text-danger">*</span></label>

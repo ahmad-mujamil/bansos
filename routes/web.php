@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\BeritaPublikController;
+use App\Http\Controllers\BlacklistInfoController;
 use App\Http\Controllers\Kelola\AlurBantuanController as KelolaAlurBantuanController;
 use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
 use App\Http\Controllers\Kelola\ProfilKantorController as KelolaProfilKantorController;
-use App\Http\Controllers\BlacklistInfoController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -119,6 +119,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
         Route::post('verifikasi-pengajuan/{pengajuan}/upload-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'uploadBa'])->name('verifikasi-pengajuan.upload-ba');
+        Route::get('verifikasi-pengajuan/{pengajuan}/download-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'downloadBaVerifikasi'])->name('verifikasi-pengajuan.download-ba-verifikasi');
     });
 
     // Blacklist Kelompok/Organisasi (OPD)
