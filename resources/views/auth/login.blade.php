@@ -102,13 +102,24 @@
                 <div>
                     <form id="loginForm" class="tooltip-end-bottom" novalidate action="{{ route('login') }}" method="post">
                         @csrf
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger mb-3">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="user"></i>
-                            <input class="form-control" placeholder="Username" name="username" id="username" />
+                            <input class="form-control @error('username') is-invalid @enderror" placeholder="Username" name="username" id="username" value="{{ old('username') }}" autocomplete="username" />
                         </div>
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="lock-off"></i>
-                            <input class="form-control pe-7" name="password" type="password" placeholder="Password" />
+                            <input class="form-control pe-7 @error('password') is-invalid @enderror" name="password" type="password" placeholder="Password" autocomplete="current-password" />
                             <!-- <a class="text-small position-absolute t-3 e-3" href="#">Lupa password?</a>
                             <a href=""><span class="badge rounded-pill bg-foreground mt-2">* Pertanyaan yang paling sering diajukan (FAQ's)</span></a>
            -->
