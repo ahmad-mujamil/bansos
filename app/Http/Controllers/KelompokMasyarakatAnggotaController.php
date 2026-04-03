@@ -7,7 +7,6 @@ use App\Http\Requests\KelompokMasyarakatAnggotaRequest;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDetail;
 use App\Models\Penduduk;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -19,12 +18,13 @@ class KelompokMasyarakatAnggotaController extends Controller
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->findOrFail($kelompok_masyarakat);
 
-        confirmDelete("Hapus Anggota", "Apakah Anda yakin ingin menghapus anggota ini?");
+        confirmDelete('Hapus Anggota', 'Apakah Anda yakin ingin menghapus anggota ini?');
         if (request()->ajax()) {
             return $this->data($kelompok_masyarakat);
         }
 
         $penduduks = Penduduk::query()->orderBy('nama')->get();
+
         return view('pages.kelompok-masyarakat.anggota.index', compact('organisasi', 'penduduks'));
     }
 
@@ -36,23 +36,33 @@ class KelompokMasyarakatAnggotaController extends Controller
             ->latest();
 
         return DataTables::of($data)
-            ->addColumn('nama_penduduk', fn($row) => $row->penduduk->nama ?? '-')
-            ->addColumn('nik_penduduk', fn($row) => $row->penduduk->nik ?? '-')
-            ->addColumn('jabatan_label', fn($row) => $row->jabatan?->getDescription() ?? $row->jabatan)
+            ->addColumn('nama_penduduk', fn ($row) => $row->penduduk->nama ?? '-')
+            ->addColumn('nik_penduduk', fn ($row) => $row->penduduk->nik ?? '-')
+            ->addColumn('jabatan_label', fn ($row) => $row->jabatan?->getDescription() ?? $row->jabatan)
+            ->addColumn('status_label', function ($row) {
+                if ($row->penduduk->is_valid) {
+                    return '<span class="badge bg-success">Terverifikasi</span>';
+                }
+                if ($row->penduduk->validated_at && ! $row->penduduk->is_valid) {
+                    return '<span class="badge bg-danger">Tidak Valid</span>';
+                }
+
+                return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
+            })
             ->addColumn('action', function ($row) use ($organisasiId) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
-                $navActionEnd = "</ul></nav>";
+                $navActionEnd = '</ul></nav>';
 
-                $delete = "<li class='breadcrumb-item'><a href='" . route('kelompok-masyarakat.anggota.destroy', [$organisasiId, $row->id]) . "' data-confirm-delete='true'
+                $delete = "<li class='breadcrumb-item'><a href='".route('kelompok-masyarakat.anggota.destroy', [$organisasiId, $row->id])."' data-confirm-delete='true'
                         title='Hapus' class='fw-bold text-danger'>Delete</a></li>";
 
                 $jabatanVal = $row->jabatan ? (is_object($row->jabatan) ? $row->jabatan->value : $row->jabatan) : '';
                 $edit = "<li class='breadcrumb-item'><a href='#' class='btn-edit-anggota fw-bold text-success' title='Edit'
-                        data-anggota-id='" . $row->id . "' data-penduduk-id='" . $row->penduduk_id . "' data-jabatan='" . e($jabatanVal) . "'>Edit</a></li>";
+                        data-anggota-id='".$row->id."' data-penduduk-id='".$row->penduduk_id."' data-jabatan='".e($jabatanVal)."'>Edit</a></li>";
 
-                return $navActionStart . $edit . $delete . $navActionEnd;
+                return $navActionStart.$edit.$delete.$navActionEnd;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'status_label'])
             ->toJson();
     }
 
@@ -64,6 +74,7 @@ class KelompokMasyarakatAnggotaController extends Controller
 
         $penduduks = Penduduk::query()->orderBy('nama')->get();
         $anggota = null;
+
         return view('pages.kelompok-masyarakat.anggota.create', compact('organisasi', 'penduduks', 'anggota'));
     }
 
@@ -85,6 +96,7 @@ class KelompokMasyarakatAnggotaController extends Controller
                 return response()->json(['success' => true, 'message' => 'Anggota berhasil ditambahkan']);
             }
             toast()->success('Yeeayy !!', 'Anggota berhasil ditambahkan');
+
             return redirect()->route('kelompok-masyarakat.anggota.index', $kelompok_masyarakat);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -92,6 +104,7 @@ class KelompokMasyarakatAnggotaController extends Controller
                 return response()->json(['success' => false, 'message' => $th->getMessage()], 500);
             }
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -107,6 +120,7 @@ class KelompokMasyarakatAnggotaController extends Controller
             ->findOrFail($anggota);
 
         $penduduks = Penduduk::query()->orderBy('nama')->get();
+
         return view('pages.kelompok-masyarakat.anggota.create', [
             'organisasi' => $organisasi,
             'penduduks' => $penduduks,
@@ -129,6 +143,7 @@ class KelompokMasyarakatAnggotaController extends Controller
                 return response()->json(['success' => true, 'message' => 'Data anggota berhasil disimpan']);
             }
             toast()->success('Yeeayy !!', 'Data anggota berhasil disimpan');
+
             return redirect()->route('kelompok-masyarakat.anggota.index', $kelompok_masyarakat);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -136,6 +151,7 @@ class KelompokMasyarakatAnggotaController extends Controller
                 return response()->json(['success' => false, 'message' => $th->getMessage()], 500);
             }
             toast()->error('Oppss !!', $th->getMessage());
+
             return back()->withInput();
         }
     }
@@ -151,9 +167,11 @@ class KelompokMasyarakatAnggotaController extends Controller
             $detail->delete();
             DB::commit();
             toast()->success('Yeeayy !!', 'Anggota berhasil dihapus');
+
             return redirect()->route('kelompok-masyarakat.anggota.index', $kelompok_masyarakat);
         } catch (\Throwable $th) {
             toast()->error('Oppss !!', $th->getMessage());
+
             return redirect()->route('kelompok-masyarakat.anggota.index', $kelompok_masyarakat);
         }
     }

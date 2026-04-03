@@ -76,6 +76,7 @@
                         <th class="text-muted text-small text-uppercase">Nama</th>
                         <th class="text-muted text-small text-uppercase">NIK</th>
                         <th class="text-muted text-small text-uppercase">Jabatan</th>
+                        <th class="text-muted text-small text-uppercase">Status</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                     </tr>
                     </thead>
@@ -159,6 +160,7 @@
                 { data: 'nama_penduduk', name: 'nama_penduduk' },
                 { data: 'nik_penduduk', name: 'nik_penduduk' },
                 { data: 'jabatan_label', name: 'jabatan_label' },
+                { data: 'status_label', name: 'status_label' },
                 { data: 'action', name: 'action' }
             ],
             order: [[0, 'asc']]

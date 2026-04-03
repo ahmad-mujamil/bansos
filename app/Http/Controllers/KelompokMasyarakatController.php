@@ -42,6 +42,8 @@ class KelompokMasyarakatController extends Controller
                 'jk' => $jk,
                 'kecamatan_id' => $penduduk->kecamatan_id,
                 'desa_id' => $penduduk->desa_id,
+                'is_valid' => (bool) $penduduk->is_valid,
+                'validated_at' => $penduduk->validated_at?->toIso8601String(),
             ],
         ]);
     }
@@ -237,6 +239,8 @@ class KelompokMasyarakatController extends Controller
                     'kecamatan_id' => $p->kecamatan_id ?? '',
                     'desa_id' => $p->desa_id ?? '',
                     'jabatan' => $jabatan,
+                    'is_valid' => (bool) $p->is_valid,
+                    'validated_at' => $p->validated_at?->toIso8601String(),
                 ];
             })->values()->all();
         }

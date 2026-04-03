@@ -192,8 +192,18 @@
         </form>
 
         <template id="tpl-anggota-row">
-            <div class="card mb-3 anggota-row-item border" data-locked="0" data-existing-anggota="0">
-                <div class="card-body py-3">
+            <div class="card mb-3 anggota-row-item border-0 shadow-sm rounded-3 overflow-hidden" data-locked="0" data-existing-anggota="0">
+                <div class="border-start border-primary border-4">
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 px-3 py-2 bg-light border-bottom">
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            <div class="anggota-verifikasi-wrap d-none text-end">
+                                <span class="d-block text-muted text-uppercase mb-0" style="font-size: 0.65rem; letter-spacing: 0.06em;">Status Penduduk</span>
+                                <span class="badge anggota-verifikasi-badge mt-1">—</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-anggota rounded-pill px-2" title="Hapus baris" aria-label="Hapus baris anggota">&times;</button>
+                        </div>
+                    </div>
+                    <div class="card-body pt-3 pb-3 px-3">
                     <input type="hidden" class="anggota-organisasi-detail-id-field" name="anggota[__IDX__][organisasi_detail_id]" value="">
                     <div class="row align-items-end">
                         <div class="col-lg-4 col-md-6 mb-3">
@@ -204,7 +214,6 @@
                                        placeholder="16 digit angka" pattern="[0-9]{16}" required>
                                 <button type="button" class="btn btn-outline-secondary btn-cek-nik" title="Cek NIK di data penduduk">Cek</button>
                             </div>
-                           
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <label class="form-label text-small text-uppercase">Nama <span class="text-danger">*</span></label>
@@ -239,7 +248,7 @@
                                 <option value="">Pilih Desa</option>
                             </select>
                         </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="col-lg-4 col-md-6 mb-3">
                             <label class="form-label text-small text-uppercase">Jabatan <span class="text-danger">*</span></label>
                             <select class="form-control anggota-jabatan" name="anggota[__IDX__][jabatan]" required>
                                 <option value="">Pilih Jabatan</option>
@@ -248,9 +257,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-lg-1 text-lg-end mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-anggota" title="Hapus baris">&times;</button>
-                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -438,6 +445,26 @@
                     $row.find('.anggota-jabatan').val('').trigger('change');
                     $row.find('.anggota-nik-found-msg').addClass('d-none');
                     $row.find('.anggota-nik-not-found-msg').addClass('d-none');
+                    setAnggotaVerifikasiBadge($row, null);
+                }
+
+                /** Sama logika badge seperti KelompokMasyarakatAnggotaController::data status_label. */
+                function setAnggotaVerifikasiBadge($row, p) {
+                    var $wrap = $row.find('.anggota-verifikasi-wrap');
+                    var $badge = $row.find('.anggota-verifikasi-badge');
+                    if (!p) {
+                        $wrap.addClass('d-none');
+                        return;
+                    }
+                    $wrap.removeClass('d-none');
+                    $badge.removeClass('bg-success bg-danger bg-warning text-dark');
+                    if (p.is_valid) {
+                        $badge.addClass('bg-success').text('Terverifikasi');
+                    } else if (p.validated_at && !p.is_valid) {
+                        $badge.addClass('bg-danger').text('Tidak Valid');
+                    } else {
+                        $badge.addClass('bg-warning text-dark').text('Belum Diverifikasi');
+                    }
                 }
 
                 function applyPendudukLookup($row, p) {
@@ -453,6 +480,10 @@
                     $row.find('.anggota-kecamatan').prop('disabled', true);
                     $row.find('.anggota-desa').prop('disabled', true);
                     $row.find('.anggota-nik-found-msg').removeClass('d-none');
+                    setAnggotaVerifikasiBadge($row, {
+                        is_valid: !!p.is_valid,
+                        validated_at: p.validated_at || null
+                    });
                 }
 
                 function fetchNikLookup($row) {
@@ -462,6 +493,7 @@
                     if (raw.length !== 16) {
                         $row.find('.anggota-nik-found-msg').addClass('d-none');
                         $row.find('.anggota-nik-not-found-msg').addClass('d-none');
+                        setAnggotaVerifikasiBadge($row, null);
                         return;
                     }
                     $.getJSON(lookupNikUrl, { nik: raw })
@@ -472,6 +504,7 @@
                                 unlockAnggotaIdentity($row);
                                 $row.find('.anggota-nik-found-msg').addClass('d-none');
                                 $row.find('.anggota-nik-not-found-msg').removeClass('d-none');
+                                setAnggotaVerifikasiBadge($row, null);
                             }
                         });
                 }
@@ -497,6 +530,7 @@
                         $el.find('.anggota-nik-not-found-msg').addClass('d-none');
                         if ($el.attr('data-locked') === '1') {
                             unlockAnggotaIdentity($el);
+                            setAnggotaVerifikasiBadge($el, null);
                         }
                     });
                     $el.find('.btn-cek-nik').on('click', function () {
@@ -551,6 +585,12 @@
                     }
                     if (values.organisasi_detail_id) {
                         applyExistingAnggotaReadOnly($el);
+                    }
+                    if (Object.prototype.hasOwnProperty.call(values, 'is_valid') || Object.prototype.hasOwnProperty.call(values, 'validated_at')) {
+                        setAnggotaVerifikasiBadge($el, {
+                            is_valid: !!values.is_valid,
+                            validated_at: values.validated_at || null
+                        });
                     }
                     anggotaIndex++;
                 }
@@ -644,7 +684,11 @@
                     jk: @json($a['jk'] ?? ''),
                     kecamatan_id: @json($a['kecamatan_id'] ?? ''),
                     desa_id: @json($a['desa_id'] ?? ''),
-                    jabatan: @json($a['jabatan'] ?? null)
+                    jabatan: @json($a['jabatan'] ?? null),
+                    @if(array_key_exists('is_valid', $a) || array_key_exists('validated_at', $a))
+                    is_valid: @json($a['is_valid'] ?? false),
+                    validated_at: @json($a['validated_at'] ?? null),
+                    @endif
                 });
                 @endforeach
 
