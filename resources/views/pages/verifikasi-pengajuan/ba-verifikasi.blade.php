@@ -488,7 +488,7 @@
         </div>
     </div>
 
-    <div class="ba-doc-footer" style="position: fixed; bottom: 16px; left: 0; width: 100%; text-align: center;">
+    <div class="ba-doc-footer">
         Dokumen ini dicetak melalui aplikasi <span class="ba-doc-footer-app">Bantu In</span>
     </div>
 </body>
