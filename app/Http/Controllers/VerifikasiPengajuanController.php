@@ -44,17 +44,17 @@ class VerifikasiPengajuanController extends Controller
         }
 
         return DataTables::of($query)
-            ->addColumn('kode_pengajuan', fn ($row) => $row->kode_pengajuan)
-            ->addColumn('jenis', fn ($row) => $row->jenisBantuan?->nama ?? '-')
-            ->addColumn('judul', fn ($row) => $row->judul ?? '-')
+            ->addColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
+            ->addColumn('jenis', fn($row) => $row->jenisBantuan?->nama ?? '-')
+            ->addColumn('judul', fn($row) => $row->judul ?? '-')
             ->addColumn('status', function ($row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
 
-                return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
+                return '<span class="badge bg-' . $badge . '">' . e($status?->getDescription() ?? '-') . '</span>';
             })
-            ->addColumn('tanggal', fn ($row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
-            ->addColumn('user', fn ($row) => $row->user?->nama ?? $row->user?->email ?? '-')
+            ->addColumn('tanggal', fn($row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
+            ->addColumn('user', fn($row) => $row->user?->nama ?? $row->user?->email ?? '-')
             ->addColumn('action', function ($row) {
                 $lihat = route('verifikasi-pengajuan.show', $row->id);
                 $label = $row->status === PengajuanStatus::DIAJUKAN ? 'Verifikasi' : 'Lihat';
@@ -100,7 +100,7 @@ class VerifikasiPengajuanController extends Controller
         $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa', 'organisasi', 'desa.kecamatan', 'verifikasiPengajuan.media']);
 
         $verifikasiIds = $pengajuan->logs
-            ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
+            ->map(fn(PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
             ->filter()
             ->unique()
             ->values()
@@ -347,32 +347,26 @@ class VerifikasiPengajuanController extends Controller
         $jumlahDisetujui = 0;
         $satuan = '-';
         $spesifikasiTeknis = '-';
-        $jenisBarang = $rupaBantuan?->getDescription() ?: '-';
 
         if ($rupaBantuan === RupaBantuan::UANG) {
             $jumlahUsulan = (float) $pengajuan->nilai;
             $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? (float) $verifikasi->nilai_rekomendasi : 0;
+            $jenisBarang = 'Uang';
         } elseif ($rupaBantuan) {
-            // $qtySum = (int) $bantuanBarangJasa->sum('qty');
-
             $jumlahUsulan = $pengajuan->nilai;
             $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? $verifikasi->nilai_rekomendasi : 0;
 
             $satuan = $bantuanBarangJasa
                 ->pluck('satuan')
                 ->filter()
-                ->unique()
-                ->values()
-                ->first() ?: '-';
+                ->unique()->implode(', ') ?: '-';
 
             $spesifikasiTeknis = $bantuanBarangJasa
                 ->pluck('spesifikasi')
                 ->filter()
-                ->unique()
-                ->values()
-                ->implode(', ');
+                ->unique()->implode(', ') ?: '-';
 
-            $jenisBarang = $jenisBarang ?: ($bantuanBarangJasa->first()->nama_barang ?? '-');
+            $jenisBarang = $bantuanBarangJasa->pluck('nama_barang')->filter()->unique()->implode(', ');
         }
 
         $pemeriksa = $pengajuan->pemeriksa;
@@ -382,7 +376,7 @@ class VerifikasiPengajuanController extends Controller
             : (int) round((float) $pengajuan->nilai);
 
         $nilaiBesar = number_format($nilaiBesarAngka, 0, ',', '.');
-        $nilaiBesarTerbilang = trim(terbilang($nilaiBesarAngka).' rupiah');
+        $nilaiBesarTerbilang = trim(terbilang($nilaiBesarAngka) . ' rupiah');
 
         $html = view('pages.verifikasi-pengajuan.ba-verifikasi', [
             'pengajuan' => $pengajuan,
@@ -414,7 +408,7 @@ class VerifikasiPengajuanController extends Controller
 
         $pdfContent = $dompdf->output();
 
-        $fileName = 'BA-Verifikasi-'.($pengajuan->kode_pengajuan ?: $pengajuan->id).'.pdf';
+        $fileName = 'BA-Verifikasi-' . ($pengajuan->kode_pengajuan ?: $pengajuan->id) . '.pdf';
 
         // $verifikasi->addMediaFromString($pdfContent)
         //     ->usingFileName($fileName)
@@ -422,6 +416,6 @@ class VerifikasiPengajuanController extends Controller
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="'.$fileName.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
     }
 }
