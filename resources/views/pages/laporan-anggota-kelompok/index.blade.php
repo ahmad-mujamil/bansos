@@ -19,9 +19,7 @@
 
         <div class="card mb-5">
             <div class="card-body">
-                <p class="text-muted mb-3">
-                    Daftar penduduk yang terdaftar sebagai anggota <strong>kelompok masyarakat</strong>, nama kelompok yang diikuti (dipisah koma), dan jumlah kelompok.
-                </p>
+                
 
                 <div class="row">
                     <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-3">
