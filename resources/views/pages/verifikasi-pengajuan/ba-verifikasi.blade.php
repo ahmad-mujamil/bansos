@@ -5,10 +5,34 @@
     <meta charset="UTF-8">
     <title>BA Verifikasi</title>
     <style>
+        @page {
+            margin: 36pt 44pt 48pt 44pt;
+        }
+
         body {
             font-family: "Times New Roman", Times, serif;
             font-size: 12px;
             line-height: 1.35;
+        }
+
+        /* Footer tiap halaman (Dompdf mengulang elemen position: fixed) */
+        .ba-doc-footer {
+            position: fixed;
+            bottom: 5pt;
+            left: 44pt;
+            right: 44pt;
+            width: auto;
+            margin: 0;
+            padding: 0;
+            text-align: right;
+            font-size: 10px;
+            font-style: italic;
+            color: #4a4a4a;
+        }
+
+        .ba-doc-footer-app {
+            font-weight: 700;
+            font-style: italic;
         }
 
         /* Kop surat: tabel agar logo & teks sejajar vertikal di Dompdf */
@@ -138,9 +162,27 @@
             vertical-align: top;
         }
 
-        table.table td.pemeriksa-cell {
+        table.table-pemeriksa thead th.pemeriksa-corner {
+            width: 22%;
+        }
+
+        table.table-pemeriksa thead th.pemeriksa-head {
             text-align: center;
-            vertical-align: top;
+            font-weight: 700;
+        }
+
+        table.table-pemeriksa tbody td.pemeriksa-label-col {
+            text-align: left;
+        }
+
+        table.table-pemeriksa tbody td.pemeriksa-value {
+            text-align: center;
+        }
+
+        table.table-pemeriksa tbody tr.pemeriksa-paraf-row td.pemeriksa-paraf-cell {
+            min-height: 44px;
+            height: 44px;
+            vertical-align: middle;
         }
 
         .bold {
@@ -265,7 +307,7 @@
 
     <div class="kop-hr"></div>
 
-    <div class="title">
+    <div class="title" style="text-transform: capitalize;">
         Berita Acara Hasil Verifikasi Usulan Permohonan Belanja Barang
         Diserahkan Kepada Masyarakat Tahun Anggaran {{ $tahunAnggaran }}
     </div>
@@ -331,17 +373,41 @@
         <div class="row lvl-1 bold" style="margin-top: 8px;">B. Pemeriksa</div>
 
         <div class="lvl-2">
-            <table class="table">
-                <tr>
-                    @for ($i = 0; $i < 3; $i++)
-                        <td class="pemeriksa-cell">
-                            <div>{{ $pemeriksa[$i]->nama ?? '' }}</div>
-                            <div>{{ $pemeriksa[$i]->jabatan ?? '' }}</div>
-                            <div>{{ $pemeriksa[$i]->nip ?? '' }}</div>
-                            <div style="margin-top: 12px;">....................</div>
-                        </td>
-                    @endfor
-                </tr>
+            <table class="table table-pemeriksa">
+                <thead>
+                    <tr>
+                        <th class="pemeriksa-corner" scope="col"></th>
+                        @for ($n = 1; $n <= 3; $n++)
+                            <th class="pemeriksa-head" scope="col">Pemeriksa {{ $n }}</th>
+                        @endfor
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="pemeriksa-label-col" style="width: 60px;">Nama</td>
+                        @for ($i = 0; $i < 3; $i++)
+                            <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->nama ?? '' }}</td>
+                        @endfor
+                    </tr>
+                    <tr>
+                        <td class="pemeriksa-label-col" style="width: 60px;">NIP</td>
+                        @for ($i = 0; $i < 3; $i++)
+                            <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->nip ?? '' }}</td>
+                        @endfor
+                    </tr>
+                    <tr>
+                        <td class="pemeriksa-label-col" style="width: 60px;">Jabatan</td>
+                        @for ($i = 0; $i < 3; $i++)
+                            <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->jabatan ?? '' }}</td>
+                        @endfor
+                    </tr>
+                    <tr class="pemeriksa-paraf-row">
+                        <td class="pemeriksa-label-col" style="width: 60px;">Paraf</td>
+                        @for ($i = 0; $i < 3; $i++)
+                            <td class="pemeriksa-value pemeriksa-paraf-cell">&nbsp;</td>
+                        @endfor
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -358,25 +424,25 @@
             <table class="kriteria-list">
                 <tr>
                     <td class="num">1.</td>
-                    <td class="lbl bold">Kriteria pemberian bantuan</td>
+                    <td class="lbl bold">Memenuhi kriteria pemberian bantuan barang</td>
                     <td class="sep">:</td>
                     <td>{{ $verifikasi->lulus_kriteria ? 'Ya' : 'Tidak' }}</td>
                 </tr>
                 <tr>
                     <td class="num">2.</td>
-                    <td class="lbl bold">Kesesuaian administrasi penerimaan bantuan</td>
+                    <td class="lbl bold">Kelengkapan administrasi penerima bantuan barang sesuai perbup</td>
                     <td class="sep">:</td>
-                    <td>{{ $verifikasi->lulus_administrasi ? 'Ya' : 'Tidak' }}</td>
+                    <td>{{ $verifikasi->lulus_administrasi ? 'Lengkap' : 'Tidak Lengkap' }}</td>
                 </tr>
                 <tr>
                     <td class="num">3.</td>
                     <td class="lbl bold">Kesesuaian kegiatan dengan proposal</td>
                     <td class="sep">:</td>
-                    <td>{{ $verifikasi->lulus_kesesuaian ? 'Ya' : 'Tidak' }}</td>
+                    <td>{{ $verifikasi->lulus_kesesuaian ? 'Sesuai' : 'Tidak Sesuai' }}</td>
                 </tr>
                 <tr>
                     <td class="num">4.</td>
-                    <td class="lbl bold">Kegiatan tersebut memenuhi pencapaian sasaran program dan kegiatan pemerintah
+                    <td class="lbl bold">Kegiatan tersebut menunjang pencapaian sasaran program dan kegiatan pemerintah
                         daerah</td>
                     <td class="sep">:</td>
                     <td>{{ $verifikasi->sesuai_program_pemda ? 'Ya' : 'Tidak' }}</td>
@@ -394,12 +460,13 @@
     <div class="section">
         <div class="bold lvl-0">II. Rekomendasi</div>
         <div class="row lvl-1" style="margin-top: 6px;">
-            Berkenaan dengan hal tersebut, permohonan/proposal dinilai layak untuk diberikan bantuan
-            sebagai mana tercantum dalam tabel di atas dengan nilai sebesar Rp. {{ $nilaiBesar }}
+            Berkenaan dengan hal tersebut, permohonan/proposal dinilai layak untuk diberikan belanja barang yang
+            diserahkan kepada masyarakat berupa sebagaimana tercantum dalam tabel di atas dengan nilai sebesar Rp.
+            {{ $nilaiBesar }}
             ({{ $nilaiBesarTerbilang }}).
         </div>
         <div class="row lvl-1" style="margin-top: 10px;">
-            Demikian berita acara hasil evaluasi ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
+            Demikian bagian rekomendasi hasil evaluasi ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
         </div>
         <div class="ttd-wrap">
             <div class="ttd-inner">
@@ -419,6 +486,10 @@
                 <div class="ttd-kepala-nip">NIP: {{ $opd?->nip ?? '' }}</div>
             </div>
         </div>
+    </div>
+
+    <div class="ba-doc-footer" style="position: fixed; bottom: 16px; left: 0; width: 100%; text-align: center;">
+        Dokumen ini dicetak melalui aplikasi <span class="ba-doc-footer-app">Bantu In</span>
     </div>
 </body>
 
