@@ -121,7 +121,11 @@
                                     @endif
                                 </div>
                                 <div class="text-small text-muted mb-2">
-                                    {{ $org->jenis ?? '—' }}
+                                    {{-- cast from JenisOrganisasi --}}
+                                    @php
+                                        $jenis = \App\Enums\JenisOrganisasi::tryFrom($org->jenis ?? '');
+                                    @endphp
+                                    {{ $jenis?->getDescription() ?? '—' }}
                                 </div>
                                 <div class="mb-2">
                                     <span class="text-small text-uppercase text-muted">Jabatan</span>
