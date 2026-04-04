@@ -8,6 +8,7 @@ use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
 use App\Http\Controllers\Kelola\ProfilKantorController as KelolaProfilKantorController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MonitoringBantuanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -144,8 +145,9 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::post('realisasi/{pengajuan}', [App\Http\Controllers\RealisasiController::class, 'store'])->name('realisasi.store');
     Route::put('realisasi/{pengajuan}', [App\Http\Controllers\RealisasiController::class, 'update'])->name('realisasi.update');
 
-    // BAST
+    // BAST & monitoring (tahap menuju / setelah BAST)
     Route::middleware(['role:super,opd'])->group(function () {
+        Route::get('monitoring-bantuan', [MonitoringBantuanController::class, 'index'])->name('monitoring-bantuan.index');
         Route::resource('bast', App\Http\Controllers\BastController::class);
     });
 
