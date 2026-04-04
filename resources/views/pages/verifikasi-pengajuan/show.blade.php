@@ -5,19 +5,24 @@
     <div class="page-title-container mb-3">
         <div class="row">
             <div class="col mb-2">
-                <h1 class="mb-2 pb-0 display-4">Detail Verifikasi Pengajuan</h1>
+                <h1 class="mb-2 pb-0 display-4">{{ ($laporanReadOnly ?? false) ? 'Detail Pengajuan' : 'Detail Verifikasi Pengajuan' }}</h1>
                 <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                     <ul class="breadcrumb pt-0">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="javascript:;">Verifikasi</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('verifikasi-pengajuan.index') }}">Pengajuan
-                                Bantuan</a></li>
+                        @if($laporanReadOnly ?? false)
+                            <li class="breadcrumb-item"><a href="javascript:;">Laporan</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('laporan-pengajuan.index') }}">Pengajuan Kelompok</a></li>
+                        @else
+                            <li class="breadcrumb-item"><a href="javascript:;">Verifikasi</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('verifikasi-pengajuan.index') }}">Pengajuan
+                                    Bantuan</a></li>
+                        @endif
                         <li class="breadcrumb-item"><a href="javascript:;">{{ $pengajuan->kode_pengajuan }}</a></li>
                     </ul>
                 </nav>
             </div>
             <div class="col-12 col-md-5 d-flex align-items-start justify-content-end gap-2">
-                <a href="{{ route('verifikasi-pengajuan.index') }}"
+                <a href="{{ $laporanBackUrl ?? route('verifikasi-pengajuan.index') }}"
                     class="btn btn-outline-secondary btn-icon btn-icon-start w-100 w-md-auto">
                     <i data-acorn-icon="arrow-left"></i>
                     <span>Kembali</span>
@@ -30,7 +35,8 @@
     $status = $pengajuan->status;
     $badge = $status?->badgeColor() ?? 'secondary';
     $catatan = $pengajuan->catatan_verifikator ?? $pengajuan->catatan;
-    $canVerify = in_array($pengajuan->status, [\App\Enums\PengajuanStatus::DIAJUKAN], true);
+    $laporanReadOnly = $laporanReadOnly ?? false;
+    $canVerify = ! $laporanReadOnly && in_array($pengajuan->status, [\App\Enums\PengajuanStatus::DIAJUKAN], true);
     @endphp
 
     <div class="card mb-4">
@@ -216,7 +222,7 @@
                             <span>{{ $baMedia->file_name }}</span>
                         </a>
                     </div>
-                    @else
+                    @elseif(!($laporanReadOnly ?? false))
                     <div class="col-12">
                         <p class="text-small text-uppercase text-muted mb-1">Dokumen BA Verifikasi</p>
                         <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan->id) }}" target="_blank"
@@ -224,6 +230,11 @@
                             <i data-acorn-icon="file-text"></i>
                             <span>Download BA</span>
                         </a>
+                    </div>
+                    @else
+                    <div class="col-12">
+                        <p class="text-small text-uppercase text-muted mb-1">Dokumen BA Verifikasi</p>
+                        <span class="text-muted">Belum diunggah.</span>
                     </div>
                     @endif
                 </div>
@@ -298,7 +309,13 @@
                 </div>
                 @endif
             @else
-                <p class="text-muted mb-0">Data verifikasi tidak ditemukan.</p>
+                <p class="text-muted mb-0">
+                    @if($laporanReadOnly && $pengajuan->status === \App\Enums\PengajuanStatus::DIAJUKAN)
+                        Belum diverifikasi.
+                    @else
+                        Data verifikasi tidak ditemukan.
+                    @endif
+                </p>
             @endif
         </div>
     </div>
