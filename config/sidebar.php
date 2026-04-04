@@ -13,7 +13,7 @@ return [
                 'id' => 'PROFILE_USER_DETAIL',
                 'icon' => 'user',
                 'url' => '/user-detail',
-                'title' => 'Detail Data'
+                'title' => 'Detail Data',
             ],
         ],
     ],
@@ -28,15 +28,15 @@ return [
                 'id' => 'PENGAJUAN',
                 'icon' => 'book',
                 'url' => '/pengajuan',
-                'title' => 'Pengajuan'
+                'title' => 'Pengajuan',
             ],
             [
                 'id' => 'REALISASI',
                 'icon' => 'notebook-1',
                 'url' => '/realisasi',
-                'title' => 'Realisasi'
+                'title' => 'Realisasi',
             ],
-        ]
+        ],
     ],
     [
         'id' => 'SIDE_LAPORAN',
@@ -48,19 +48,19 @@ return [
             [
                 'id' => 'SIDE_LAP_PENGAJUAN',
                 'icon' => 'file-text',
-                'url' => '/lap-pengajuan',
-                'title' => 'Pengajuan'
+                'url' => '/laporan-pengajuan',
+                'title' => 'Pengajuan',
             ],
             [
-                'id' => 'SIDE_LAP_REALISASI',
-                'icon' => 'file-text',
-                'url' => '/lap-realisasi',
-                'title' => 'Realisasi'
+                'id' => 'SIDE_LAP_ANGGOTA_KELOMPOK',
+                'icon' => 'user',
+                'url' => '/laporan-anggota-kelompok',
+                'title' => 'Anggota Kelompok',
             ],
         ],
     ],
     [
-        //ROLE OPD
+        // ROLE OPD
         'id' => 'SIDE_MASTER_DATA',
         'icon' => '',
         'title' => 'Master Data',
@@ -71,13 +71,13 @@ return [
                 'id' => 'USER_KELOMPOK',
                 'icon' => 'user',
                 'url' => '/user-kelompok',
-                'title' => 'User Kelompok'
+                'title' => 'User Kelompok',
             ],
             [
                 'id' => 'KELOMPOK_MASYARAKAT',
                 'icon' => 'diagram-1',
                 'url' => '/kelompok-masyarakat',
-                'title' => 'Kelompok Masyarakat'
+                'title' => 'Kelompok Masyarakat',
             ],
         ],
     ],
@@ -93,22 +93,22 @@ return [
                 'id' => 'VERIFY_PENGGUNA',
                 'icon' => 'check-square',
                 'url' => '/verifikasi-pengguna',
-                'title' => 'Verifikasi Pengguna'
+                'title' => 'Verifikasi Pengguna',
             ],
             [
                 'id' => 'VERIFY_PENDUDUK',
                 'icon' => 'check-square',
                 'url' => '/verifikasi-penduduk',
-                'title' => 'Verifikasi Penduduk'
+                'title' => 'Verifikasi Penduduk',
             ],
 
             [
                 'id' => 'VERIFY_PENGAJUAN',
                 'icon' => 'check-square',
                 'url' => '/verifikasi-pengajuan',
-                'title' => 'Pengajuan Bantuan'
+                'title' => 'Pengajuan Bantuan',
             ],
-        ]
+        ],
     ],
 
     [
@@ -122,15 +122,15 @@ return [
                 'id' => 'BAST',
                 'icon' => 'book',
                 'url' => '/bast',
-                'title' => 'BA Serah Terima'
+                'title' => 'BA Serah Terima',
             ],
             [
                 'id' => 'BLACKLIST',
                 'icon' => 'close-circle',
                 'url' => '/blacklist',
-                'title' => 'Blacklist Kelompok'
-            ]
-        ]
+                'title' => 'Blacklist Kelompok',
+            ],
+        ],
     ],
 
     [
@@ -144,14 +144,14 @@ return [
                 'id' => 'MONITORING',
                 'icon' => 'activity',
                 'url' => '/monitoring-bantuan',
-                'title' => 'Monitoring Bantuan'
+                'title' => 'Monitoring Bantuan',
             ],
             [
                 'id' => 'REALISASI_BANTUAN',
                 'icon' => 'delivery-truck',
                 'url' => '/realisasi-bantuan',
-                'title' => 'Realisasi Bantuan'
+                'title' => 'Realisasi Bantuan',
             ],
-        ]
+        ],
     ],
 ];
