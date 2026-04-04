@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BeritaPublikController;
 use App\Http\Controllers\BlacklistInfoController;
+use App\Http\Controllers\CariPendudukByNikController;
 use App\Http\Controllers\Kelola\AlurBantuanController as KelolaAlurBantuanController;
 use App\Http\Controllers\Kelola\BeritaController as KelolaBeritaController;
 use App\Http\Controllers\Kelola\HeroSlideController as KelolaHeroSlideController;
@@ -153,6 +154,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
         Route::resource('desa', App\Http\Controllers\DesaController::class);
         Route::resource('penduduk', App\Http\Controllers\PendudukController::class);
+        Route::get('cari-penduduk-by-nik', CariPendudukByNikController::class)->name('penduduk.cari-by-nik');
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
         Route::get('kelompok-masyarakat/penduduk-by-nik', [App\Http\Controllers\KelompokMasyarakatController::class, 'lookupPendudukByNik'])->name('kelompok-masyarakat.penduduk-by-nik');

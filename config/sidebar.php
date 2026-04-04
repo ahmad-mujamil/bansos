@@ -79,6 +79,12 @@ return [
                 'url' => '/kelompok-masyarakat',
                 'title' => 'Kelompok Masyarakat',
             ],
+            [
+                'id' => 'CARI_PENDUDUK_NIK',
+                'icon' => 'search',
+                'url' => '/cari-penduduk-by-nik',
+                'title' => 'Cari Penduduk (NIK)',
+            ],
         ],
     ],
 
