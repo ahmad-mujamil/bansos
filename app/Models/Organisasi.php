@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JenisOrganisasi;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ class Organisasi extends Model
             'tgl_pembentukan' => 'date:Y-m-d',
             'is_active' => 'boolean',
             'is_blacklist' => 'boolean',
+            'jenis' => JenisOrganisasi::class,
         ];
     }
 

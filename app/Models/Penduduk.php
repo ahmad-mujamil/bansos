@@ -5,15 +5,17 @@ namespace App\Models;
 use App\Enums\JenisKelamin;
 use App\Enums\LevelDesil;
 use App\Enums\StatusPerkawinan;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Penduduk extends Model
 {
     use HasUuids;
+
     protected $table = 'penduduk';
+
     protected $keyType = 'string';
 
     protected $guarded = [];
@@ -43,5 +45,13 @@ class Penduduk extends Model
     public function validatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validated_by');
+    }
+
+    /**
+     * Keanggotaan penduduk di kelompok/organisasi (baris organisasi_detail).
+     */
+    public function organisasiDetails(): HasMany
+    {
+        return $this->hasMany(OrganisasiDetail::class, 'penduduk_id');
     }
 }
