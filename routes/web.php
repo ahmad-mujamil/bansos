@@ -101,7 +101,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     });
 
     // Verifikasi Pengguna (user belum aktif)
-    Route::middleware(['role:super,admin'])->group(function () {
+    Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::get('verifikasi-pengguna', [App\Http\Controllers\VerifikasiPenggunaController::class, 'index'])->name('verifikasi-pengguna.index');
         Route::get('verifikasi-pengguna/{user}/aktifkan', [App\Http\Controllers\VerifikasiPenggunaController::class, 'aktifkan'])->name('verifikasi-pengguna.aktifkan');
         Route::get('verifikasi-pengguna/{user}', [App\Http\Controllers\VerifikasiPenggunaController::class, 'show'])->name('verifikasi-pengguna.show');
@@ -127,6 +127,14 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::middleware(['role:opd'])->group(function () {
         Route::get('blacklist', [App\Http\Controllers\BlacklistOrganisasiOpdController::class, 'index'])->name('blacklist.index');
         Route::post('blacklist/{organisasi}/toggle', [App\Http\Controllers\BlacklistOrganisasiOpdController::class, 'toggle'])->name('blacklist.toggle');
+    });
+
+    // Laporan (rekap pengajuan kelompok + hasil verifikasi)
+    Route::middleware(['role:super,admin,opd'])->group(function () {
+        Route::get('laporan-pengajuan', [App\Http\Controllers\LaporanPengajuanController::class, 'index'])->name('laporan-pengajuan.index');
+        Route::get('laporan-pengajuan/{pengajuan}', [App\Http\Controllers\LaporanPengajuanController::class, 'show'])->name('laporan-pengajuan.show');
+        Route::get('laporan-anggota-kelompok', [App\Http\Controllers\LaporanAnggotaKelompokController::class, 'index'])->name('laporan-anggota-kelompok.index');
+        Route::get('laporan-realisasi', fn () => redirect()->route('realisasi.index'))->name('laporan-realisasi');
     });
 
     // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)

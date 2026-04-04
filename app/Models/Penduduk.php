@@ -42,6 +42,11 @@ class Penduduk extends Model
         return $this->belongsTo(Kecamatan::class);
     }
 
+    public function organisasiDetails(): HasMany
+    {
+        return $this->hasMany(OrganisasiDetail::class, 'penduduk_id');
+    }
+
     public function validatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'validated_by');
