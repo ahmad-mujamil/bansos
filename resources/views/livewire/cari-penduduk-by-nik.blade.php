@@ -121,7 +121,7 @@
                                     @endif
                                 </div>
                                 <div class="text-small text-muted mb-2">
-                                    {{ $org->jenis->getDescription() ?? '—' }}
+                                    {{ $org->jenis ?? '—' }}
                                 </div>
                                 <div class="mb-2">
                                     <span class="text-small text-uppercase text-muted">Jabatan</span>

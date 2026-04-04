@@ -52,11 +52,5 @@ class Penduduk extends Model
         return $this->belongsTo(User::class, 'validated_by');
     }
 
-    /**
-     * Keanggotaan penduduk di kelompok/organisasi (baris organisasi_detail).
-     */
-    public function organisasiDetails(): HasMany
-    {
-        return $this->hasMany(OrganisasiDetail::class, 'penduduk_id');
-    }
+    
 }

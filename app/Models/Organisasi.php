@@ -21,8 +21,7 @@ class Organisasi extends Model
         return [
             'tgl_pembentukan' => 'date:Y-m-d',
             'is_active' => 'boolean',
-            'is_blacklist' => 'boolean',
-            'jenis' => JenisOrganisasi::class,
+            'is_blacklist' => 'boolean'
         ];
     }
 
