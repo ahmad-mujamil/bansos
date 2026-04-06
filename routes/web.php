@@ -135,7 +135,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('laporan-pengajuan', [App\Http\Controllers\LaporanPengajuanController::class, 'index'])->name('laporan-pengajuan.index');
         Route::get('laporan-pengajuan/{pengajuan}', [App\Http\Controllers\LaporanPengajuanController::class, 'show'])->name('laporan-pengajuan.show');
         Route::get('laporan-anggota-kelompok', [App\Http\Controllers\LaporanAnggotaKelompokController::class, 'index'])->name('laporan-anggota-kelompok.index');
-        // Route::get('laporan-realisasi', fn () => redirect()->route('realisasi.index'))->name('laporan-realisasi');
+        Route::get('laporan-realisasi', [App\Http\Controllers\LaporanRealisasiController::class, 'index'])->name('laporan-realisasi.index');
     });
 
     // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)
