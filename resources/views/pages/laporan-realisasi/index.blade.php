@@ -18,9 +18,6 @@
         </div>
         <div class="card mb-5">
             <div class="card-body">
-                <p class="text-alternate mb-4">
-                    Daftar pengajuan yang sudah memiliki BAST. Status kolom Realisasi menunjukkan apakah dokumentasi laporan kegiatan sudah diunggah.
-                </p>
                 <div class="row">
                     <div class="col-12 col-lg-6 col-xxl-5 mb-3">
                         <div class="d-flex flex-wrap gap-2 align-items-center">
