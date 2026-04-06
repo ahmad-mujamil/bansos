@@ -34,7 +34,7 @@ class HomeController extends Controller
                 ->whereHas('realisasi')
                 ->count();
 
-            
+
             return view('home-user', compact(
                 'totalPengajuan',
                 'totalVerifikasi',
@@ -88,7 +88,7 @@ class HomeController extends Controller
         $totalPengajuan = Pengajuan::query()->count();
 
 
-        $totalBansos = (float) Pengajuan::query()
+        $totalBantuan = (float) Pengajuan::query()
             ->whereHas('realisasi')
             ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
             ->get()
@@ -97,7 +97,7 @@ class HomeController extends Controller
         return view('home', array_merge(compact(
             'totalPerorangan',
             'totalOrganisasi',
-            'totalBansos',
+            'totalBantuan',
             'totalPengajuan',
         ), $charts));
     }

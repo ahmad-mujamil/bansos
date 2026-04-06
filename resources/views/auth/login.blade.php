@@ -51,7 +51,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <span class="text-muted text-small text-uppercase">Tempat Ibadah</span>
-                                <i data-acorn-icon="close-circle" class="text-danger"></i>
+                                <i data-acorn-icon="school" class="text-danger"></i>
                             </div>
                             <div class="cta-1 text-danger">{{ number_format($organisasiAktif['TIB'] ?? 0) }}</div>
                         </div>
@@ -62,7 +62,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <span class="text-muted text-small text-uppercase">Organisasi</span>
-                                <i data-acorn-icon="office" class="text-info"></i>
+                                <i data-acorn-icon="building" class="text-info"></i>
                             </div>
                             <div class="cta-1 text-info">{{ number_format($organisasiAktif['ORG'] ?? 0) }}</div>
                         </div>
@@ -73,7 +73,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <span class="text-muted text-small text-uppercase">Instansi</span>
-                                <i data-acorn-icon="building" class="text-secondary"></i>
+                                <i data-acorn-icon="building-large" class="text-secondary"></i>
                             </div>
                             <div class="cta-1 text-secondary">{{ number_format($organisasiAktif['INS'] ?? 0) }}</div>
                         </div>
