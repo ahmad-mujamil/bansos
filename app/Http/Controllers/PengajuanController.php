@@ -66,6 +66,10 @@ class PengajuanController extends Controller
             && $organisasiId
             && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
 
+        $anggotaBelumTerverifikasi = $organisasiId
+            ? (Organisasi::query()->find($organisasiId)?->anggotaBelumTerverifikasiData() ?? collect())
+            : collect();
+
         return view('pages.pengajuan.form', [
             'pengajuan' => null,
             'kelompokList' => $kelompokList,
@@ -78,6 +82,7 @@ class PengajuanController extends Controller
             'pendudukIsValidMap' => $pendudukIsValidMap,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
         ]);
     }
 
@@ -208,6 +213,10 @@ class PengajuanController extends Controller
             && $organisasiId
             && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
 
+        $anggotaBelumTerverifikasi = $organisasiId
+            ? (Organisasi::query()->find($organisasiId)?->anggotaBelumTerverifikasiData() ?? collect())
+            : collect();
+
         return view('pages.pengajuan.form', [
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
@@ -220,6 +229,7 @@ class PengajuanController extends Controller
             'pendudukIsValidMap' => $pendudukIsValidMap,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
         ]);
     }
 
