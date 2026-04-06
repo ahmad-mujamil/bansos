@@ -67,8 +67,9 @@
                     <tr>
                         <th class="text-muted text-small text-uppercase">Kode Pengajuan</th>
                         <th class="text-muted text-small text-uppercase">Judul</th>
-                        <th class="text-muted text-small text-uppercase">Nomor BAST</th>
+                        <th class="text-muted text-small text-uppercase">OPD</th>
                         <th class="text-muted text-small text-uppercase">Tanggal BAST</th>
+                        <th class="text-muted text-small text-uppercase">Nilai Pengajuan</th>
                         <th class="text-muted text-small text-uppercase">Nilai Rekomendasi</th>
                         <th class="text-muted text-small text-uppercase">Realisasi</th>
                         <th class="text-muted text-small text-uppercase w-15">Aksi</th>
@@ -108,8 +109,9 @@
             columns: [
                 { data: 'kode_pengajuan', name: 'kode_pengajuan' },
                 { data: 'judul', name: 'judul' },
-                { data: 'bast_nomor', name: 'bast_nomor', orderable: false, searchable: false },
+                { data: 'opd', name: 'opd', orderable: false, searchable: false },
                 { data: 'bast_tanggal', name: 'bast_tanggal', orderable: false, searchable: false },
+                { data: 'nilai_pengajuan', name: 'nilai_pengajuan', orderable: false, searchable: false },
                 { data: 'nilai_rekomendasi', name: 'nilai_rekomendasi', orderable: false, searchable: false },
                 { data: 'status_realisasi', name: 'status_realisasi', orderable: false, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
