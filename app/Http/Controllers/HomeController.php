@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\JenisUser;
 use App\Enums\PengajuanStatus;
 use App\Models\Organisasi;
+use Illuminate\Support\Collection;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanRealisasi;
@@ -34,12 +35,18 @@ class HomeController extends Controller
                 ->whereHas('realisasi')
                 ->count();
 
-            
+            /** @var Collection<int, array{nama: string, nik: string, status: string}> $anggotaKelompokBelumTerverifikasi */
+            $anggotaKelompokBelumTerverifikasi = collect();
+            if ($user->jenis_user === JenisUser::KELOMPOK && ($oid = $user->userDetail?->organisasi_id)) {
+                $anggotaKelompokBelumTerverifikasi = Organisasi::query()->find($oid)?->anggotaBelumTerverifikasiData() ?? collect();
+            }
+
             return view('home-user', compact(
                 'totalPengajuan',
                 'totalVerifikasi',
                 'totalBelumVerifikasi',
                 'totalRealisasi',
+                'anggotaKelompokBelumTerverifikasi',
             ));
         }
 

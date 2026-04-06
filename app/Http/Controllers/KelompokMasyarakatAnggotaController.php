@@ -40,14 +40,11 @@ class KelompokMasyarakatAnggotaController extends Controller
             ->addColumn('nik_penduduk', fn ($row) => $row->penduduk->nik ?? '-')
             ->addColumn('jabatan_label', fn ($row) => $row->jabatan?->getDescription() ?? $row->jabatan)
             ->addColumn('status_label', function ($row) {
-                if ($row->penduduk->is_valid) {
-                    return '<span class="badge bg-success">Terverifikasi</span>';
-                }
-                if ($row->penduduk->validated_at && ! $row->penduduk->is_valid) {
-                    return '<span class="badge bg-danger">Tidak Valid</span>';
-                }
-
-                return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
+                return match ($row->penduduk->labelStatusVerifikasi()) {
+                    'Terverifikasi' => '<span class="badge bg-success">Terverifikasi</span>',
+                    'Tidak Valid' => '<span class="badge bg-danger">Tidak Valid</span>',
+                    default => '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>',
+                };
             })
             ->addColumn('action', function ($row) use ($organisasiId) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';

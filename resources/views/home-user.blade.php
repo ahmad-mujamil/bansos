@@ -222,6 +222,45 @@
             </div>
         </div>
         <!-- Dashboard Stats End -->
+
+        @if(isset($anggotaKelompokBelumTerverifikasi) && $anggotaKelompokBelumTerverifikasi->isNotEmpty())
+        <div class="mb-4">
+            <div class="alert alert-warning border-0 shadow-sm mb-0">
+                <h6 class="fw-bold mb-2">
+                    <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
+                    Anggota Kelompok Belum Terverifikasi
+                </h6>
+                <p class="text-muted small mb-3">Berikut anggota yang data penduduknya belum Terverifikasi oleh Dukcapil. Pengajuan bantuan kelompok akan terblokir sampai seluruh anggota terverifikasi.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered bg-white mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($anggotaKelompokBelumTerverifikasi as $row)
+                            <tr>
+                                <td>{{ $row['nama'] }}</td>
+                                <td>{{ $row['nik'] }}</td>
+                                <td>
+                                    @if($row['status'] === 'Tidak Valid')
+                                        <span class="badge bg-danger">Tidak Valid</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark">Belum Diverifikasi</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Menu Bantuan Start -->
         @php
             $jenisUser = auth()->user()->jenis_user?->value ?? null;

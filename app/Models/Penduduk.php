@@ -52,5 +52,15 @@ class Penduduk extends Model
         return $this->belongsTo(User::class, 'validated_by');
     }
 
-    
+    public function labelStatusVerifikasi(): string
+    {
+        if ($this->is_valid) {
+            return 'Terverifikasi';
+        }
+        if ($this->validated_at && ! $this->is_valid) {
+            return 'Tidak Valid';
+        }
+
+        return 'Belum Diverifikasi';
+    }
 }

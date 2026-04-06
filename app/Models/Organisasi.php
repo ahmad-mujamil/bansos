@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Organisasi extends Model
 {
@@ -52,6 +53,25 @@ class Organisasi extends Model
     public function opd(): BelongsTo
     {
         return $this->belongsTo(Opd::class);
+    }
+
+    /**
+     * Anggota yang terhubung ke penduduk dengan is_valid = false (nama, NIK, label status).
+     *
+     * @return Collection<int, array{nama: string, nik: string, status: string}>
+     */
+    public function anggotaBelumTerverifikasiData(): Collection
+    {
+        return $this->organisasiDetail()
+            ->with('penduduk')
+            ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (OrganisasiDetail $d) => [
+                'nama' => $d->penduduk?->nama ?? '-',
+                'nik' => $d->penduduk?->nik ?? '-',
+                'status' => $d->penduduk?->labelStatusVerifikasi() ?? '-',
+            ]);
     }
 
     public function user(): BelongsTo
