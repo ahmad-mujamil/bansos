@@ -46,6 +46,7 @@
     $pendudukIsValidMap = $pendudukIsValidMap ?? [];
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
+    $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
     @endphp
 
     <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan" enctype="multipart/form-data">
@@ -99,7 +100,43 @@
                         @enderror
                     </div>
 
-
+                    @if($isBantuanKelompok && $anggotaBelumTerverifikasi->isNotEmpty())
+                    <div class="col-12">
+                        <div class="alert alert-warning border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-2">
+                                <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
+                                Anggota kelompok yang data penduduknya belum terverifikasi (is_valid)
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered bg-white mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>NIK</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($anggotaBelumTerverifikasi as $row)
+                                        <tr>
+                                            <td>{{ $row['nama'] }}</td>
+                                            <td>{{ $row['nik'] }}</td>
+                                            <td>
+                                                @if($row['status'] === 'Tidak Valid')
+                                                    <span class="badge bg-danger">Tidak Valid</span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark">Belum Diverifikasi</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted text-small mb-0 mt-2">Selesaikan verifikasi data penduduk anggota di halaman administrasi penduduk/kelompok sebelum menyimpan pengajuan.</p>
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="col-lg-12 col-md-12 col-sm-12">
                         <label class="form-label text-small text-uppercase">Judul Usulan <span class="text-danger">*</span></label>

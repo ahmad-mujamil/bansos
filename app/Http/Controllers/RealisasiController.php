@@ -14,7 +14,7 @@ class RealisasiController extends Controller
     {
         $q = Pengajuan::query()
             ->whereHas('bast')
-            ->with(['bast', 'realisasi', 'verifikasiPengajuan']);
+            ->with(['bast', 'realisasi', 'verifikasiPengajuan', 'opd']);
 
         $user = auth()->user();
         if ($user->is_user()) {
@@ -38,8 +38,9 @@ class RealisasiController extends Controller
         $data = $this->pengajuanBaseQuery()->latest();
 
         return DataTables::of($data)
-            ->addColumn('bast_nomor', fn ($row) => $row->bast?->nomor ?? '-')
+            ->addColumn('opd', fn ($row) => $row->opd?->nama ?? '-')
             ->addColumn('bast_tanggal', fn ($row) => $row->bast?->tanggal?->format('d-m-Y') ?? '-')
+            ->addColumn('nilai_pengajuan', fn ($row) => 'Rp '.number_format((float) $row->nilai, 0, ',', '.'))
             ->addColumn('nilai_rekomendasi', function ($row) {
                 $nilai = $row->verifikasiPengajuan?->nilai_rekomendasi;
 
