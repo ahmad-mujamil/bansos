@@ -10,12 +10,14 @@ use App\Models\Desa;
 use App\Models\JenisBantuan;
 use App\Models\Kecamatan;
 use App\Models\Organisasi;
+use App\Models\OrganisasiDetail;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class PengajuanController extends Controller
 {
@@ -47,7 +49,7 @@ class PengajuanController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nik']);
 
-        $jenis = auth()->user()->jenis_user?->value === JenisUser::INDIVIDUAL->value ? JenisPengajuan::BANSOS->value : JenisPengajuan::BANTUAN_KELOMPOK->value;
+        $jenis = $this->jenisPengajuanForUser();
 
         $jenisBantuanKelompokList = JenisBantuan::query()
             ->where('kategori', 'bantuan_kelompok')
@@ -55,6 +57,14 @@ class PengajuanController extends Controller
             ->get(['id', 'nama', 'keterangan']);
 
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
+
+        $organisasiId = auth()->user()->userDetail?->organisasi_id;
+        $selectedPendudukId = old('penduduk_id');
+        $pendudukIsValidMap = $this->pendudukIsValidMap();
+        $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
+        $kelompokSimpanDiblokir = $jenis !== JenisPengajuan::BANSOS->value
+            && $organisasiId
+            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
 
         return view('pages.pengajuan.form', [
             'pengajuan' => null,
@@ -64,6 +74,10 @@ class PengajuanController extends Controller
             'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
             'jenis' => $jenis,
             'kecamatans' => $kecamatans,
+            'selectedPendudukId' => $selectedPendudukId,
+            'pendudukIsValidMap' => $pendudukIsValidMap,
+            'simpanDiblokir' => $simpanDiblokir,
+            'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
         ]);
     }
 
@@ -71,6 +85,7 @@ class PengajuanController extends Controller
     {
 
         $validated = $this->validatePengajuan($request);
+        $this->validatePengajuanVerifikasi($request);
         // return $request->all();
         try {
             DB::beginTransaction();
@@ -159,7 +174,7 @@ class PengajuanController extends Controller
             return redirect()->route('pengajuan.show', $pengajuan);
         }
 
-        $pengajuan->load(['desa.kecamatan']);
+        $pengajuan->load(['desa.kecamatan', 'details']);
 
         $jenisUser = auth()->user()->jenis_user?->value ?? null;
         $jenisOptions = match ($jenisUser) {
@@ -184,14 +199,27 @@ class PengajuanController extends Controller
 
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
+        $jenis = $this->jenisPengajuanForUser();
+        $organisasiId = auth()->user()->userDetail?->organisasi_id;
+        $selectedPendudukId = old('penduduk_id', $pengajuan->details->first()?->penduduk_id);
+        $pendudukIsValidMap = $this->pendudukIsValidMap();
+        $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
+        $kelompokSimpanDiblokir = $jenis !== JenisPengajuan::BANSOS->value
+            && $organisasiId
+            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
+
         return view('pages.pengajuan.form', [
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
             'pendudukList' => $pendudukList,
             'jenisOptions' => $jenisOptions,
             'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
-            'jenis' => $pengajuan->jenis?->value,
+            'jenis' => $jenis,
             'kecamatans' => $kecamatans,
+            'selectedPendudukId' => $selectedPendudukId,
+            'pendudukIsValidMap' => $pendudukIsValidMap,
+            'simpanDiblokir' => $simpanDiblokir,
+            'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
         ]);
     }
 
@@ -207,6 +235,7 @@ class PengajuanController extends Controller
         }
 
         $validated = $this->validatePengajuan($request);
+        $this->validatePengajuanVerifikasi($request);
 
         try {
             DB::beginTransaction();
@@ -295,6 +324,77 @@ class PengajuanController extends Controller
         } while (Pengajuan::where('kode_pengajuan', $kode)->exists());
 
         return $kode;
+    }
+
+    /**
+     * Selaras dengan form: hanya pengguna IND yang memakai BANSOS; KLP/ORG memakai alur kelompok.
+     */
+    private function jenisPengajuanForUser(): string
+    {
+        return auth()->user()->jenis_user === JenisUser::INDIVIDUAL
+            ? JenisPengajuan::BANSOS->value
+            : JenisPengajuan::BANTUAN_KELOMPOK->value;
+    }
+
+    /**
+     * @param  array<string, bool>  $pendudukIsValidMap
+     */
+    private function shouldBlockSimpanPengajuan(string $jenis, ?string $selectedPendudukId, ?string $organisasiId, array $pendudukIsValidMap): bool
+    {
+        if ($jenis === JenisPengajuan::BANSOS->value) {
+            if (! $selectedPendudukId) {
+                return false;
+            }
+
+            return ! ($pendudukIsValidMap[$selectedPendudukId] ?? false);
+        }
+
+        if (! $organisasiId) {
+            return false;
+        }
+
+        return $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    private function pendudukIsValidMap(): array
+    {
+        return Penduduk::query()
+            ->get(['id', 'is_valid'])
+            ->mapWithKeys(fn (Penduduk $p) => [$p->id => (bool) $p->is_valid])
+            ->all();
+    }
+
+    private function kelompokMemilikiAnggotaBelumTerverifikasi(string $organisasiId): bool
+    {
+        return OrganisasiDetail::query()
+            ->where('organisasi_id', $organisasiId)
+            ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
+            ->exists();
+    }
+
+    private function validatePengajuanVerifikasi(Request $request): void
+    {
+        $jenis = $this->jenisPengajuanForUser();
+        if ($jenis === JenisPengajuan::BANSOS->value) {
+            $pendudukId = $request->input('penduduk_id');
+            if ($pendudukId && ! Penduduk::query()->whereKey($pendudukId)->where('is_valid', true)->exists()) {
+                throw ValidationException::withMessages([
+                    'penduduk_id' => ['Penduduk yang dipilih belum terverifikasi.'],
+                ]);
+            }
+
+            return;
+        }
+
+        $organisasiId = $request->input('organisasi_id');
+        if ($organisasiId && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
+            throw ValidationException::withMessages([
+                'organisasi_id' => ['Masih ada anggota kelompok yang data penduduknya belum diverifikasi.'],
+            ]);
+        }
     }
 
     private function validatePengajuan(Request $request): array

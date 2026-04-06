@@ -43,6 +43,9 @@
     // $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
     $isBansos = $jenis === \App\Enums\JenisPengajuan::BANSOS->value;
     $isBantuanKelompok = $jenis === \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value;
+    $pendudukIsValidMap = $pendudukIsValidMap ?? [];
+    $simpanDiblokir = $simpanDiblokir ?? false;
+    $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
     @endphp
 
     <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan" enctype="multipart/form-data">
@@ -73,7 +76,7 @@
                         <select name="penduduk_id" id="penduduk_id" class="form-select @error('penduduk_id') is-invalid @enderror">
                             <option value="">Pilih Penduduk</option>
                             @foreach($pendudukList as $p)
-                            <option value="{{ $p->id }}" {{ old('penduduk_id', $detail?->penduduk_id) == $p->id ? 'selected' : '' }}>{{ $p->nama }} ({{ $p->nik }})</option>
+                            <option value="{{ $p->id }}" {{ old('penduduk_id', $selectedPendudukId ?? null) == $p->id ? 'selected' : '' }}>{{ $p->nama }} ({{ $p->nik }})</option>
                             @endforeach
                         </select>
                         @error('penduduk_id')
@@ -213,10 +216,21 @@
 
                 </div>
 
-                <div class="d-flex gap-2 mt-5">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-5">
+                    <button type="submit" id="btnSimpanPengajuan" class="btn btn-primary" @if($simpanDiblokir) disabled aria-disabled="true" @endif>Simpan</button>
                     <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-secondary">Batal</a>
                 </div>
+                @if($simpanDiblokir)
+                <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
+                    @if($isBansos)
+                        Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @else
+                        Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.
+                    @endif
+                </p>
+                @else
+                <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0 d-none"></p>
+                @endif
             </div>
         </div>
     </form>
@@ -239,6 +253,31 @@
     $(function() {
         var BANSOS = '{{ \App\Enums\JenisPengajuan::BANSOS->value }}';
         var BANTUAN_KELOMPOK = '{{ \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value }}';
+        var jenisPengajuan = '{{ $jenis }}';
+        var pendudukIsValidMap = @json($pendudukIsValidMap);
+        var kelompokSimpanDiblokir = {{ $kelompokSimpanDiblokir ? 'true' : 'false' }};
+
+        function updateSimpanBlokir() {
+            var blokir = false;
+            var hint = '';
+            if (jenisPengajuan === BANSOS) {
+                var pid = $('#penduduk_id').val();
+                if (pid && pendudukIsValidMap[pid] !== true) {
+                    blokir = true;
+                    hint = 'Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.';
+                }
+            } else if (kelompokSimpanDiblokir) {
+                blokir = true;
+                hint = 'Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.';
+            }
+            $('#btnSimpanPengajuan').prop('disabled', blokir).attr('aria-disabled', blokir ? 'true' : 'false');
+            var $hint = $('#hintSimpanDiblokir');
+            if (blokir && hint) {
+                $hint.removeClass('d-none').text(hint);
+            } else {
+                $hint.addClass('d-none').text('');
+            }
+        }
 
         @php
         $kecamatansData = $kecamatans->map(function($kecamatan) {
@@ -303,6 +342,9 @@
             placeholder: 'Pilih Penduduk',
             allowClear: true
         });
+        $('#penduduk_id').on('change', function() {
+            updateSimpanBlokir();
+        });
         $('#kecamatan_id').select2({
             theme: 'bootstrap4',
             placeholder: 'Pilih Kecamatan',
@@ -354,8 +396,13 @@
 
         $('#jenis').on('change', toggleJenis);
         toggleJenis();
+        updateSimpanBlokir();
 
         $('#formPengajuan').on('submit', function(e) {
+            if ($('#btnSimpanPengajuan').prop('disabled')) {
+                e.preventDefault();
+                return;
+            }
             e.preventDefault();
             var form = this;
             Swal.fire({
