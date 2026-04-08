@@ -88,7 +88,7 @@ class HomeController extends Controller
         $totalPengajuan = Pengajuan::query()->count();
 
 
-        $totalBansos = (float) Pengajuan::query()
+        $totalBantuan = (float) Pengajuan::query()
             ->whereHas('realisasi')
             ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
             ->get()
@@ -97,7 +97,7 @@ class HomeController extends Controller
         return view('home', array_merge(compact(
             'totalPerorangan',
             'totalOrganisasi',
-            'totalBansos',
+            'totalBantuan',
             'totalPengajuan',
         ), $charts));
     }
@@ -117,7 +117,7 @@ class HomeController extends Controller
                     'Jumlah' => $this->pengajuanCountsPerMonth($year, $opdId),
                 ],
             ],
-            'dataChartBansos' => [
+            'dataChartBantuan' => [
                 'labels' => $labels,
                 'data' => [
                     'Rupiah' => $this->realisasiNilaiPerMonth($year, $opdId),
