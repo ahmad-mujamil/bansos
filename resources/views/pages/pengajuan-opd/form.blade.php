@@ -6,17 +6,22 @@
     <div class="page-title-container mb-3">
         <div class="row">
             <div class="col mb-2">
-                <h1 class="mb-2 pb-0 display-4">{{ $pengajuan ? 'Edit Pengajuan' : 'Tambah Pengajuan' }}</h1>
+                <h1 class="mb-2 pb-0 display-4">
+                    {{ $pengajuan ? 'Edit Pengajuan' : 'Tambah Pengajuan ' }}
+                    @unless ($pengajuan)
+                    <strong>{{ \Illuminate\Support\Str::of($jenis)->replace('_', ' ')->title() }}</strong>
+                    @endunless
+                </h1>
                 <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                     <ul class="breadcrumb pt-0">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('pengajuan.index') }}">Pengajuan</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('pengajuan-opd.index') }}">Pengajuan OPD</a></li>
                         <li class="breadcrumb-item"><a href="javascript:;">{{ $pengajuan ? 'Edit' : 'Tambah' }}</a></li>
                     </ul>
                 </nav>
             </div>
             <div class="col-12 col-md-5 d-flex align-items-start justify-content-end">
-                <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
+                <a href="{{ route('pengajuan-opd.index') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
                     <i data-acorn-icon="arrow-left"></i>
                     <span>Kembali</span>
                 </a>
@@ -38,7 +43,7 @@
     $detail = $pengajuan;
     $mediaPengajuan = $pengajuan?->getFirstMedia('pengajuan');
     $isEdit = (bool) $pengajuan;
-    $route = $isEdit ? route('pengajuan.update', $pengajuan) : route('pengajuan.store');
+    $route = $isEdit ? route('pengajuan-opd.update', $pengajuan) : route('pengajuan-opd.store');
     $method = $isEdit ? 'PUT' : 'POST';
     // $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
     $isBansos = $jenis === \App\Enums\JenisPengajuan::BANSOS->value;
@@ -56,21 +61,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-6 col-sm-12">
-                        <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
-                        <input type="hidden" name="jenis" value="{{ $jenis }}">
-                        <select id="jenis" class="form-select @error('jenis') is-invalid @enderror" disabled>
-                            <option value="">Pilih Jenis</option>
-                            @foreach($jenisOptions as $opt)
-                            <option value="{{ $opt->value }}" {{ 'bantuan_kelompok' == $opt->value ? 'selected' : '' }}>
-                                {{ $opt->getDescription() }}
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('jenis')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    <input type="hidden" name="jenis" value="{{ $jenis }}">
 
                     <div class="col-md-6 col-sm-12" id="wrap-penduduk" style="{{ !$isBansos ? 'display:none;' : '' }}">
                         <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
@@ -85,17 +76,17 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
+                    <div class="col-md-12 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
 
 
                         <label class="form-label text-small text-uppercase">Kelompok <span class="text-danger">*</span></label>
-                        <select name="kelompok_id" id="kelompok_id" class="form-select @error('kelompok_id') is-invalid @enderror" disabled>
+                        <select name="organisasi_id" id="organisasi_id" class="form-select @error('organisasi_id') is-invalid @enderror" >
                             <option value="">Pilih Kelompok</option>
                             @foreach($kelompokList as $k)
-                            <option value="{{ $k->id }}" {{ old('kelompok_id', auth()->user()->userDetail?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                            <option value="{{ $k->id }}" {{ old('organisasi_id', $pengajuan?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
                             @endforeach
                         </select>
-                        @error('kelompok_id')
+                        @error('organisasi_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -146,11 +137,6 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <input type="hidden" name="opd_id" value="{{ auth()->user()->userDetail?->organisasi?->opd_id ?? '' }}">
-                    <input type="hidden" name="organisasi_id" value="{{ auth()->user()->userDetail?->organisasi_id ?? '' }}">
-
-
-
                     <div class="col-md-6 col-sm-12">
                         <label class="form-label text-small text-uppercase">Kecamatan</label>
                         <select name="kecamatan_id" id="kecamatan_id" class="form-select @error('kecamatan_id') is-invalid @enderror">
@@ -255,7 +241,7 @@
 
                 <div class="d-flex flex-wrap align-items-center gap-2 mt-5">
                     <button type="submit" id="btnSimpanPengajuan" class="btn btn-primary" @if($simpanDiblokir) disabled aria-disabled="true" @endif>Simpan</button>
-                    <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-secondary">Batal</a>
+                    <a href="{{ route('pengajuan-opd.index') }}" class="btn btn-outline-secondary">Batal</a>
                 </div>
                 @if($simpanDiblokir)
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
@@ -369,7 +355,7 @@
                 allowClear: true
             });
         }
-        $('#kelompok_id').select2({
+        $('#organisasi_id').select2({
             theme: 'bootstrap4',
             placeholder: 'Pilih Kelompok',
             allowClear: true
@@ -427,7 +413,7 @@
             $('#wrap-penduduk').toggle(isBansos);
             $('#wrap-jenis-bantuan').toggle(isBantuanKelompok);
             $('#jenis_bantuan_id').prop('required', isBantuanKelompok);
-            $('#kelompok_id').prop('required', !isBansos);
+            $('#organisasi_id').prop('required', !isBansos);
             $('#penduduk_id').prop('required', isBansos);
         }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JenisUser;
-use App\Enums\PengajuanStatus;
 use App\Models\Organisasi;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
@@ -34,7 +33,6 @@ class HomeController extends Controller
                 ->whereHas('realisasi')
                 ->count();
 
-
             return view('home-user', compact(
                 'totalPengajuan',
                 'totalVerifikasi',
@@ -54,11 +52,11 @@ class HomeController extends Controller
                 : 0;
             $totalBansos = (float) ($opdId
                 ? Pengajuan::query()
-                ->where('opd_id', $opdId)
-                ->whereHas('realisasi')
-                ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
-                ->get()
-                ->sum(fn(Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0))
+                    ->where('opd_id', $opdId)
+                    ->whereHas('realisasi')
+                    ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
+                    ->get()
+                    ->sum(fn (Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0))
                 : 0.0);
             $totalBlacklist = 0;
 
@@ -75,6 +73,7 @@ class HomeController extends Controller
             $totalPendudukTerverifikasi = Penduduk::query()
                 ->whereNotNull('validated_at')
                 ->count();
+
             return view('home-dukcapil', compact(
                 'totalPenduduk',
                 'totalPendudukTerverifikasi'
@@ -87,12 +86,11 @@ class HomeController extends Controller
         $totalOrganisasi = Organisasi::query()->count();
         $totalPengajuan = Pengajuan::query()->count();
 
-
         $totalBantuan = (float) Pengajuan::query()
             ->whereHas('realisasi')
             ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
             ->get()
-            ->sum(fn(Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0));
+            ->sum(fn (Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0));
 
         return view('home', array_merge(compact(
             'totalPerorangan',
@@ -132,7 +130,7 @@ class HomeController extends Controller
     private function monthLabels(int $year): array
     {
         return collect(range(1, 12))
-            ->map(fn(int $month) => Carbon::create($year, $month, 1)->translatedFormat('F'))
+            ->map(fn (int $month) => Carbon::create($year, $month, 1)->translatedFormat('F'))
             ->all();
     }
 
@@ -143,7 +141,7 @@ class HomeController extends Controller
     {
         $query = Pengajuan::query()
             ->whereYear('created_at', $year)
-            ->when($opdId !== null, fn($q) => $q->where('opd_id', $opdId));
+            ->when($opdId !== null, fn ($q) => $q->where('opd_id', $opdId));
 
         $byMonth = [];
         foreach ($query->get(['created_at']) as $pengajuan) {
@@ -162,7 +160,7 @@ class HomeController extends Controller
         $query = PengajuanRealisasi::query()
             ->whereYear('tanggal_laporan', $year)
             ->with([
-                'pengajuan' => fn($pengajuanQuery) => $pengajuanQuery
+                'pengajuan' => fn ($pengajuanQuery) => $pengajuanQuery
                     ->select(['id', 'opd_id'])
                     ->with([
                         'verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi',
