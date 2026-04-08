@@ -101,7 +101,7 @@
                 <div class="card mb-5">
                     <div class="card-body">
                         <div class="sh-45">
-                            <canvas id="chartBansos"></canvas>
+                            <canvas id="chartBantuan"></canvas>
                         </div>
                     </div>
                 </div>
@@ -167,19 +167,19 @@
                 });
             }
 
-            if (document.getElementById('chartBansos')) {
-                const chartBansos = document.getElementById('chartBansos');
-                new Chart(chartBansos, {
+            if (document.getElementById('chartBantuan')) {
+                const chartBantuan = document.getElementById('chartBantuan');
+                new Chart(chartBantuan, {
                     type: 'bar',
                     data: {
-                        labels: {!!  json_encode($dataChartBansos["labels"], JSON_THROW_ON_ERROR) !!},
+                        labels: {!!  json_encode($dataChartBantuan["labels"], JSON_THROW_ON_ERROR) !!},
                         datasets: [
                             {
-                                label: "{{ array_keys($dataChartBansos["data"])[0]??"-" }}",
+                                label: "{{ array_keys($dataChartBantuan["data"])[0]??"-" }}",
                                 fill: true,
                                 borderColor: [Globals.primary],
                                 borderWidth: 2,
-                                data: {!!  json_encode(collect($dataChartBansos["data"]["Rupiah"]), JSON_THROW_ON_ERROR) !!},
+                                data: {!!  json_encode(collect($dataChartBantuan["data"]["Rupiah"]), JSON_THROW_ON_ERROR) !!},
                             },
                         ],
                     },
