@@ -85,7 +85,7 @@ return [
     [
         'id' => 'SIDE_VERIFIKASI',
         'url' => 'javascript:;',
-        'title' => 'Verifikasi',
+        'title' => 'Verifikasi & Pengajuan',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
@@ -106,6 +106,13 @@ return [
                 'id' => 'VERIFY_PENGAJUAN',
                 'icon' => 'check-square',
                 'url' => '/verifikasi-pengajuan',
+                'title' => 'Verifikasi Pengajuan',
+            ],
+
+            [
+                'id' => 'PENGAJUAN_OPD',
+                'icon' => 'book',
+                'url' => '/pengajuan-opd',
                 'title' => 'Pengajuan Bantuan',
             ],
         ],

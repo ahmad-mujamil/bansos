@@ -117,6 +117,14 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
 
     // Verifikasi Pengajuan
     Route::middleware(['role:opd'])->group(function () {
+        Route::get('pengajuan-opd', [App\Http\Controllers\PengajuanOpdController::class, 'index'])->name('pengajuan-opd.index');
+        Route::get('pengajuan-opd/create', [App\Http\Controllers\PengajuanOpdController::class, 'create'])->name('pengajuan-opd.create');
+        Route::post('pengajuan-opd', [App\Http\Controllers\PengajuanOpdController::class, 'store'])->name('pengajuan-opd.store');
+        Route::get('pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'show'])->name('pengajuan-opd.show');
+        Route::get('pengajuan-opd/{pengajuan}/edit', [App\Http\Controllers\PengajuanOpdController::class, 'edit'])->name('pengajuan-opd.edit');
+        Route::put('pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'update'])->name('pengajuan-opd.update');
+        Route::post('pengajuan-opd/{pengajuan}/submit', [App\Http\Controllers\PengajuanOpdController::class, 'submit'])->name('pengajuan-opd.submit');
+
         Route::get('verifikasi-pengajuan', [App\Http\Controllers\VerifikasiPengajuanController::class, 'index'])->name('verifikasi-pengajuan.index');
         Route::get('verifikasi-pengajuan/{pengajuan}', [App\Http\Controllers\VerifikasiPengajuanController::class, 'show'])->name('verifikasi-pengajuan.show');
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
