@@ -35,6 +35,7 @@ class VerifikasiPengajuanForm extends Component
     public ?string $catatan = null;
 
     public ?string $disahkan_oleh = null;
+    public ?string $disahkan_nip = null;
 
     public string $lokasi_pengesahan = 'Gerung';
 
@@ -64,6 +65,8 @@ class VerifikasiPengajuanForm extends Component
         $this->pengajuan = $pengajuan->loadMissing(['details.penduduk', 'logs', 'user', 'verifiedBy']);
 
         $this->disahkan_oleh = Auth::user()?->opd?->kepala_opd ?? null;
+        $this->disahkan_nip = auth()->user()?->opd?->nip??null;
+
 
         foreach ($this->pengajuan->details as $row) {
             $this->detail[(string) $row->id] = [
@@ -105,10 +108,11 @@ class VerifikasiPengajuanForm extends Component
             'nilai_rekomendasi' => ['nullable', 'numeric', 'min:0'],
             'catatan'            => ['nullable', 'string', 'max:1000'],
             'disahkan_oleh'      => ['nullable', 'string', 'max:255'],
+            'disahkan_nip'      => ['nullable', 'string', 'max:18'],
             'lokasi_pengesahan'  => ['required', 'string', 'max:255'],
             'pemeriksa' => ['required', 'array', 'size:3'],
             'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
-            'pemeriksa.*.nip' => ['required', 'string', 'max:50'],
+            'pemeriksa.*.nip' => ['required', 'string', 'max:18'],
             'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
         ];
 
@@ -249,9 +253,8 @@ class VerifikasiPengajuanForm extends Component
         $oldStatus = $this->pengajuan->status;
         $newStatus = $this->allPassed() ? PengajuanStatus::DISETUJUI : PengajuanStatus::DITOLAK;
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
             $verifikasi = VerifikasiPengajuan::create([
                 'pengajuan_id'      => $this->pengajuan->id,
                 'user_id'           => Auth::id(),
@@ -263,6 +266,7 @@ class VerifikasiPengajuanForm extends Component
                 'lulus_kesesuaian'  => (bool) $validated['lulus_kesesuaian'],
                 'sesuai_program_pemda' => (bool) $validated['sesuai_program_pemda'],
                 'disahkan_oleh'     => $validated['disahkan_oleh'] ?? null,
+                'disahkan_nip'     => $validated['disahkan_nip'] ?? null,
                 'lokasi_pengesahan' => $validated['lokasi_pengesahan'],
             ]);
 
@@ -324,7 +328,6 @@ class VerifikasiPengajuanForm extends Component
 
             $this->redirectRoute('verifikasi-pengajuan.index');
         } catch (\Throwable $e) {
-            DB::rollBack();
             \Illuminate\Support\Facades\Log::error('VerifikasiPengajuan submit error: ' . $e->getMessage(), [
                 'exception' => get_class($e),
                 'file' => $e->getFile(),

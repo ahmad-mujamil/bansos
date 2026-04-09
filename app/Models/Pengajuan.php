@@ -15,6 +15,9 @@ class Pengajuan extends Model implements HasMedia
 {
     use HasUuids, InteractsWithMedia;
 
+    /**
+     * @var mixed|true
+     */
     protected $table = 'pengajuan';
 
     protected $keyType = 'string';

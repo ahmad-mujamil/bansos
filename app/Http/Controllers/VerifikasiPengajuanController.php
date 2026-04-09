@@ -136,13 +136,14 @@ class VerifikasiPengajuanController extends Controller
 
         $newStatus = $allPassed ? PengajuanStatus::DISETUJUI : PengajuanStatus::DITOLAK;
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
             $verifikasi = VerifikasiPengajuan::create([
                 'pengajuan_id' => $pengajuan->id,
                 'user_id' => Auth::id(),
                 'catatan' => $catatan,
+                'disahkan_oleh' => $request->validated('disahkan_oleh'),
+                'disahkan_nip' => $request->validated('disahkan_nip'),
                 'nilai_rekomendasi' => $request->validated('nilai_rekomendasi'),
                 'rupa_bantuan' => $request->validated('rupa_bantuan'),
                 'lulus_kriteria' => (bool) $request->validated('lulus_kriteria'),
@@ -242,7 +243,6 @@ class VerifikasiPengajuanController extends Controller
 
             return redirect()->route('verifikasi-pengajuan.index');
         } catch (\Throwable $e) {
-            DB::rollBack();
             toast()->error('Gagal', $e->getMessage());
 
             return redirect()->back()->withInput();
@@ -264,9 +264,9 @@ class VerifikasiPengajuanController extends Controller
             return redirect()->route('verifikasi-pengajuan.index');
         }
 
-        DB::beginTransaction();
 
         try {
+            DB::beginTransaction();
             $verifikasi->update(['tgl_disahkan' => $request->tgl_pengesahan]);
 
             $verifikasi->addMediaFromRequest('dokumen')
@@ -336,13 +336,13 @@ class VerifikasiPengajuanController extends Controller
         ])));
 
         $pemohon = $pengajuan->user?->userDetail?->nama_user
-            ?: $pengajuan->user?->nama
-            ?: $pengajuan->user?->email
-            ?: '-';
+            ?? $pengajuan->user?->nama
+            ?? $pengajuan->user?->email
+            ?? '-';
 
         $namaKelompok = $pengajuan->organisasi?->nama ?: '-';
-        $kepalaSkpd = $pengajuan->organisasi?->opd?->kepala_opd ?: ($verifikasi->disahkan_oleh ?: '-');
-        $nipKepalaSkpd = $pengajuan->organisasi?->opd?->nip ?: '-';
+        $kepalaSkpd = $verifikasi->disahkan_oleh ?? '-';
+        $nipKepalaSkpd = $verifikasi->disahkan_nip ?? '-';
         $jumlahUsulan = 0;
         $jumlahDisetujui = 0;
         $satuan = '-';
