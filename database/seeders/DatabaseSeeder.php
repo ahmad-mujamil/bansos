@@ -22,12 +22,21 @@ class DatabaseSeeder extends Seeder
             OrganisasiSeeder::class,
             PengajuanSeeder::class,
         ]);
+        User::query()->updateOrCreate([
+            'email' => 'super@bantuin.id',
+        ], [
+            'nama' => 'Super Admin',
+            'role' => 'super',
+            'is_active' => true,
+            'username' => 'super',
+            'password' => bcrypt('1q2w3e4r5t'),
+        ]);
 
         User::query()->updateOrCreate([
-            'email' => 'admin@bansos.test',
+            'email' => 'admin@bantuin.id',
         ], [
             'nama' => 'Administrator',
-            'role' => 'super',
+            'role' => 'admin',
             'is_active' => true,
             'username' => 'admin',
             'password' => bcrypt('1q2w3e4r5t'),
