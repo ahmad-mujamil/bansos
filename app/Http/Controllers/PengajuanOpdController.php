@@ -98,6 +98,7 @@ class PengajuanOpdController extends Controller
             $pengajuan->organisasi_id = $validated['organisasi_id'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
             $pengajuan->status = PengajuanStatus::DRAFT;
+            $pengajuan->is_pengajuan_opd = true;
             $pengajuan->save();
 
             if ($request->hasFile('file_pengajuan')) {
@@ -243,6 +244,7 @@ class PengajuanOpdController extends Controller
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->organisasi_id = $validated['organisasi_id'];
+            $pengajuan->is_pengajuan_opd = true;
             $pengajuan->save();
 
             if ($request->hasFile('file_pengajuan')) {

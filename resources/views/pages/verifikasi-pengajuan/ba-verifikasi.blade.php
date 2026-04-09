@@ -481,9 +481,9 @@
                 </div>
                 <div class="bold ttd-kepala-jabatan">Kepala SKPD,</div>
                 <div class="ttd-ruang-tanda-tangan" aria-hidden="true"></div>
-                <div class="bold ttd-kepala-nama">{{ $kepalaSkpd ?: '-' }}</div>
+                <div class="bold ttd-kepala-nama">{{ $verifikasi->disahkan_oleh ?: '-' }}</div>
                 <div class="ttd-kepala-garis">...................................................</div>
-                <div class="ttd-kepala-nip">NIP: {{ $opd?->nip ?? '' }}</div>
+                <div class="ttd-kepala-nip">NIP: {{ $verifikasi->disahkan_nip ?? '' }}</div>
             </div>
         </div>
     </div>

@@ -49,8 +49,11 @@ class VerifikasiPengajuanRequest extends FormRequest
 
             'pemeriksa' => ['required', 'array', 'size:3'],
             'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
-            'pemeriksa.*.nip' => ['required', 'string', 'max:50'],
+            'pemeriksa.*.nip' => ['required', 'string', 'max:18'],
             'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
+            'lokasi_pengesahan' => ['required', 'string', 'max:255'],
+            'disahkan_oleh' => ['required', 'string', 'max:255'],
+            'disahkan_nip' => ['required', 'string', 'max:18'],
         ];
     }
 
@@ -58,6 +61,13 @@ class VerifikasiPengajuanRequest extends FormRequest
     {
         return [
             'rupa_bantuan.in' => 'Rupa bantuan tidak valid.',
+            'detail.*.penduduk_id.required_with' => 'Nilai harus diisi jika penduduk tersebut dipilih.',
+            'detail.*.nilai.required_with' => 'Penduduk harus dipilih jika nilai diisi.',
+            'items.*.nama_barang.required_with' => 'Satuan, spesifikasi, harga satuan, dan qty harus diisi jika barang tersebut dipilih.',
+            'items.*.satuan.required_with' => 'Nama barang, spesifikasi, harga satuan, dan qty harus diisi jika satuan tersebut dipilih.',
+            'items.*.spesifikasi.required_with' => 'Nama barang, satuan, harga satuan, dan qty harus diisi jika spesifikasi tersebut dipilih.',
+            'items.*.harga_satuan.required_with' => 'Nama barang, satuan, spesifikasi, dan qty harus diisi jika harga satuan tersebut dipilih.',
+
         ];
     }
 }

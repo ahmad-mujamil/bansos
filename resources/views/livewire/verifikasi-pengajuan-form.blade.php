@@ -99,7 +99,7 @@
                                         </td>
                                         <td class="py-2">
                                             <label class="visually-hidden" for="pemeriksa-{{ $index }}-nip">NIP pemeriksa {{ $index + 1 }}</label>
-                                            <input type="text" id="pemeriksa-{{ $index }}-nip" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off">
+                                            <input type="number" id="pemeriksa-{{ $index }}-nip" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off" maxlength="18">
                                             @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </td>
                                         <td class="pe-3 py-2">
@@ -114,8 +114,19 @@
                     </div>
                     @error('pemeriksa') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
-
-                <div class="col-12 col-lg-6 mt-3">
+                <div class="col-12 col-lg-3 mt-3">
+                    <label class="form-label text-muted text-small text-uppercase" for="disahkan-nip">NIP</label>
+                    <input
+                        type="number"
+                        id="disahkan-nip"
+                        class="form-control"
+                        wire:model="disahkan_nip"
+                        placeholder="NIP kepala OPD"
+                        maxlength="18"
+                    >
+                    @error('disahkan_nip') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-12 col-lg-3 mt-3">
                     <label class="form-label text-muted text-small text-uppercase" for="disahkan-oleh">Disahkan Oleh</label>
                     <input
                         type="text"
