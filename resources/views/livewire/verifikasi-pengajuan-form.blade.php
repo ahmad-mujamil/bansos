@@ -99,7 +99,16 @@
                                         </td>
                                         <td class="py-2">
                                             <label class="visually-hidden" for="pemeriksa-{{ $index }}-nip">NIP pemeriksa {{ $index + 1 }}</label>
-                                            <input type="number" id="pemeriksa-{{ $index }}-nip" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.nip" autocomplete="off" maxlength="18">
+                                            <input
+                                                type="text"
+                                                id="pemeriksa-{{ $index }}-nip"
+                                                class="form-control form-control-sm"
+                                                wire:model="pemeriksa.{{ $index }}.nip"
+                                                inputmode="numeric"
+                                                pattern="[0-9]{1,18}"
+                                                maxlength="18"
+                                                autocomplete="off"
+                                            >
                                             @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </td>
                                         <td class="pe-3 py-2">
