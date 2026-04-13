@@ -119,7 +119,13 @@
                         </div>
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="lock-off"></i>
-                            <input class="form-control pe-7 @error('password') is-invalid @enderror" name="password" type="password" placeholder="Password" autocomplete="current-password" />
+                            <div class="position-relative">
+                                <input class="form-control pe-7 password-input @error('password') is-invalid @enderror" name="password" type="password" placeholder="Password" autocomplete="current-password" />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                             <!-- <a class="text-small position-absolute t-3 e-3" href="#">Lupa password?</a>
                             <a href=""><span class="badge rounded-pill bg-foreground mt-2">* Pertanyaan yang paling sering diajukan (FAQ's)</span></a>
            -->

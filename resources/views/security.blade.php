@@ -39,19 +39,37 @@
                     <div class="mb-3 row">
                         <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Password Lama</label>
                         <div class="col-sm-8 col-md-9 col-lg-10">
-                            <input type="password" class="form-control" value="" name="password_old" id="password_old" required />
+                            <div class="position-relative">
+                                <input type="password" class="form-control password-input" value="" name="password_old" id="password_old" required />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Password Baru</label>
                         <div class="col-sm-8 col-md-9 col-lg-10">
-                            <input type="password" class="form-control" value="" name="password" id="password" required />
+                            <div class="position-relative">
+                                <input type="password" class="form-control password-input" value="" name="password" id="password" required />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label class="col-lg-2 col-md-3 col-sm-4 col-form-label">Konfirmasi Password</label>
                         <div class="col-sm-8 col-md-9 col-lg-10">
-                            <input type="password" class="form-control" name="password_confirmation" id="password_confirmation"  required/>
+                            <div class="position-relative">
+                                <input type="password" class="form-control password-input" name="password_confirmation" id="password_confirmation" required />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3 row mt-5">
