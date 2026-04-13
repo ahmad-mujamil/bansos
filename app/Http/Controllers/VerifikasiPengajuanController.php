@@ -73,7 +73,6 @@ class VerifikasiPengajuanController extends Controller
                     if ($baMedia) {
                         $baUrl = $baMedia->getUrl();
                         $action .= " <a href='{$baUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Lihat File BA'>Lihat BA</a>";
-                        $action .= $actionUpload;
                     } else {
                         $action .= " <a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Download BA Verifikasi (template)'>Download BA</a>";
                         $action .= $actionUpload;
