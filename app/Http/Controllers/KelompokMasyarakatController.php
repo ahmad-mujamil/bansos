@@ -350,16 +350,13 @@ class KelompokMasyarakatController extends Controller
     public function destroy(string $kelompok_masyarakat): ?\Illuminate\Http\RedirectResponse
     {
         try {
-            // Hapus semua anggota kelompok
             $organisasi = Organisasi::query()
                 ->where('jenis', JenisOrganisasi::KELOMPOK)
                 ->findOrFail($kelompok_masyarakat);
 
-            // Hapus seluruh anggota kelompok terkait
-            $organisasi->anggota()->delete();
+            $organisasi->organisasiDetail()->delete();
 
-            // Hapus seluruh dokumen yang dimiliki kelompok, beserta media-nya
-            $dokumenList = $organisasi->dokumen()->get();
+            $dokumenList = $organisasi->organisasiDokumen()->get();
             foreach ($dokumenList as $dokumen) {
                 $dokumen->clearMediaCollection('dokumen');
                 $dokumen->delete();
