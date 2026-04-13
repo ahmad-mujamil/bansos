@@ -72,7 +72,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
 
     // USERS
-    Route::middleware(['role:super'])->group(function () {
+    Route::middleware(['role:super,admin'])->group(function () {
         Route::resource('pengguna', App\Http\Controllers\PenggunaController::class);
     });
 
