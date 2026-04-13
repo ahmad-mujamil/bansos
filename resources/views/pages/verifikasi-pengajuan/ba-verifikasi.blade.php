@@ -413,11 +413,12 @@
     </div>
 
     <div class="section">
+        @php($tglVerifikasi = $pengajuan->verified_at->locale('id'))
         <div class="lvl-1">Berdasarkan hasil verifikasi administrasi terhadap permohonan/proposal yang dilaksanakan
-            pada hari {{ $pengajuan->verified_at->translatedFormat('l') }} tanggal
-            {{ $pengajuan->verified_at->translatedFormat('d') }} bulan
-            {{ $pengajuan->verified_at->translatedFormat('F') }}
-            tahun {{ $pengajuan->verified_at->translatedFormat('Y') }}, dengan hasil sebagai berikut:
+            pada hari {{ $tglVerifikasi->translatedFormat('l') }} tanggal
+            {{ $tglVerifikasi->translatedFormat('d') }} bulan
+            {{ $tglVerifikasi->translatedFormat('F') }}
+            tahun {{ $tglVerifikasi->translatedFormat('Y') }}, dengan hasil sebagai berikut:
         </div>
 
         <div class="lvl-2">

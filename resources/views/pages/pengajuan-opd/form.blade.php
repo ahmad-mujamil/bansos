@@ -201,9 +201,10 @@
                         <small class="text-muted">Format PDF, maksimal 5 MB.</small>
                         @if($mediaPengajuan)
                         <div class="mt-2">
-                            <a href="{{ $mediaPengajuan->getUrl() }}" target="_blank" class="text-primary fw-semibold">
-                                Lihat file saat ini: {{ $mediaPengajuan->file_name }}
+                            <a href="{{ $mediaPengajuan->getUrl() }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                                <i data-acorn-icon="eye"></i> Lihat file saat ini
                             </a>
+                            <div class="text-muted text-small mt-1 mb-0">{{ $mediaPengajuan->file_name }}</div>
                         </div>
                         @endif
                         @error('file_pengajuan')
