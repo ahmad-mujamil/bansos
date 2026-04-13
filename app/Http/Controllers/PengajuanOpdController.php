@@ -202,6 +202,10 @@ class PengajuanOpdController extends Controller
             ? (Organisasi::query()->find($selectedOrganisasiId)?->anggotaBelumTerverifikasiData() ?? collect())
             : collect();
 
+        $pendudukList = Penduduk::query()
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'nik']);
+
         return view('pages.pengajuan-opd.form', [
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
@@ -211,6 +215,7 @@ class PengajuanOpdController extends Controller
             'kecamatans' => $kecamatans,
             'simpanDiblokir' => $simpanDiblokir,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
+            'pendudukList' => $pendudukList,
         ]);
     }
 
@@ -315,7 +320,7 @@ class PengajuanOpdController extends Controller
     private function generateKodePengajuan(): string
     {
         do {
-            $kode = 'PEN-'.now()->format('Ymd').'-'.strtoupper(Str::random(4));
+            $kode = 'PEN-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
         } while (Pengajuan::where('kode_pengajuan', $kode)->exists());
 
         return $kode;
@@ -325,7 +330,7 @@ class PengajuanOpdController extends Controller
     {
         return OrganisasiDetail::query()
             ->where('organisasi_id', $organisasiId)
-            ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
+            ->whereHas('penduduk', fn($q) => $q->where('is_valid', false))
             ->exists();
     }
 
@@ -348,7 +353,7 @@ class PengajuanOpdController extends Controller
             'judul' => 'required|string|max:255',
             'organisasi_id' => [
                 'required',
-                Rule::exists('organisasi', 'id')->where(fn ($q) => $q->where('opd_id', $opdId)),
+                Rule::exists('organisasi', 'id')->where(fn($q) => $q->where('opd_id', $opdId)),
             ],
             'lokasi' => 'nullable|string|max:255',
             'nilai' => 'required|numeric|min:0',
