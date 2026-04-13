@@ -17,7 +17,13 @@
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
 
                             <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                                <div class="position-relative">
+                                    <input id="password" type="password" class="form-control password-input @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                                    <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                        <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                        <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                    </button>
+                                </div>
 
                                 @error('password')
                                     <span class="invalid-feedback" role="alert">

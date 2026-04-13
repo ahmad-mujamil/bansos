@@ -15,6 +15,8 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <script src="{{ asset('/icon/acorn-icons.js') }}"></script>
+    <script src="{{ asset('/icon/acorn-icons-interface.js') }}"></script>
 </head>
 <body>
     <div id="app">
@@ -76,5 +78,6 @@
             @yield('content')
         </main>
     </div>
+    <script src="{{ asset('/js/password-addon.init.js') }}"></script>
 </body>
 </html>

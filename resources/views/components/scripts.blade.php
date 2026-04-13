@@ -19,5 +19,6 @@
 <!-- Page Specific Scripts Start -->
 <script src="{{ asset('/js/common.js') }}"></script>
 <script src="{{ asset('/js/scripts.js') }}"></script>
+<script src="{{ asset('/js/password-addon.init.js') }}"></script>
 @stack('js_page')
 <!-- Page Specific Scripts End -->

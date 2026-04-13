@@ -135,12 +135,24 @@
 
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="lock-off"></i>
-                            <input type="password" class="form-control pe-7 @error('password') is-invalid @enderror" name="password" placeholder="Password" required />
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-7 password-input @error('password') is-invalid @enderror" name="password" placeholder="Password" required />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mb-3 filled form-group tooltip-end-top">
                             <i data-acorn-icon="lock-off"></i>
-                            <input type="password" class="form-control pe-7 @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="Konfirmasi Password" required />
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-7 password-input @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="Konfirmasi Password" required />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
 
                         @php

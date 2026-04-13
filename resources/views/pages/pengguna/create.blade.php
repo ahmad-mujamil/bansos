@@ -87,9 +87,15 @@
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">Password</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                   id="password" name="password" {{ request()->routeIs('pengguna.create') ? 'required' : '' }}
-                                   />
+                            <div class="position-relative">
+                                <input type="password" class="form-control password-input @error('password') is-invalid @enderror"
+                                       id="password" name="password" {{ request()->routeIs('pengguna.create') ? 'required' : '' }}
+                                       />
+                                <button class="btn position-absolute end-0 top-0 h-100 px-3 password-addon" type="button">
+                                    <i data-acorn-icon="eye-off" class="icon-eye-off text-primary"></i>
+                                    <i data-acorn-icon="eye" class="icon-eye d-none text-primary"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="col-lg-3 col-md-3 col-sm-12 mb-3">
