@@ -104,7 +104,6 @@ class LandingController extends Controller
                     JenisOrganisasi::PARTAI_POLITIK->value,
                     JenisOrganisasi::BADAN_LEMBAGA->value,
                     JenisOrganisasi::LEMBAGA_NON_PEMERINTAH->value,
-
                 ])
                 ->where('is_active', true)
                 ->count();

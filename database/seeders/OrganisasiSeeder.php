@@ -39,7 +39,7 @@ class OrganisasiSeeder extends Seeder
                 'nama'            => 'Yayasan Peduli Lombok',
                 'nomor'           => 'AHU-0012345.AH.01.04.2019',
                 'tgl_pembentukan' => '2019-07-20',
-                'jenis'           => JenisOrganisasi::YAYASAN->value,
+                'jenis'           => JenisOrganisasi::LEMBAGA_NON_PEMERINTAH->value,
                 'user_id'         => $users->get(1)->id,
             ],
             [
@@ -53,14 +53,14 @@ class OrganisasiSeeder extends Seeder
                 'nama'            => 'Masjid Al-Ikhlas Gerung',
                 'nomor'           => 'SK/003/KEMENAG/2018',
                 'tgl_pembentukan' => '2018-05-05',
-                'jenis'           => JenisOrganisasi::TEMPAT_IBADAH->value,
+                'jenis'           => JenisOrganisasi::BADAN_LEMBAGA->value,
                 'user_id'         => $users->get(3)->id,
             ],
             [
                 'nama'            => 'Organisasi Masyarakat Mandiri Lombok',
                 'nomor'           => 'AHU-0098765.AH.01.07.2021',
                 'tgl_pembentukan' => '2021-09-01',
-                'jenis'           => JenisOrganisasi::ORGANISASI->value,
+                'jenis'           => JenisOrganisasi::LEMBAGA_NON_PEMERINTAH->value,
                 'user_id'         => $users->get(4)->id,
             ],
         ];
