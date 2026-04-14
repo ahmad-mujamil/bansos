@@ -15,7 +15,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function index(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+        
             ->findOrFail($kelompok_masyarakat);
 
         confirmDelete('Hapus Anggota', 'Apakah Anda yakin ingin menghapus anggota ini?');
@@ -66,7 +66,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function create(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+        
             ->findOrFail($kelompok_masyarakat);
 
         $penduduks = Penduduk::query()->orderBy('nama')->get();
@@ -78,7 +78,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function store(KelompokMasyarakatAnggotaRequest $request, string $kelompok_masyarakat): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+        
             ->findOrFail($kelompok_masyarakat);
 
         try {
@@ -109,7 +109,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function edit(string $kelompok_masyarakat, string $anggota)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+        
             ->findOrFail($kelompok_masyarakat);
 
         $detail = OrganisasiDetail::query()
