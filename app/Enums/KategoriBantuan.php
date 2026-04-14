@@ -24,9 +24,7 @@ enum KategoriBantuan: string
         return match ($this) {
             self::BANSOS => "<span class='badge bg-success'>Bantuan Sosial</span>",
             self::HIBAH => "<span class='badge bg-primary'>Hibah</span>",
-            self::SUBSIDI => "<span class='badge bg-warning'>Subsidi</span>",
-            self::PINJAMAN => "<span class='badge bg-info'>Pinjaman</span>",
-            self::LAINNYA => "<span class='badge bg-secondary'>Lainnya</span>",
+            self::BANTUAN_KELOMPOK => "<span class='badge bg-warning'>Bantuan Kelompok</span>",
         };
     }
 }
