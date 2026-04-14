@@ -95,12 +95,6 @@ class LandingController extends Controller
                 ->count();
 
             $totalOrganisasiTerdaftar = Organisasi::query()
-                ->whereIn('jenis', [
-                    JenisOrganisasi::ORGANISASI->value,
-                    JenisOrganisasi::YAYASAN->value,
-                    JenisOrganisasi::TEMPAT_IBADAH->value,
-                    JenisOrganisasi::INSTANSI->value,
-                ])
                 ->where('is_active', true)
                 ->count();
         }
