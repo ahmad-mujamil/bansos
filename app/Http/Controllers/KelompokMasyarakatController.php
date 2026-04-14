@@ -144,7 +144,9 @@ class KelompokMasyarakatController extends Controller
             $dokumenInitial = [];
         }
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial'));
+        $jenisOrganisasiOptions = JenisOrganisasi::cases();
+
+        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions'));
     }
 
     public function store(KelompokMasyarakatRequest $request): ?\Illuminate\Http\RedirectResponse
@@ -204,9 +206,9 @@ class KelompokMasyarakatController extends Controller
 
     public function edit(string $kelompok_masyarakat)
     {
+
         $organisasi = Organisasi::query()
             ->with(['kecamatan.desa', 'organisasiDetail.penduduk', 'organisasiDokumen.media'])
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->findOrFail($kelompok_masyarakat);
 
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
@@ -260,7 +262,9 @@ class KelompokMasyarakatController extends Controller
             })->values()->all();
         }
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial'));
+        $jenisOrganisasiOptions = JenisOrganisasi::cases();
+
+        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions'));
     }
 
     public function update(KelompokMasyarakatRequest $request, string $kelompok_masyarakat): ?\Illuminate\Http\RedirectResponse
@@ -274,7 +278,7 @@ class KelompokMasyarakatController extends Controller
 
         try {
             $organisasi = Organisasi::query()
-                ->where('jenis', JenisOrganisasi::KELOMPOK)
+
                 ->findOrFail($kelompok_masyarakat);
 
             DB::beginTransaction();
@@ -351,7 +355,6 @@ class KelompokMasyarakatController extends Controller
     {
         try {
             $organisasi = Organisasi::query()
-                ->where('jenis', JenisOrganisasi::KELOMPOK)
                 ->findOrFail($kelompok_masyarakat);
 
             $organisasi->organisasiDetail()->delete();
@@ -362,7 +365,7 @@ class KelompokMasyarakatController extends Controller
                 $dokumen->delete();
             }
             $organisasi = Organisasi::query()
-                ->where('jenis', JenisOrganisasi::KELOMPOK)
+
                 ->findOrFail($kelompok_masyarakat);
 
             DB::beginTransaction();
