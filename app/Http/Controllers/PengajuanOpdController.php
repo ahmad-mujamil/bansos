@@ -41,7 +41,7 @@ class PengajuanOpdController extends Controller
         $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
 
         $kelompokList = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+            
             ->where('is_active', true)
             ->where('opd_id', $opdId)
             ->orderBy('nama')
@@ -180,7 +180,7 @@ class PengajuanOpdController extends Controller
         $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
 
         $kelompokList = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+            
             ->where('is_active', true)
             ->where('opd_id', $opdId)
             ->orderBy('nama')
