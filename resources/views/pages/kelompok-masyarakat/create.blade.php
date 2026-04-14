@@ -95,10 +95,18 @@
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                                 <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
+                                @php
+                                    $jenisStored = optional($organisasi)->jenis;
+                                    $selectedJenis = old(
+                                        'jenis',
+                                        \App\Enums\JenisOrganisasi::tryFrom((string) ($jenisStored ?? ''))?->value
+                                            ?? \App\Enums\JenisOrganisasi::KELOMPOK->value
+                                    );
+                                @endphp
                                 <select name="jenis" id="jenis" class="form-control @error('jenis') is-invalid @enderror" required>
                                     <option value="">Pilih Jenis</option>
-                                    @foreach(\App\Enums\JenisOrganisasi::cases() as $jenisOption)
-                                        <option value="{{ $jenisOption->value }}" {{ old('jenis', optional($organisasi)->jenis?->value ?? \App\Enums\JenisOrganisasi::KELOMPOK->value) == $jenisOption->value ? 'selected' : '' }}>
+                                    @foreach($jenisOrganisasiOptions as $jenisOption)
+                                        <option value="{{ $jenisOption->value }}" {{ $selectedJenis === $jenisOption->value ? 'selected' : '' }}>
                                             {{ $jenisOption->getDescription() }}
                                         </option>
                                     @endforeach
