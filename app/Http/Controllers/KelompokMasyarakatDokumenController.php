@@ -15,7 +15,7 @@ class KelompokMasyarakatDokumenController extends Controller
     public function index(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+            
             ->findOrFail($kelompok_masyarakat);
 
         confirmDelete("Hapus Dokumen", "Apakah Anda yakin ingin menghapus dokumen ini?");
@@ -64,7 +64,7 @@ class KelompokMasyarakatDokumenController extends Controller
     public function create(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+            
             ->findOrFail($kelompok_masyarakat);
 
         return view('pages.kelompok-masyarakat.dokumen.create', compact('organisasi'));
@@ -73,7 +73,7 @@ class KelompokMasyarakatDokumenController extends Controller
     public function store(KelompokMasyarakatDokumenRequest $request, string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-            ->where('jenis', JenisOrganisasi::KELOMPOK)
+            
             ->findOrFail($kelompok_masyarakat);
 
         try {
