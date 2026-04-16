@@ -28,7 +28,7 @@ enum RoleUser: string
             self::ADMIN => [
                 'ADMIN', 'PENGGUNA',
                 'LANDING-PAGE', 'BERITA', 'SLIDER',
-                'MASTER_DATA', 'SIDE_MASTER_DATA', 'PENDUDUK', 'KELOMPOK_MASYARAKAT', 'JENIS_BANTUAN', 'OPD',
+                'MASTER_DATA', 'SIDE_MASTER_DATA', 'PENDUDUK', 'JENIS_KELOMPOK_MASYARAKAT', 'JENIS_BANTUAN', 'OPD',
                 'WILAYAH_ADMINISTRASI', 'KECAMATAN', 'DESA',
                 'LANDING_PAGE', 'BERITA', 'SLIDER', 'GALERI', 'ALUR_BANTUAN', 'PROFILE',
                 'LAPORAN', 'LAP_PENGAJUAN', 'LAP_REALISASI',

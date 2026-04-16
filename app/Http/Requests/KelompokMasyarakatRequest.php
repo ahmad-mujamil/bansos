@@ -6,6 +6,7 @@ use App\Enums\JabatanOrganisasi;
 use App\Enums\JenisDokumen;
 use App\Enums\JenisKelamin;
 use App\Enums\JenisOrganisasi;
+use App\Enums\JenisPengajuan;
 use App\Models\Desa;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,14 @@ class KelompokMasyarakatRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->input('jenis_kelompok_masyarakat_id') === '') {
+            $this->merge(['jenis_kelompok_masyarakat_id' => null]);
+        }
+
+        if ($this->input('jenis_pengajuan') === '') {
+            $this->merge(['jenis_pengajuan' => null]);
+        }
+
         $dokumen = $this->input('dokumen', []);
         if (is_array($dokumen)) {
             foreach ($dokumen as $i => $row) {
@@ -53,10 +62,18 @@ class KelompokMasyarakatRequest extends FormRequest
     {
         $organisasiId = $this->route('kelompok_masyarakat') ?? null;
         $jenis = $this->input('jenis');
+        $isBantuanKelompok = $this->input('jenis_pengajuan') === JenisPengajuan::BANTUAN_KELOMPOK->value;
 
         $base = [
             'nama' => ['required', 'string', 'max:255'],
+            'jenis_pengajuan' => ['nullable', Rule::enum(JenisPengajuan::class)],
             'jenis' => ['required', Rule::enum(JenisOrganisasi::class)],
+            'jenis_kelompok_masyarakat_id' => [
+                Rule::requiredIf($isBantuanKelompok),
+                'nullable',
+                'uuid',
+                'exists:jenis_kelompok_masyarakat,id',
+            ],
             'nomor' => [
                 'required',
                 'string',
