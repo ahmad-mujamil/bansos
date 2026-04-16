@@ -32,20 +32,14 @@ class PengajuanOpdController extends Controller
         return view('pages.pengajuan-opd.index', compact('pengajuan'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
         $opdId = $user->opd_id;
 
-        $jenis = request()->get('jenis');
-        $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
+        $jenis = $request->input('jenis');
 
-        $kelompokList = Organisasi::query()
-            
-            ->where('is_active', true)
-            ->where('opd_id', $opdId)
-            ->orderBy('nama')
-            ->get(['id', 'nama']);
+         $kelompokList = $this->kelompokListForOpd($opdId, $jenis);
 
         $jenisBantuanKelompokList = JenisBantuan::query()
             ->where('kategori', 'bantuan_kelompok')
@@ -71,7 +65,6 @@ class PengajuanOpdController extends Controller
             'pengajuan' => null,
             'pendudukList' => $pendudukList,
             'kelompokList' => $kelompokList,
-            'jenisOptions' => $jenisOptions,
             'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
             'jenis' => $jenis,
             'kecamatans' => $kecamatans,
@@ -179,12 +172,7 @@ class PengajuanOpdController extends Controller
         $jenis = JenisPengajuan::BANTUAN_KELOMPOK->value;
         $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
 
-        $kelompokList = Organisasi::query()
-            
-            ->where('is_active', true)
-            ->where('opd_id', $opdId)
-            ->orderBy('nama')
-            ->get(['id', 'nama']);
+        $kelompokList = $this->kelompokListForOpd($opdId, $jenis, $pengajuan->organisasi_id);
 
         $jenisBantuanKelompokList = JenisBantuan::query()
             ->where('kategori', 'bantuan_kelompok')
@@ -306,6 +294,24 @@ class PengajuanOpdController extends Controller
         return redirect()->route('pengajuan-opd.index');
     }
 
+
+    private function kelompokListForOpd(string $opdId, ?string $jenis, ?string $alwaysIncludeOrganisasiId = null)
+    {
+
+        $jenis_pengajuan = JenisPengajuan::tryFrom($jenis);
+        if ($jenis_pengajuan === null) {
+            return [];
+        }
+        $jenisOrganisasiValues = $jenis_pengajuan->getJenisOrganisasi();
+        return Organisasi::query()
+            ->where('is_active', true)
+            ->where('is_blacklist', false)
+            ->where('opd_id', $opdId)
+            ->whereIn('jenis', $jenisOrganisasiValues)
+            ->orderBy('nama')
+            ->get(['id', 'nama']);
+    }
+
     private function authorizeUser(Pengajuan $pengajuan): void
     {
         $user = Auth::user();
@@ -348,12 +354,19 @@ class PengajuanOpdController extends Controller
     {
         $opdId = Auth::user()?->opd_id;
 
+        $jenisOrgValues = $this->jenisOrganisasiValuesForPengajuan($request->input('jenis'));
+
         return $request->validate([
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',
             'organisasi_id' => [
                 'required',
-                Rule::exists('organisasi', 'id')->where(fn($q) => $q->where('opd_id', $opdId)),
+                Rule::exists('organisasi', 'id')->where(function ($q) use ($opdId, $jenisOrgValues) {
+                    $q->where('opd_id', $opdId);
+                    if ($jenisOrgValues !== []) {
+                        $q->whereIn('jenis', $jenisOrgValues);
+                    }
+                }),
             ],
             'lokasi' => 'nullable|string|max:255',
             'nilai' => 'required|numeric|min:0',
