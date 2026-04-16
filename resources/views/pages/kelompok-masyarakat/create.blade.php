@@ -97,10 +97,14 @@
                                 <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
                                 @php
                                     $jenisStored = optional($organisasi)->jenis;
+                                    $fallbackJenis = ($requireJenisSelection ?? false)
+                                        ? ''
+                                        : \App\Enums\JenisOrganisasi::KELOMPOK->value;
                                     $selectedJenis = old(
                                         'jenis',
                                         \App\Enums\JenisOrganisasi::tryFrom((string) ($jenisStored ?? ''))?->value
-                                            ?? \App\Enums\JenisOrganisasi::KELOMPOK->value
+                                            ?? ($defaultJenis ?? null)
+                                            ?? $fallbackJenis
                                     );
                                 @endphp
                                 <select name="jenis" id="jenis" class="form-control @error('jenis') is-invalid @enderror" required>

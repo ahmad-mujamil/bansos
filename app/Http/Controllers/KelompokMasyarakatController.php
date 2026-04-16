@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\JabatanOrganisasi;
 use App\Enums\JenisKelamin;
+use App\Enums\JenisPengajuan;
 use App\Enums\JenisOrganisasi;
 use App\Http\Requests\KelompokMasyarakatRequest;
 use App\Models\Kecamatan;
@@ -131,7 +132,7 @@ class KelompokMasyarakatController extends Controller
         return view('pages.kelompok-masyarakat.index');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $organisasi = null;
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
@@ -144,9 +145,21 @@ class KelompokMasyarakatController extends Controller
             $dokumenInitial = [];
         }
 
-        $jenisOrganisasiOptions = JenisOrganisasi::cases();
+        $jenisQuery = (string) $request->query('jenis');
+        $jenisPengajuan = JenisPengajuan::tryFrom($jenisQuery);
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions'));
+        $requireJenisSelection = false;
+
+        if ($jenisPengajuan instanceof JenisPengajuan) {
+            $jenisOrganisasiOptions = $jenisPengajuan->getJenisOrganisasi();
+            $requireJenisSelection = count($jenisOrganisasiOptions) > 1;
+            $defaultJenis = $requireJenisSelection ? null : ($jenisOrganisasiOptions[0]?->value ?? null);
+        } else {
+            $jenisOrganisasiOptions = JenisOrganisasi::cases();
+            $defaultJenis = JenisOrganisasi::tryFrom($jenisQuery)?->value;
+        }
+
+        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions', 'defaultJenis', 'requireJenisSelection'));
     }
 
     public function store(KelompokMasyarakatRequest $request): ?\Illuminate\Http\RedirectResponse
