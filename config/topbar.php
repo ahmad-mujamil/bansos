@@ -73,6 +73,11 @@ return [
                 'url' => '/opd',
                 'title' => 'OPD',
             ],
+            [
+                'id' => 'JENIS_KELOMPOK_MASYARAKAT',
+                'url' => '/jenis-kelompok-masyarakat',
+                'title' => 'Jenis Kelompok Masyarakat',
+            ],
 
         ],
     ],

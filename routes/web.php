@@ -170,6 +170,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('cari-penduduk-by-nik', CariPendudukByNikController::class)->name('penduduk.cari-by-nik');
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
+        Route::resource('jenis-kelompok-masyarakat', App\Http\Controllers\JenisKelompokMasyarakatController::class);
         Route::get('kelompok-masyarakat/penduduk-by-nik', [App\Http\Controllers\KelompokMasyarakatController::class, 'lookupPendudukByNik'])->name('kelompok-masyarakat.penduduk-by-nik');
         Route::resource('kelompok-masyarakat', App\Http\Controllers\KelompokMasyarakatController::class);
         Route::resource('kelompok-masyarakat.anggota', App\Http\Controllers\KelompokMasyarakatAnggotaController::class)->except(['show']);

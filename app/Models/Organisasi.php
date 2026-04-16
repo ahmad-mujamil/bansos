@@ -55,6 +55,11 @@ class Organisasi extends Model
         return $this->belongsTo(Opd::class);
     }
 
+    public function jenisKelompokMasyarakat(): BelongsTo
+    {
+        return $this->belongsTo(JenisKelompokMasyarakat::class);
+    }
+
     /**
      * Anggota yang terhubung ke penduduk dengan is_valid = false (nama, NIK, label status).
      *

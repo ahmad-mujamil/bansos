@@ -51,6 +51,7 @@
             @if ($isEdit)
                 @method($method)
             @endif
+            <input type="hidden" name="jenis_pengajuan" value="{{ old('jenis_pengajuan', $jenisPengajuanValue ?? '') }}">
             <div class="card mb-5">
                 <div class="card-body">
                     <ul class="nav nav-pills nav-justified flex-column flex-sm-row gap-2 mb-4" id="wizardSteps" role="list">
@@ -94,7 +95,6 @@
                                 @enderror
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
                                 @php
                                     $jenisStored = optional($organisasi)->jenis;
                                     $fallbackJenis = ($requireJenisSelection ?? false)
@@ -107,15 +107,47 @@
                                             ?? $fallbackJenis
                                     );
                                 @endphp
-                                <select name="jenis" id="jenis" class="form-control @error('jenis') is-invalid @enderror" required>
-                                    <option value="">Pilih Jenis</option>
-                                    @foreach($jenisOrganisasiOptions as $jenisOption)
-                                        <option value="{{ $jenisOption->value }}" {{ $selectedJenis === $jenisOption->value ? 'selected' : '' }}>
-                                            {{ $jenisOption->getDescription() }}
+                                @if(($isBantuanKelompok ?? false) && $selectedJenis === \App\Enums\JenisOrganisasi::KELOMPOK->value)
+                                    <input type="hidden" name="jenis" value="{{ \App\Enums\JenisOrganisasi::KELOMPOK->value }}">
+                                    <label class="form-label text-small text-uppercase">Jenis</label>
+                                    <input type="text" class="form-control" value="Kelompok Masyarakat" readonly>
+                                @else
+                                    <label class="form-label text-small text-uppercase">Jenis <span class="text-danger">*</span></label>
+                                    <select name="jenis" id="jenis" class="form-control @error('jenis') is-invalid @enderror" required>
+                                        <option value="">Pilih Jenis</option>
+                                        @foreach($jenisOrganisasiOptions as $jenisOption)
+                                            <option value="{{ $jenisOption->value }}" {{ $selectedJenis === $jenisOption->value ? 'selected' : '' }}>
+                                                {{ $jenisOption->getDescription() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('jenis')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                @endif
+                            </div>
+                            @php
+                                $selectedJenisKelompokMasyarakat = old(
+                                    'jenis_kelompok_masyarakat_id',
+                                    optional($organisasi)->jenis_kelompok_masyarakat_id ?? ''
+                                );
+                            @endphp
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3 {{ ($isBantuanKelompok ?? false) ? '' : 'd-none' }}" id="jenisKelompokMasyarakatField">
+                                <label class="form-label text-small text-uppercase">Jenis Kelompok Masyarakat <span class="text-danger">*</span></label>
+                                <select
+                                    name="jenis_kelompok_masyarakat_id"
+                                    id="jenis_kelompok_masyarakat_id"
+                                    class="form-control @error('jenis_kelompok_masyarakat_id') is-invalid @enderror"
+                                    {{ ($isBantuanKelompok ?? false) ? 'required' : '' }}
+                                >
+                                    <option value="">Pilih Jenis Kelompok Masyarakat</option>
+                                    @foreach(($jenisKelompokMasyarakatOptions ?? collect()) as $jenisKelompokMasyarakat)
+                                        <option value="{{ $jenisKelompokMasyarakat->id }}" {{ $selectedJenisKelompokMasyarakat == $jenisKelompokMasyarakat->id ? 'selected' : '' }}>
+                                            {{ $jenisKelompokMasyarakat->nama }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('jenis')
+                                @error('jenis_kelompok_masyarakat_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -333,6 +365,21 @@
                 })->values()->all();
             @endphp
             var kecamatansData = @json($kecamatansData);
+            var BANTUAN_KELOMPOK = @json(\App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value);
+
+            function syncJenisKelompokMasyarakatField() {
+                var jenisPengajuan = $('input[name="jenis_pengajuan"]').val() || '';
+                var isBantuanKelompok = jenisPengajuan === BANTUAN_KELOMPOK;
+                var $fieldWrap = $('#jenisKelompokMasyarakatField');
+                var $select = $('#jenis_kelompok_masyarakat_id');
+
+                $fieldWrap.toggleClass('d-none', !isBantuanKelompok);
+                $select.prop('required', isBantuanKelompok);
+
+                if (!isBantuanKelompok) {
+                    $select.val('').trigger('change');
+                }
+            }
 
             function loadDesaByKecamatan(kecamatanId, selectedDesaId) {
                 var desaSelect = $('#desa_id');
@@ -353,9 +400,13 @@
                 desaSelect.select2({ theme: 'bootstrap4', placeholder: 'Pilih Desa', allowClear: true });
             }
 
-            $('#jenis').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jenis', allowClear: false });
+            if ($('#jenis').length) {
+                $('#jenis').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jenis', allowClear: false });
+            }
+            $('#jenis_kelompok_masyarakat_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Jenis Kelompok Masyarakat', allowClear: true });
             $('#kecamatan_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Kecamatan', allowClear: true });
             $('#desa_id').select2({ theme: 'bootstrap4', placeholder: 'Pilih Desa', allowClear: true });
+            syncJenisKelompokMasyarakatField();
 
             var initialKecamatanId = $('#kecamatan_id').val();
             var initialDesaId = $('#desa_id').val();
@@ -715,7 +766,7 @@
                 @endforeach
 
                 @if ($errors->any())
-                    @if ($errors->has('nama') || $errors->has('nomor') || $errors->has('jenis') || $errors->has('tgl_pembentukan') || $errors->has('kecamatan_id') || $errors->has('desa_id'))
+                    @if ($errors->has('nama') || $errors->has('nomor') || $errors->has('jenis') || $errors->has('jenis_kelompok_masyarakat_id') || $errors->has('tgl_pembentukan') || $errors->has('kecamatan_id') || $errors->has('desa_id'))
                         setStep(1);
                     @elseif (collect($errors->keys())->contains(fn ($k) => str_starts_with($k, 'anggota.')))
                         setStep(2);

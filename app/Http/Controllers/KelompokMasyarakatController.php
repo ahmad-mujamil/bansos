@@ -6,6 +6,7 @@ use App\Enums\JabatanOrganisasi;
 use App\Enums\JenisKelamin;
 use App\Enums\JenisPengajuan;
 use App\Enums\JenisOrganisasi;
+use App\Models\JenisKelompokMasyarakat;
 use App\Http\Requests\KelompokMasyarakatRequest;
 use App\Models\Kecamatan;
 use App\Models\Organisasi;
@@ -147,6 +148,11 @@ class KelompokMasyarakatController extends Controller
 
         $jenisQuery = (string) $request->query('jenis');
         $jenisPengajuan = JenisPengajuan::tryFrom($jenisQuery);
+        $jenisPengajuanValue = $jenisPengajuan?->value;
+        $isBantuanKelompok = $jenisPengajuan === JenisPengajuan::BANTUAN_KELOMPOK;
+        $jenisKelompokMasyarakatOptions = $isBantuanKelompok
+            ? JenisKelompokMasyarakat::query()->orderBy('nama')->get()
+            : collect();
 
         $requireJenisSelection = false;
 
@@ -159,7 +165,18 @@ class KelompokMasyarakatController extends Controller
             $defaultJenis = JenisOrganisasi::tryFrom($jenisQuery)?->value;
         }
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions', 'defaultJenis', 'requireJenisSelection'));
+        return view('pages.kelompok-masyarakat.create', compact(
+            'organisasi',
+            'kecamatans',
+            'anggotaInitial',
+            'dokumenInitial',
+            'jenisOrganisasiOptions',
+            'defaultJenis',
+            'requireJenisSelection',
+            'jenisPengajuanValue',
+            'isBantuanKelompok',
+            'jenisKelompokMasyarakatOptions',
+        ));
     }
 
     public function store(KelompokMasyarakatRequest $request): ?\Illuminate\Http\RedirectResponse
@@ -176,7 +193,7 @@ class KelompokMasyarakatController extends Controller
             $validated = $request->validated();
             $anggotaRows = array_values($validated['anggota'] ?? []);
             $dokumenRows = array_values($validated['dokumen'] ?? []);
-            unset($validated['anggota'], $validated['dokumen']);
+            unset($validated['anggota'], $validated['dokumen'], $validated['jenis_pengajuan']);
 
             $organisasi = Organisasi::query()->create([
                 ...$validated,
@@ -221,7 +238,7 @@ class KelompokMasyarakatController extends Controller
     {
 
         $organisasi = Organisasi::query()
-            ->with(['kecamatan.desa', 'organisasiDetail.penduduk', 'organisasiDokumen.media'])
+            ->with(['kecamatan.desa', 'organisasiDetail.penduduk', 'organisasiDokumen.media', 'jenisKelompokMasyarakat'])
             ->findOrFail($kelompok_masyarakat);
 
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
@@ -276,8 +293,22 @@ class KelompokMasyarakatController extends Controller
         }
 
         $jenisOrganisasiOptions = JenisOrganisasi::cases();
+        $isBantuanKelompok = ! empty($organisasi->jenis_kelompok_masyarakat_id);
+        $jenisPengajuanValue = $isBantuanKelompok ? JenisPengajuan::BANTUAN_KELOMPOK->value : null;
+        $jenisKelompokMasyarakatOptions = $isBantuanKelompok
+            ? JenisKelompokMasyarakat::query()->orderBy('nama')->get()
+            : collect();
 
-        return view('pages.kelompok-masyarakat.create', compact('organisasi', 'kecamatans', 'anggotaInitial', 'dokumenInitial', 'jenisOrganisasiOptions'));
+        return view('pages.kelompok-masyarakat.create', compact(
+            'organisasi',
+            'kecamatans',
+            'anggotaInitial',
+            'dokumenInitial',
+            'jenisOrganisasiOptions',
+            'jenisPengajuanValue',
+            'isBantuanKelompok',
+            'jenisKelompokMasyarakatOptions',
+        ));
     }
 
     public function update(KelompokMasyarakatRequest $request, string $kelompok_masyarakat): ?\Illuminate\Http\RedirectResponse
@@ -298,7 +329,7 @@ class KelompokMasyarakatController extends Controller
             $validated = $request->validated();
             $anggotaRows = array_values($validated['anggota'] ?? []);
             $dokumenRows = array_values($validated['dokumen'] ?? []);
-            unset($validated['anggota'], $validated['dokumen']);
+            unset($validated['anggota'], $validated['dokumen'], $validated['jenis_pengajuan']);
 
             $organisasi->update([
                 ...$validated,
