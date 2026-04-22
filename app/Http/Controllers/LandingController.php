@@ -9,6 +9,7 @@ use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Models\AlurBantuan;
 use App\Models\Berita;
+use App\Models\Gallery;
 use App\Models\HeroSlide;
 use App\Models\Organisasi;
 use App\Models\Pengajuan;
@@ -109,9 +110,15 @@ class LandingController extends Controller
                 ->count();
         }
 
+        $galeriItems = collect();
+        if (Schema::hasTable('galleries')) {
+            $galeriItems = Gallery::query()->active()->ordered()->get();
+        }
+
         return view('pages.landing', compact(
             'beritaTerbaru',
             'heroSlides',
+            'galeriItems',
             'pengajuanTerbaru',
             'totalPengajuanPublik',
             'totalDiajukan',

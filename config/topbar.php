@@ -64,7 +64,7 @@ return [
                 'title' => 'Slider',
             ], [
                 'id' => 'GALERI',
-                'url' => '/gallery',
+                'url' => '/kelola/gallery',
                 'title' => 'Gallery',
             ], [
                 'id' => 'PROFILE',

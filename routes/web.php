@@ -99,6 +99,13 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::delete('slider/{heroSlide}', [KelolaHeroSlideController::class, 'destroy'])->name('slider.destroy');
 
         Route::get('alur-bantuan', [KelolaAlurBantuanController::class, 'edit'])->name('alur-bantuan.edit');
+
+        Route::get('gallery', [\App\Http\Controllers\Kelola\GalleryController::class, 'index'])->name('gallery.index');
+        Route::get('gallery/create', [\App\Http\Controllers\Kelola\GalleryController::class, 'create'])->name('gallery.create');
+        Route::post('gallery', [\App\Http\Controllers\Kelola\GalleryController::class, 'store'])->name('gallery.store');
+        Route::get('gallery/{gallery}/edit', [\App\Http\Controllers\Kelola\GalleryController::class, 'edit'])->name('gallery.edit');
+        Route::put('gallery/{gallery}', [\App\Http\Controllers\Kelola\GalleryController::class, 'update'])->name('gallery.update');
+        Route::delete('gallery/{gallery}', [\App\Http\Controllers\Kelola\GalleryController::class, 'destroy'])->name('gallery.destroy');
     });
 
     // Verifikasi Pengguna (user belum aktif)
