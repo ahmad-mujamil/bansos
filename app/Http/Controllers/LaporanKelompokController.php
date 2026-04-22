@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanKelompokExport;
 use App\Models\Opd;
 use App\Models\Organisasi;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class LaporanKelompokController extends Controller
@@ -90,42 +92,8 @@ class LaporanKelompokController extends Controller
     public function export()
     {
         $kelompoks = $this->baseQuery()->get();
+        $filename  = 'laporan-kelompok-' . date('YmdHis') . '.xlsx';
 
-        $filename = 'laporan-kelompok-' . date('YmdHis') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function () use ($kelompoks) {
-            $handle = fopen('php://output', 'w');
-            fwrite($handle, "\xEF\xBB\xBF"); // BOM for Excel UTF-8
-
-            fputcsv($handle, [
-                'No', 'Nama Kelompok', 'Nomor SK', 'Tanggal Pembentukan',
-                'Jenis Kelompok', 'OPD', 'Kecamatan', 'Desa/Kelurahan',
-                'Jumlah Anggota', 'Status',
-            ]);
-
-            foreach ($kelompoks as $i => $row) {
-                fputcsv($handle, [
-                    $i + 1,
-                    $row->nama,
-                    $row->nomor,
-                    $row->tgl_pembentukan?->format('d/m/Y') ?? '-',
-                    $row->jenisKelompokMasyarakat?->nama ?? '-',
-                    $row->opd?->nama ?? '-',
-                    $row->kecamatan?->nama ?? '-',
-                    $row->desa?->nama ?? '-',
-                    $row->organisasi_detail_count,
-                    $row->is_active ? 'Aktif' : 'Nonaktif',
-                ]);
-            }
-
-            fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new LaporanKelompokExport($kelompoks), $filename);
     }
 }
