@@ -463,21 +463,34 @@ class Nav {
   _matchUrlByMenu(selector) {
     const url = window.location.pathname.toLowerCase();
     const urlWithoutBackslash = url.replace(/^\/+/g, '').replace(/\.[^/.]+$/, '');
+    const urlSegments = urlWithoutBackslash.split('/').filter(Boolean);
+
+    const segmentMatch = (candidate) => {
+      if (!candidate) return -1;
+      const parts = candidate.split('/').filter(Boolean);
+      if (parts.length === 0) return -1;
+      if (parts.length > urlSegments.length) return -1;
+      for (let i = 0; i < parts.length; i++) {
+        if (urlSegments[i] !== parts[i]) return -1;
+      }
+      return parts.length;
+    };
+
     let active;
+    let bestMatchLength = -1;
     document.querySelectorAll(selector + ' a').forEach((el) => {
-      const href = el
-        .getAttribute('href')
-        .toLowerCase()
-        .replace(/^\/+/g, '')
-        .replace(/\.[^/.]+$/, '');
-      const hrefData =
-        el.getAttribute('data-href') &&
-        el
-          .getAttribute('data-href')
-          .toLowerCase()
-          .replace(/^\/+/g, '')
-          .replace(/\.[^/.]+$/, '');
-      if (urlWithoutBackslash.includes(href) || urlWithoutBackslash.includes(hrefData)) {
+      const rawHref = el.getAttribute('href');
+      if (!rawHref) return;
+      const href = rawHref.toLowerCase().replace(/^\/+/g, '').replace(/\.[^/.]+$/, '');
+      const rawDataHref = el.getAttribute('data-href');
+      const hrefData = rawDataHref
+        ? rawDataHref.toLowerCase().replace(/^\/+/g, '').replace(/\.[^/.]+$/, '')
+        : null;
+
+      const matchLength = Math.max(segmentMatch(href), segmentMatch(hrefData));
+      if (matchLength > bestMatchLength) {
+        if (active) active.classList.remove('active');
+        bestMatchLength = matchLength;
         el.classList.add('active');
         active = el;
       }

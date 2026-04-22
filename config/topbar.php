@@ -1,24 +1,55 @@
 <?php
 
 return [
+//    [
+//        'id' => 'ADMIN',
+//        'url' => 'javascript:;',
+//        'icon' => 'shield-check',
+//        'title' => 'Administrator',
+//        'caret' => true,
+//        'sub_menu' => [
+//            [
+//                'id' => 'PENGGUNA',
+//                'url' => '/pengguna',
+//                'title' => 'Pengguna',
+//            ],
+//        ],
+//    ],
     [
-        'id' => 'ADMIN',
+        'id' => 'MASTER_DATA',
+        'icon' => 'gear',
+        'title' => 'Master Data',
         'url' => 'javascript:;',
-        'icon' => 'shield-check',
-        'title' => 'Administrator',
         'caret' => true,
         'sub_menu' => [
+            [
+                'id' => 'PENDUDUK',
+                'url' => '/penduduk',
+                'title' => 'Penduduk',
+            ],
+            [
+                'id' => 'JENIS_BANTUAN',
+                'url' => '/jenis-bantuan',
+                'title' => 'Jenis Bantuan',
+            ],
+            [
+                'id' => 'OPD',
+                'url' => '/opd',
+                'title' => 'OPD',
+            ],
             [
                 'id' => 'PENGGUNA',
                 'url' => '/pengguna',
                 'title' => 'Pengguna',
             ],
+
+
         ],
     ],
     [
         'id' => 'LANDING_PAGE',
         'url' => 'javascript:;',
-        'icon' => 'shield-check',
+        'icon' => 'board-3',
         'title' => 'Landing Page',
         'caret' => true,
         'sub_menu' => [
@@ -47,36 +78,21 @@ return [
         ],
     ],
     [
-        'id' => 'MASTER_DATA',
-        'icon' => 'gear',
-        'title' => 'Master Data',
+        'id' => 'DATA_KELOMPOK_MASYARAKAT',
+        'icon' => 'diagram-1',
+        'title' => 'Kelompok Masyarakat',
         'url' => 'javascript:;',
         'caret' => true,
         'sub_menu' => [
             [
-                'id' => 'PENDUDUK',
-                'url' => '/penduduk',
-                'title' => 'Penduduk',
+                'id' => 'JENIS_KELOMPOK_MASYARAKAT',
+                'url' => '/jenis-kelompok-masyarakat',
+                'title' => 'Jenis Kelompok',
             ],
             [
                 'id' => 'KELOMPOK_MASYARAKAT',
                 'url' => '/kelompok-masyarakat',
-                'title' => 'Kelompok Masyarakat',
-            ],
-            [
-                'id' => 'JENIS_BANTUAN',
-                'url' => '/jenis-bantuan',
-                'title' => 'Jenis Bantuan',
-            ],
-            [
-                'id' => 'OPD',
-                'url' => '/opd',
-                'title' => 'OPD',
-            ],
-            [
-                'id' => 'JENIS_KELOMPOK_MASYARAKAT',
-                'url' => '/jenis-kelompok-masyarakat',
-                'title' => 'Jenis Kelompok Masyarakat',
+                'title' => 'Data Kelompok',
             ],
 
         ],
@@ -119,6 +135,11 @@ return [
                 'id' => 'LAP_REALISASI',
                 'url' => '/laporan-realisasi',
                 'title' => 'Realisasi',
+            ],
+            [
+                'id' => 'LAP_KELOMPOK',
+                'url' => '/laporan-kelompok',
+                'title' => 'Rekap Kelompok',
             ],
         ],
     ],

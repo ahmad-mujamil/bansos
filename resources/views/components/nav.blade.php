@@ -87,7 +87,7 @@
                 $userMenus = auth()->user()->role->getPermissions();
             @endphp
             @foreach($topbarMenus as $menu)
-                @if(in_array($menu["id"], $userMenus) || auth()->user()->is_super())
+                @if(in_array($menu["id"], $userMenus, true) || auth()->user()->is_super())
 
                     @php
                         $subMenus = collect($menu['sub_menu']);
@@ -129,8 +129,7 @@
 
                                 // Check detail menu URLs if submenu has submenu
                                 if (isset($subMenu["sub_menu"]) && is_array($subMenu['sub_menu'])) {
-                                    $detailMenus = collect($subMenu['sub_menu']);
-                                    return $detailMenus->contains(function($detailMenu) use ($currentUrl) {
+                                    return collect($subMenu['sub_menu'])->contains(function($detailMenu) use ($currentUrl) {
                                         $detailMenuUrl = ltrim($detailMenu['url'] ?? '', '/');
                                         return !empty($detailMenuUrl) && strpos($currentUrl, $detailMenuUrl) !== false;
                                     });
@@ -150,7 +149,7 @@
                             </a>
                             <ul id="menu_{{ $menu['id'] }}">
                                 @foreach($subMenus as $subMenu)
-                                    @if(in_array($subMenu["id"], $userMenus) || auth()->user()->is_super())
+                                    @if(in_array($subMenu["id"], $userMenus, true) || auth()->user()->is_super())
                                         @php
                                             $detailMenus = collect($subMenu['sub_menu']??[]);
                                             $hasDetailMenu = $detailMenus->count() > 0;
@@ -162,7 +161,7 @@
                                                 </a>
                                                 <ul id="submenu_{{ $subMenu['id'] }}">
                                                     @foreach($detailMenus as $detailMenu)
-                                                        @if(in_array($detailMenu["id"], $userMenus) || auth()->user()->is_super())
+                                                        @if(in_array($detailMenu["id"], $userMenus, true) || auth()->user()->is_super())
                                                             <li>
                                                                 <a href="{{ $detailMenu["url"] }}">
                                                                     <span
