@@ -22,7 +22,7 @@
                     <div class="col-12 col-lg-6 col-xxl-5 mb-3">
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             @if (auth()->user()->is_super() || auth()->user()->is_admin())
-                                <div class="flex-grow-1 border border-separator bg-foreground" style="min-width: 12rem;">
+                                <div class="flex-grow-1" style="min-width: 12rem;">
                                     <select id="filter-opd-laporan-realisasi" class="form-select form-select-sm">
                                         <option value="">Semua OPD</option>
                                         @foreach ($opds as $opd)

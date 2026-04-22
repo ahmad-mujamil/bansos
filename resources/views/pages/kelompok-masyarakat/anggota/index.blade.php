@@ -12,8 +12,8 @@
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Organisasi</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('kelompok-masyarakat.index') }}">Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('kelompok-masyarakat.index') }}">Data Kelompok</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('kelompok-masyarakat.anggota.index', $organisasi->id) }}">Anggota - {{ $organisasi->nama }}</a></li>
                         </ul>
                     </nav>
