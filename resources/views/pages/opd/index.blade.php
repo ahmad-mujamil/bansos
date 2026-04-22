@@ -81,7 +81,7 @@
                         <th class="text-muted text-small text-uppercase">Nama OPD</th>
                         <th class="text-muted text-small text-uppercase">Kepala OPD</th>
                         <th class="text-muted text-small text-uppercase">No. Telepon</th>
-                        <th class="text-muted text-small text-uppercase">Email</th>
+                        <th class="text-muted text-small text-uppercase">Jumlah <br>Kelompok</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                     </tr>
                     </thead>
@@ -122,7 +122,7 @@
                 { data: 'nama', name: 'nama' },
                 { data: 'kepala_opd', name: 'kepala_opd', defaultContent: '-' },
                 { data: 'no_telp', name: 'no_telp', defaultContent: '-' },
-                { data: 'email', name: 'email', defaultContent: '-' },
+                { data: 'organisasi_count', name: 'organisasi_count', defaultContent: '-' },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ],
             render: function(data, type, row, meta) {

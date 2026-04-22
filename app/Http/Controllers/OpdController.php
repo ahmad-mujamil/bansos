@@ -12,6 +12,7 @@ class OpdController extends Controller
     private function data(): \Illuminate\Http\JsonResponse
     {
         $data = Opd::query()
+            ->withCount('organisasi')
             ->latest();
 
         return DataTables::of($data)
