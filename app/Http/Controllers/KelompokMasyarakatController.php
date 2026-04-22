@@ -46,6 +46,7 @@ class KelompokMasyarakatController extends Controller
                 'desa_id' => $penduduk->desa_id,
                 'is_valid' => (bool) $penduduk->is_valid,
                 'validated_at' => $penduduk->validated_at?->toIso8601String(),
+                'catatan_validasi' => $penduduk->catatan_validasi,
             ],
         ]);
     }
@@ -66,9 +67,22 @@ class KelompokMasyarakatController extends Controller
         $pendudukByNik = Penduduk::query()->where('nik', $row['nik'])->first();
 
         if ($pendudukByNik !== null) {
+            if (! $pendudukByNik->is_valid && $pendudukByNik->validated_at !== null) {
+                $jk = $row['jk'];
+                if ($jk instanceof JenisKelamin) {
+                    $jk = $jk->value;
+                }
+                $pendudukByNik->update([
+                    'nama' => $row['nama'],
+                    'jk' => $jk,
+                    'kecamatan_id' => $row['kecamatan_id'],
+                    'desa_id' => $row['desa_id'],
+                    'is_valid' => false,
+                    'validated_at' => null,
+                ]);
+            }
             return $pendudukByNik;
         }
-
         return Penduduk::query()->create([
             'nik' => $row['nik'],
             'nama' => $row['nama'],
@@ -91,7 +105,6 @@ class KelompokMasyarakatController extends Controller
     private function data(): \Illuminate\Http\JsonResponse
     {
         $data = $this->getQuery();
-
         return DataTables::of($data)
             ->addColumn('nomor_tgl', fn ($row) => ($row->nomor ?? '-').' / '.($row->tgl_pembentukan?->format('d-m-Y') ?? '-'))
             ->addColumn('wilayah', fn ($row) => ($row->kecamatan->nama ?? '-').' / '.($row->desa->nama ?? '-'))
@@ -99,7 +112,6 @@ class KelompokMasyarakatController extends Controller
             ->addColumn('anggota', function ($row) {
                 $count = (int) ($row->organisasi_detail_count ?? 0);
                 $url = route('kelompok-masyarakat.anggota.index', $row->id);
-
                 return '<a href="'.$url.'" title="Lihat Anggota ('.$count.' orang)" class="btn btn-sm btn-outline-primary btn-icon btn-icon-start">'
                     .'<i data-acorn-icon="user"></i><span>Anggota ('.$count.')</span></a>';
             })
@@ -113,10 +125,8 @@ class KelompokMasyarakatController extends Controller
             ->addColumn('action', function ($row) {
                 $navActionStart = '<nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb"><ul class="breadcrumb pt-0">';
                 $navActionEnd = '</ul></nav>';
-
                 $edit = "<li class='breadcrumb-item'><a href='".route('kelompok-masyarakat.edit', $row->id)."' title='Edit Data' class='fw-bold text-success'>Edit</a></li>";
                 $delete = "<li class='breadcrumb-item'><a href='".route('kelompok-masyarakat.destroy', $row->id)."' data-confirm-delete='true' title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
-
                 return $navActionStart.$edit.$delete.$navActionEnd;
             })
             ->rawColumns(['anggota', 'dokumen', 'action'])
@@ -273,6 +283,7 @@ class KelompokMasyarakatController extends Controller
                     'jabatan' => $jabatan,
                     'is_valid' => (bool) $p->is_valid,
                     'validated_at' => $p->validated_at?->toIso8601String(),
+                    'catatan_validasi' => $p->catatan_validasi,
                 ];
             })->values()->all();
         }

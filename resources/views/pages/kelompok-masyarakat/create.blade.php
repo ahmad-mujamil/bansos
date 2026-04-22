@@ -243,6 +243,9 @@
                             <div class="anggota-verifikasi-wrap d-none text-end">
                                 <span class="d-block text-muted text-uppercase mb-0" style="font-size: 0.65rem; letter-spacing: 0.06em;">Status Penduduk</span>
                                 <span class="badge anggota-verifikasi-badge mt-1">—</span>
+                                <div class="anggota-catatan-validasi-wrap d-none mt-1">
+                                    <span class="badge bg-warning text-dark fw-normal text-start anggota-catatan-validasi-text d-inline-block" title="Catatan validasi" style="font-size: 0.65rem; max-width: 16rem; white-space: normal; line-height: 1.35;"></span>
+                                </div>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-danger btn-remove-anggota rounded-pill px-2" title="Hapus baris" aria-label="Hapus baris anggota">&times;</button>
                         </div>
@@ -475,6 +478,11 @@
                     loadDesaForAnggotaRow($row, $row.find('.anggota-kecamatan').val() || null, null);
                 }
 
+                /** Penduduk sudah diverifikasi sebagai tidak valid (is_valid = 0, validated_at terisi): identitas boleh diubah sepenuhnya. */
+                function isPendudukInvalidVerified(p) {
+                    return !!(p && !p.is_valid && p.validated_at);
+                }
+
                 /** Baris anggota dari database (mode edit): NIK–desa terkunci; hanya jabatan yang dapat diedit; tombol Cek disembunyikan. */
                 function applyExistingAnggotaReadOnly($row) {
                     $row.attr('data-existing-anggota', '1');
@@ -515,37 +523,65 @@
                 function setAnggotaVerifikasiBadge($row, p) {
                     var $wrap = $row.find('.anggota-verifikasi-wrap');
                     var $badge = $row.find('.anggota-verifikasi-badge');
+                    var $catWrap = $row.find('.anggota-catatan-validasi-wrap');
+                    var $catText = $row.find('.anggota-catatan-validasi-text');
                     if (!p) {
                         $wrap.addClass('d-none');
+                        $catWrap.addClass('d-none');
+                        $catText.text('');
                         return;
                     }
                     $wrap.removeClass('d-none');
                     $badge.removeClass('bg-success bg-danger bg-warning text-dark');
                     if (p.is_valid) {
                         $badge.addClass('bg-success').text('Terverifikasi');
+                        $catWrap.addClass('d-none');
+                        $catText.text('');
                     } else if (p.validated_at && !p.is_valid) {
                         $badge.addClass('bg-danger').text('Tidak Valid');
+                        $catWrap.removeClass('d-none');
+                        $catText.text(String(p.catatan_validasi || '').trim() || '—');
                     } else {
                         $badge.addClass('bg-warning text-dark').text('Belum Diverifikasi');
+                        var catPending = String(p.catatan_validasi || '').trim();
+                        if (catPending) {
+                            $catWrap.removeClass('d-none');
+                            $catText.text(catPending);
+                        } else {
+                            $catWrap.addClass('d-none');
+                            $catText.text('');
+                        }
                     }
                 }
 
                 function applyPendudukLookup($row, p) {
-                    $row.attr('data-locked', '1');
                     $row.find('.anggota-nik-not-found-msg').addClass('d-none');
-                    $row.find('.anggota-nama').val(p.nama).prop('readonly', true);
+                    $row.find('.anggota-nama').val(p.nama);
                     $row.data('skipDesaReset', true);
                     $row.find('.anggota-kecamatan').val(p.kecamatan_id).trigger('change');
                     loadDesaForAnggotaRow($row, p.kecamatan_id, p.desa_id);
                     $row.removeData('skipDesaReset');
                     $row.find('.anggota-jk').val(p.jk).trigger('change');
-                    $row.find('.anggota-jk').prop('disabled', true);
-                    $row.find('.anggota-kecamatan').prop('disabled', true);
-                    $row.find('.anggota-desa').prop('disabled', true);
+
+                    if (isPendudukInvalidVerified(p)) {
+                        $row.attr('data-locked', '0');
+                        $row.find('.anggota-nama').prop('readonly', false);
+                        $row.find('.anggota-jk').prop('disabled', false);
+                        $row.find('.anggota-kecamatan').prop('disabled', false);
+                        $row.find('.anggota-desa').prop('disabled', false);
+                    } else {
+                        $row.attr('data-locked', '1');
+                        $row.find('.anggota-nama').prop('readonly', true);
+                        $row.find('.anggota-jk').prop('disabled', true);
+                        $row.find('.anggota-kecamatan').prop('disabled', true);
+                        $row.find('.anggota-desa').prop('disabled', true);
+                    }
+
                     $row.find('.anggota-nik-found-msg').removeClass('d-none');
                     setAnggotaVerifikasiBadge($row, {
                         is_valid: !!p.is_valid,
-                        validated_at: p.validated_at || null
+                        validated_at: p.validated_at || null,
+                        catatan_validasi: p.catatan_validasi || null
                     });
                 }
 
@@ -646,13 +682,17 @@
                     if (values.jabatan) {
                         $el.find('.anggota-jabatan').val(values.jabatan).trigger('change');
                     }
-                    if (values.organisasi_detail_id) {
+                    if (values.organisasi_detail_id && !isPendudukInvalidVerified({
+                        is_valid: !!values.is_valid,
+                        validated_at: values.validated_at || null
+                    })) {
                         applyExistingAnggotaReadOnly($el);
                     }
-                    if (Object.prototype.hasOwnProperty.call(values, 'is_valid') || Object.prototype.hasOwnProperty.call(values, 'validated_at')) {
+                    if (Object.prototype.hasOwnProperty.call(values, 'is_valid') || Object.prototype.hasOwnProperty.call(values, 'validated_at') || Object.prototype.hasOwnProperty.call(values, 'catatan_validasi')) {
                         setAnggotaVerifikasiBadge($el, {
                             is_valid: !!values.is_valid,
-                            validated_at: values.validated_at || null
+                            validated_at: values.validated_at || null,
+                            catatan_validasi: values.catatan_validasi != null ? values.catatan_validasi : null
                         });
                     }
                     anggotaIndex++;
@@ -748,9 +788,10 @@
                     kecamatan_id: @json($a['kecamatan_id'] ?? ''),
                     desa_id: @json($a['desa_id'] ?? ''),
                     jabatan: @json($a['jabatan'] ?? null),
-                    @if(array_key_exists('is_valid', $a) || array_key_exists('validated_at', $a))
+                    @if(array_key_exists('is_valid', $a) || array_key_exists('validated_at', $a) || array_key_exists('catatan_validasi', $a))
                     is_valid: @json($a['is_valid'] ?? false),
                     validated_at: @json($a['validated_at'] ?? null),
+                    catatan_validasi: @json($a['catatan_validasi'] ?? null),
                     @endif
                 });
                 @endforeach
