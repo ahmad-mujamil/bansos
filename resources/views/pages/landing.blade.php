@@ -178,44 +178,122 @@
             @endforeach
         </div>
     </section>
-    <section class="py-24 bg-surface-container-lowest" id="gallery">
-        <div class="max-w-7xl mx-auto px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between mb-16 gap-6">
-                <h2 class="text-4xl font-bold text-primary">Galeri Kegiatan</h2>
-                <div class="flex gap-2">
-                    <span class="px-4 py-2 bg-primary text-white rounded-full text-sm font-medium">Semua</span>
-                    <span class="px-4 py-2 bg-surface-container text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high cursor-pointer">Logistik</span>
-                    <span class="px-4 py-2 bg-surface-container text-on-surface-variant rounded-full text-sm font-medium hover:bg-surface-container-high cursor-pointer">Edukasi</span>
+    {{-- ═══ GALERI ═══ --}}
+    @php
+        $galeriList = $galeriItems->take(9)->values();
+        $glItems = $galeriList->map(fn($g) => [
+            'src'     => $g->getFirstMediaUrl('galeri'),
+            'caption' => $g->keterangan ?: $g->judul,
+        ])->values()->toJson();
+    @endphp
+    <section class="py-20 bg-white" id="gallery">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+
+            {{-- Header --}}
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+                <div>
+                    <p class="text-xs font-bold tracking-[0.18em] uppercase text-primary/50 mb-2">Dokumentasi</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary leading-tight">Galeri Kegiatan</h2>
                 </div>
+                <p class="text-sm text-on-surface-variant max-w-xs md:text-right leading-relaxed">
+                    Rekam jejak kegiatan penyaluran bantuan sosial di Lombok Barat.
+                </p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-                <div class="col-span-2 row-span-2 rounded-2xl overflow-hidden group relative">
-                    <img alt="Gallery 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_aGAWZ9e1r4xmn_6_Quv7oxruCW9Wc16_RBCedlyBxIBie5VHJBNJSx-ElNT35TxW4V9fqOlFaqGjnTl1Yt5qeY_P6xCEPLgtL8E0ePbzgnh4NS1bQtURGSOAApZqCcZhrGQFWfuBXkVfNLbcCi6h_yr-hTXa6Nw12ITy55Be20lbWPo2Vlxo_uUbeo8y7VQqEn5l_pWlF9DSKTT4iW9pL0Q816jP5Oz-WCaiFg6fuEHmUX7fZTTKdjC7HGF1zKS1c00YaBv7_fo"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                        <p class="text-white font-medium">Distribusi Bantuan Pangan Nasional 2024</p>
+
+            @if($galeriList->isNotEmpty())
+
+                {{-- Top section: featured left + 2 stacked right --}}
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+
+                    {{-- Featured --}}
+                    <div class="col-span-2 h-56 md:h-[530px] group relative overflow-hidden rounded-2xl bg-surface-container cursor-pointer"
+                         onclick="glOpen(0)">
+                        @if($galeriList->get(0)?->getFirstMediaUrl('galeri'))
+                            <img src="{{ $galeriList->get(0)->getFirstMediaUrl('galeri','thumb') ?: $galeriList->get(0)->getFirstMediaUrl('galeri') }}"
+                                 alt="{{ e($galeriList->get(0)->judul) }}"
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"/>
+                        @endif
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                                <span class="material-symbols-outlined text-white text-2xl" data-icon="zoom_in">zoom_in</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/55 to-transparent translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                            <p class="text-white text-sm font-medium line-clamp-1">{{ $galeriList->get(0)->keterangan ?: $galeriList->get(0)->judul }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Right: 2 stacked --}}
+                    <div class="hidden md:flex flex-col gap-3" style="height:530px">
+                        @foreach($galeriList->slice(1, 2) as $si => $item)
+                            <div class="flex-1 group relative overflow-hidden rounded-2xl bg-surface-container cursor-pointer"
+                                 onclick="glOpen({{ $si + 1 }})">
+                                @if($item->getFirstMediaUrl('galeri'))
+                                    <img src="{{ $item->getFirstMediaUrl('galeri','thumb') ?: $item->getFirstMediaUrl('galeri') }}"
+                                         alt="{{ e($item->judul) }}"
+                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"/>
+                                @endif
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-center justify-center">
+                                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                                        <span class="material-symbols-outlined text-white text-xl" data-icon="zoom_in">zoom_in</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                <div class="col-span-2 row-span-1 rounded-2xl overflow-hidden group relative">
-                    <img alt="Gallery 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7m2CDjZYN7umd9A_-j1uAHY6pBGT569VBqUan3e6D3dnxA8V8kzW-1VCMTsSas54q4tkjlDsneaj6Fqa1mqM69N0Kx2l1zoyHYftzY_s3_bhuW9Y_JhjUNI2OYubxNGTW3WKUJIv1hvsmcso5AwkWXJdKV4nP7GtV8sabCVLPQ282Uei5MdfdeyeWMP9lRRt-WALmjN7jXTflVPo4_GpTiJLfxOilJh2B8NR6v6D05c02SqXLJXBwP7cqoO7ON74fG7HdRFGXMVo"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                        <p class="text-white font-medium">Layanan Home Care Lansia</p>
+
+                {{-- Bottom strip: items 3–8 --}}
+                @if($galeriList->count() > 3)
+                    <div class="grid grid-cols-2 md:grid-cols-{{ min($galeriList->slice(3)->count(), 3) > 2 ? '3' : $galeriList->slice(3)->count() }} gap-3 mt-3">
+                        @foreach($galeriList->slice(3, 6) as $si => $item)
+                            <div class="h-44 md:h-52 group relative overflow-hidden rounded-2xl bg-surface-container cursor-pointer"
+                                 onclick="glOpen({{ $si + 3 }})">
+                                @if($item->getFirstMediaUrl('galeri'))
+                                    <img src="{{ $item->getFirstMediaUrl('galeri','thumb') ?: $item->getFirstMediaUrl('galeri') }}"
+                                         alt="{{ e($item->judul) }}"
+                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"/>
+                                @endif
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-center justify-center">
+                                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                                        <span class="material-symbols-outlined text-white text-xl" data-icon="zoom_in">zoom_in</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
+                @endif
+
+            @else
+                <div class="flex flex-col items-center justify-center py-24 text-on-surface-variant/50 gap-4">
+                    <span class="material-symbols-outlined text-6xl" data-icon="photo_library">photo_library</span>
+                    <p class="text-sm tracking-wide">Belum ada foto galeri.</p>
                 </div>
-                <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden group relative">
-                    <img alt="Gallery 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9uPANjqFrd1XtTIgdsZRO7xzEoOSycrwz-JaV_MWpoZzBEcnfTr4Xx8eyixYh4Ar2zNmARPGyMAotsmbcji7omh8w1xYxFLOwwoLSSKwK_jWvXAwjoHAysudbfEmqQYp9KIwRGMWVYZ-hDQlLbD3KCMD7sz0mA5CzrMo1XxLo8f6wB01QGD9wXtDSgXjVwrIrsO3cT1C39vUCQeO5bi7Yv1RB0YbEOB-VCWI2teOrBoGcLhWlSoiNCX2m1pZ8CDDJ22aL6gw8Z2g"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                        <p class="text-white text-xs font-medium">Program Literasi Desa</p>
-                    </div>
-                </div>
-                <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden group relative">
-                    <img alt="Gallery 4" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqQCF0IFlyA9jxtydBVJLyDIvN5b7-Nu-I3IhSn-dWI-Vgx9muDn6hGZSavBQjB0yDk-mLU32wsKuitTL6AuVkNl-HmKAMRGFZxetut9tvvquuza1GibwiOMNhvSEEgF-yGN67DCEpMLM1PNBf3zJB6vaXWMAuIiZ2-3PItdfEpeFqb70oMDaf_6rZE7Eq_aYeSizNy-EQX2cCG6SoVMd1SM44GqqZUmf0xDKcEPdx76LsdIFnbLg91uPkT7QRUYjk6IvX2EBmt-I"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                        <p class="text-white text-xs font-medium">Pelatihan Digital KPM</p>
-                    </div>
-                </div>
-            </div>
+            @endif
         </div>
     </section>
+
+    {{-- ═══ LIGHTBOX ═══ --}}
+    <div id="gl-lb" class="fixed inset-0 z-[999] hidden bg-black/95 backdrop-blur-md" role="dialog" aria-modal="true">
+        <button onclick="glClose()" aria-label="Tutup"
+                class="absolute top-5 right-5 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white">
+            <span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+        </button>
+        <div class="absolute top-5 left-1/2 -translate-x-1/2 text-white/40 text-xs tracking-[0.2em] select-none font-medium" id="gl-counter"></div>
+        <button onclick="glNav(-1)" aria-label="Sebelumnya"
+                class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white">
+            <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+        </button>
+        <button onclick="glNav(1)" aria-label="Berikutnya"
+                class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white">
+            <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+        </button>
+        <div class="flex flex-col items-center justify-center h-full px-16 md:px-24 gap-5">
+            <img id="gl-img" src="" alt=""
+                 class="max-h-[78vh] max-w-full w-auto object-contain rounded-xl shadow-2xl"/>
+            <p id="gl-caption" class="text-white/60 text-sm text-center max-w-lg leading-relaxed"></p>
+        </div>
+    </div>
     <section class="py-24 bg-primary overflow-hidden">
         <div class="max-w-7xl mx-auto px-8 grid md:grid-cols-2 gap-20 items-center">
             <div class="relative">
@@ -290,6 +368,47 @@
 </main>
     @include('partials.public.footer', ['variant' => 'full'])
     <script>
+        var glData = {!! $glItems !!};
+        var glCurrent = 0;
+
+        function glOpen(idx) {
+            glCurrent = idx;
+            glRender();
+            var lb = document.getElementById('gl-lb');
+            lb.classList.remove('hidden');
+            lb.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        function glClose() {
+            var lb = document.getElementById('gl-lb');
+            lb.classList.add('hidden');
+            lb.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+        function glNav(dir) {
+            glCurrent = (glCurrent + dir + glData.length) % glData.length;
+            glRender();
+        }
+        function glRender() {
+            var item = glData[glCurrent];
+            var img = document.getElementById('gl-img');
+            img.style.opacity = '0';
+            img.src = item.src;
+            img.onload = function () { img.style.opacity = '1'; };
+            document.getElementById('gl-caption').textContent = item.caption;
+            document.getElementById('gl-counter').textContent = (glCurrent + 1) + ' / ' + glData.length;
+        }
+        document.getElementById('gl-lb').addEventListener('click', function (e) {
+            if (e.target === this) glClose();
+        });
+        document.addEventListener('keydown', function (e) {
+            var lb = document.getElementById('gl-lb');
+            if (lb.classList.contains('hidden')) return;
+            if (e.key === 'Escape')      glClose();
+            if (e.key === 'ArrowRight')  glNav(1);
+            if (e.key === 'ArrowLeft')   glNav(-1);
+        });
+
         (function () {
             var root = document.getElementById('hero-slider-root');
             if (!root) {
