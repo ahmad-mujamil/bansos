@@ -1,16 +1,16 @@
 @extends('layouts.layout')
-@section('title', 'Jenis Kelompok Masyarakat')
+@section('title', 'Jenis Kelompok')
 @section('content')
     <div class="col">
         <div class="page-title-container mb-3">
             <div class="row">
                 <div class="col mb-2">
-                    <h1 class="mb-2 pb-0 display-4" id="title">Jenis Kelompok Masyarakat</h1>
+                    <h1 class="mb-2 pb-0 display-4" id="title">Jenis Kelompok</h1>
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('jenis-kelompok-masyarakat.index') }}">Jenis Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('jenis-kelompok-masyarakat.index') }}">Jenis Kelompok</a></li>
                             <li class="breadcrumb-item">
                                 <a href="javascript:;">{{ request()->routeIs('jenis-kelompok-masyarakat.create') ? 'Tambah Data' : 'Edit Data' }}</a>
                             </li>

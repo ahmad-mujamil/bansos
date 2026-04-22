@@ -1,5 +1,5 @@
 @extends('layouts.layout')
-@section('title', 'Kelompok Masyarakat')
+@section('title', 'Data Kelompok Masyarakat')
 @section('content')
     <!-- Page Content Start -->
     @php
@@ -13,12 +13,12 @@
             <div class="row">
                 <!-- Title Start -->
                 <div class="col mb-2">
-                    <h1 class="mb-2 pb-0 display-4" id="title">Kelompok Masyarakat</h1>
+                    <h1 class="mb-2 pb-0 display-4" id="title">Data Kelompok Masyarakat</h1>
                     <nav class="breadcrumb-container d-inline-block" aria-label="breadcrumb">
                         <ul class="breadcrumb pt-0">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="javascript:;">Organisasi</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('kelompok-masyarakat.index') }}">Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:;">Kelompok Masyarakat</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('kelompok-masyarakat.index') }}">Data Kelompok Masyarakat</a></li>
                             <li class="breadcrumb-item"><a href="javascript:;">{{ $isEdit ? 'Edit Data' : 'Tambah Data' }}</a></li>
                         </ul>
                     </nav>
