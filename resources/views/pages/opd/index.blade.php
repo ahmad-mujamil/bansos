@@ -46,7 +46,7 @@
                             </span>
                         </div>
                     </div> --}}
-                    {{-- <div class="col-12 col-sm-7 col-lg-9 col-xxl-10 text-end mb-3">
+                    <div class="col-12 col-sm-12 col-lg-12 col-xxl-12 text-end mb-3">
                         <div class="d-inline-block">
                             <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm datatable-print" type="button" data-datatable="#datatable-serverside">
                                 <i data-acorn-icon="print"></i>
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                 </div>
                 <!-- Controls End -->
 
