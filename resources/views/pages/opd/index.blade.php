@@ -35,7 +35,7 @@
             <div class="card-body">
                 <!--  Controls Start -->
                 <div class="row">
-                    <div class="col-12 col-sm-5 col-lg-3 col-xxl-2 mb-3">
+                    {{-- <div class="col-12 col-sm-5 col-lg-3 col-xxl-2 mb-3">
                         <div class="d-inline-block float-md-start me-1 mb-1 search-input-container w-100 border border-separator bg-foreground search-sm">
                             <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-serverside" />
                             <span class="search-magnifier-icon">
@@ -45,8 +45,8 @@
                               <i data-acorn-icon="close"></i>
                             </span>
                         </div>
-                    </div>
-                    <div class="col-12 col-sm-7 col-lg-9 col-xxl-10 text-end mb-3">
+                    </div> --}}
+                    {{-- <div class="col-12 col-sm-7 col-lg-9 col-xxl-10 text-end mb-3">
                         <div class="d-inline-block">
                             <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm datatable-print" type="button" data-datatable="#datatable-serverside">
                                 <i data-acorn-icon="print"></i>
@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
                 <!-- Controls End -->
 
@@ -115,8 +115,7 @@
             processing: true,
             serverSide: true,
             responsive: true,
-            lengthChange: false,
-            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
+            lengthChange: true,
             ajax: "{!! route('opd.index') !!}",
             columns: [
                 { data: 'nama', name: 'nama' },
