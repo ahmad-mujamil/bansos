@@ -30,7 +30,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 mb-3">
                         <div class="d-flex gap-2 w-100 align-items-center">
-                            <div class="flex-grow-1 border border-separator bg-foreground">
+                            <div class="flex-grow-1">
                                 <select id="filter-status-validasi" class="form-select form-select-sm">
                                     <option value="all" selected>Semua Status</option>
                                     <option value="1">Terverifikasi</option>

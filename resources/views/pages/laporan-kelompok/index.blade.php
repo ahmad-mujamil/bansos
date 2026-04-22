@@ -22,7 +22,7 @@
                     <div class="col-12 col-lg-7 col-xxl-6 mb-3">
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             @if (auth()->user()->is_super() || auth()->user()->is_admin())
-                                <div class="flex-grow-1 border border-separator bg-foreground" style="min-width: 12rem;">
+                                <div class="flex-grow-1" style="min-width: 12rem;">
                                     <select id="filter-opd" class="form-select form-select-sm">
                                         <option value="">Semua OPD</option>
                                         @foreach ($opds as $opd)
@@ -31,7 +31,7 @@
                                     </select>
                                 </div>
                             @endif
-                            <div class="flex-grow-1 border border-separator bg-foreground" style="min-width: 9rem;">
+                            <div class="flex-grow-1" style="min-width: 9rem;">
                                 <select id="filter-status" class="form-select form-select-sm">
                                     <option value="">Semua Status</option>
                                     <option value="aktif">Aktif</option>
@@ -109,16 +109,6 @@
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
     <style>
-        #filter-opd + .select2-container--bootstrap4 .select2-selection--single,
-        #filter-status + .select2-container--bootstrap4 .select2-selection--single {
-            height: 31px;
-        }
-        #filter-opd + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered,
-        #filter-status + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-            line-height: 31px;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
         tr.group-opd-header td {
             background: var(--bs-primary, #0d6efd) !important;
             color: #fff;
