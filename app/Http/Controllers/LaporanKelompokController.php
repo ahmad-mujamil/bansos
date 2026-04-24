@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\LaporanKelompokExport;
 use App\Models\Opd;
 use App\Models\Organisasi;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
@@ -44,6 +45,7 @@ class LaporanKelompokController extends Controller
     {
         return DataTables::of($this->baseQuery())
             ->addIndexColumn()
+            ->addColumn('id', fn ($row) => $row->id)
             ->addColumn('opd', fn ($row) => $row->opd?->nama ?? '-')
             ->addColumn('jenis_kelompok', fn ($row) => $row->jenisKelompokMasyarakat?->nama ?? '-')
             ->addColumn('kecamatan', fn ($row) => $row->kecamatan?->nama ?? '-')
@@ -89,10 +91,26 @@ class LaporanKelompokController extends Controller
         return view('pages.laporan-kelompok.preview', compact('kelompoks', 'selectedOpd', 'statusLabel'));
     }
 
+    public function anggota(Organisasi $organisasi): JsonResponse
+    {
+        $anggota = $organisasi->organisasiDetail()
+            ->with('penduduk')
+            ->orderByRaw("FIELD(jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Admin', 'Anggota')")
+            ->get()
+            ->map(fn ($d) => [
+                'nik'     => $d->penduduk?->nik ?? '-',
+                'nama'    => $d->penduduk?->nama ?? '-',
+                'alamat'  => $d->penduduk?->alamat ?? '-',
+                'jabatan' => $d->jabatan?->value ?? '-',
+            ]);
+
+        return response()->json($anggota);
+    }
+
     public function export()
     {
         $kelompoks = $this->baseQuery()->get();
-        $filename  = 'laporan-kelompok-' . date('YmdHis') . '.xlsx';
+        $filename = 'laporan-kelompok-'.date('YmdHis').'.xlsx';
 
         return Excel::download(new LaporanKelompokExport($kelompoks), $filename);
     }
