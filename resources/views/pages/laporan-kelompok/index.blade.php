@@ -117,6 +117,19 @@
             padding: 6px 10px;
             letter-spacing: 0.03em;
         }
+        #datatable-laporan-kelompok tbody tr:not(.group-opd-header):not(.child) {
+            cursor: pointer;
+        }
+        #datatable-laporan-kelompok tbody tr.shown > td:first-child::before {
+            content: "▾ ";
+            color: var(--bs-primary);
+            font-size: 0.8rem;
+        }
+        #datatable-laporan-kelompok tbody tr:not(.shown):not(.group-opd-header):not(.child) > td:first-child::before {
+            content: "▸ ";
+            color: #aaa;
+            font-size: 0.8rem;
+        }
     </style>
 @endpush
 
@@ -169,6 +182,7 @@
                 { data: 'jumlah_anggota', name: 'jumlah_anggota',  searchable: false },
                 { data: 'status',         name: 'status',          searchable: false },
                 { data: 'opd',            name: 'opd',             visible: false, searchable: false },
+                { data: 'id',             name: 'id',              visible: false, searchable: false },
             ],
             drawCallback: function () {
                 var api   = this.api();
@@ -190,6 +204,58 @@
 
         $filterOpd.on('change', function () { tableLaporanKelompok.ajax.reload(); });
         $filterStatus.on('change', function () { tableLaporanKelompok.ajax.reload(); });
+
+        const baseAnggotaUrl = "{!! url('laporan-kelompok') !!}";
+
+        function anggotaRowHtml(anggota) {
+            if (!anggota.length) {
+                return '<tr><td colspan="5" class="text-center text-muted fst-italic py-2">Belum ada anggota</td></tr>';
+            }
+            return anggota.map(function (a, i) {
+                return '<tr>' +
+                    '<td class="text-muted text-small" style="width:2rem">' + (i + 1) + '</td>' +
+                    '<td style="width:10rem">' + a.nik + '</td>' +
+                    '<td>' + a.nama + '</td>' +
+                    '<td>' + a.alamat + '</td>' +
+                    '<td><span class="badge bg-secondary">' + a.jabatan + '</span></td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        $('#datatable-laporan-kelompok tbody').on('click', 'tr:not(.group-opd-header):not(.child)', function () {
+            var tr  = $(this);
+            var row = tableLaporanKelompok.row(tr);
+
+            if (!row.data()) { return; }
+
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+                return;
+            }
+
+            var organisasiId = row.data().id;
+            var childDiv = $('<div class="p-2"><span class="text-muted fst-italic">Memuat anggota…</span></div>');
+            row.child(childDiv).show();
+            tr.addClass('shown');
+
+            $.getJSON(baseAnggotaUrl + '/' + organisasiId + '/anggota', function (data) {
+                childDiv.html(
+                    '<table class="table table-sm table-bordered mb-0" style="background:#f8f9fa">' +
+                        '<thead class="table-secondary"><tr>' +
+                            '<th style="width:2rem">#</th>' +
+                            '<th style="width:10rem">NIK</th>' +
+                            '<th>Nama</th>' +
+                            '<th>Alamat</th>' +
+                            '<th>Jabatan</th>' +
+                        '</tr></thead>' +
+                        '<tbody>' + anggotaRowHtml(data) + '</tbody>' +
+                    '</table>'
+                );
+            }).fail(function () {
+                childDiv.html('<span class="text-danger">Gagal memuat data anggota.</span>');
+            });
+        });
 
         $('#btn-preview').on('click', function () {
             const params = new URLSearchParams();
