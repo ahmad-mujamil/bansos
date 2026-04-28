@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JenisPenerimaBantuan;
 use App\Enums\PengajuanStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,7 @@ class Pengajuan extends Model implements HasMedia
     {
         return [
             'status' => PengajuanStatus::class,
+            'jenis_penerima_bantuan' => JenisPenerimaBantuan::class,
             'verified_at' => 'datetime',
         ];
     }
