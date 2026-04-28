@@ -39,27 +39,6 @@ return [
         ],
     ],
     [
-        'id' => 'SIDE_LAPORAN',
-        'icon' => '',
-        'title' => 'Laporan',
-        'url' => 'javascript:;',
-        'caret' => true,
-        'sub_menu' => [
-            [
-                'id' => 'SIDE_LAP_PENGAJUAN',
-                'icon' => 'file-text',
-                'url' => '/laporan-pengajuan',
-                'title' => 'Pengajuan',
-            ],
-            [
-                'id' => 'SIDE_LAP_ANGGOTA_KELOMPOK',
-                'icon' => 'user',
-                'url' => '/laporan-anggota-kelompok',
-                'title' => 'Anggota Kelompok',
-            ],
-        ],
-    ],
-    [
         // ROLE OPD
         'id' => 'SIDE_MASTER_DATA',
         'icon' => '',
@@ -85,13 +64,20 @@ return [
     [
         'id' => 'SIDE_VERIFIKASI',
         'url' => 'javascript:;',
-        'title' => 'Verifikasi & Pengajuan',
+        'title' => 'Pengajuan & Verifikasi',
         'icon' => '',
         'caret' => true,
         'sub_menu' => [
             [
+                'id' => 'PENGAJUAN_OPD',
+                'icon' => 'book',
+                'url' => '/pengajuan-opd',
+                'title' => 'Pengajuan Bantuan',
+            ],
+
+            [
                 'id' => 'VERIFY_PENGGUNA',
-                'icon' => 'check-square',
+                'icon' => 'user',
                 'url' => '/verifikasi-pengguna',
                 'title' => 'Verifikasi Pengguna',
             ],
@@ -104,16 +90,9 @@ return [
 
             [
                 'id' => 'VERIFY_PENGAJUAN',
-                'icon' => 'check-square',
+                'icon' => 'form-check',
                 'url' => '/verifikasi-pengajuan',
                 'title' => 'Verifikasi Pengajuan',
-            ],
-
-            [
-                'id' => 'PENGAJUAN_OPD',
-                'icon' => 'book',
-                'url' => '/pengajuan-opd',
-                'title' => 'Pengajuan Bantuan',
             ],
         ],
     ],
@@ -164,6 +143,27 @@ return [
                 'icon' => 'search',
                 'url' => '/cari-penduduk-by-nik',
                 'title' => 'Cari Penduduk (NIK)',
+            ],
+        ],
+    ],
+    [
+        'id' => 'SIDE_LAPORAN',
+        'icon' => '',
+        'title' => 'Laporan',
+        'url' => 'javascript:;',
+        'caret' => true,
+        'sub_menu' => [
+            [
+                'id' => 'SIDE_LAP_PENGAJUAN',
+                'icon' => 'file-text',
+                'url' => '/laporan-pengajuan',
+                'title' => 'Pengajuan',
+            ],
+            [
+                'id' => 'SIDE_LAP_ANGGOTA_KELOMPOK',
+                'icon' => 'user',
+                'url' => '/laporan-anggota-kelompok',
+                'title' => 'Anggota Kelompok',
             ],
         ],
     ],
