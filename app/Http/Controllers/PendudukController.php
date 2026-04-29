@@ -35,10 +35,10 @@ class PendudukController extends Controller
                 return $navActionStart . $edit . $delete . $navActionEnd;
             })
             ->editColumn('jk', function ($data) {
-                return $data->jk->getDescription();
+                return $data->jk?->getDescription();
             })
             ->editColumn('level_desil', function ($data) {
-                return $data->level_desil->getDescription();
+                return $data->level_desil?->getDescription();
             })
             ->rawColumns(['action'])
             ->toJson();
