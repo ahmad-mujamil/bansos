@@ -87,8 +87,7 @@
                     id="datatable-serverside">
                     <thead>
                     <tr>
-                        <th class="text-muted text-small text-uppercase">NIK</th>
-                        <th class="text-muted text-small text-uppercase">Nama</th>
+                        <th class="text-muted text-small text-uppercase">Nama / NIK</th>
                         <th class="text-muted text-small text-uppercase">Desa / Kecamatan</th>
                         <th class="text-muted text-small text-uppercase">Desil</th>
                         <th class="text-muted text-small text-uppercase">Kelompok</th>
@@ -166,12 +165,9 @@
             },
             columns: [
                 {
-                    data: 'nik',
-                    name: 'nik'
-                },
-                {
-                    data: 'nama',
-                    name: 'nama'
+                    data: 'nik_nama',
+                    name: 'nama',
+                    defaultContent: '-'
                 },
                 {
                     data: 'desa_kecamatan',
