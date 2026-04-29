@@ -58,6 +58,12 @@ return [
                 'url' => '/kelompok-masyarakat',
                 'title' => 'Kelompok Masyarakat',
             ],
+            [
+                'id' => 'PENDUDUK',
+                'icon' => 'users',
+                'url' => '/penduduk',
+                'title' => 'Penduduk',
+            ],
         ],
     ],
 
