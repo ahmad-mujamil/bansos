@@ -12,6 +12,7 @@ enum JenisKelamin: string
         return match ($this) {
             self::LAKI_LAKI => "Laki-laki",
             self::PEREMPUAN => "Perempuan",
+            default => "Tidak Diketahui",
         };
     }
 }
