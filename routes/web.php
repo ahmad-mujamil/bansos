@@ -169,7 +169,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::put('realisasi/{pengajuan}', [App\Http\Controllers\RealisasiController::class, 'update'])->name('realisasi.update');
 
     // BAST & monitoring (tahap menuju / setelah BAST)
-    Route::middleware(['role:super,opd'])->group(function () {
+    Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::get('monitoring-bantuan', [MonitoringBantuanController::class, 'index'])->name('monitoring-bantuan.index');
         Route::resource('bast', App\Http\Controllers\BastController::class);
     });

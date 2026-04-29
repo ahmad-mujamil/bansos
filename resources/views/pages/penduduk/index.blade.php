@@ -89,9 +89,7 @@
                     <tr>
                         <th class="text-muted text-small text-uppercase">NIK</th>
                         <th class="text-muted text-small text-uppercase">Nama</th>
-                        <th class="text-muted text-small text-uppercase">Jenis Kelamin</th>
-                        <th class="text-muted text-small text-uppercase">Desa</th>
-                        <th class="text-muted text-small text-uppercase">Kecamatan</th>
+                        <th class="text-muted text-small text-uppercase">Desa / Kecamatan</th>
                         <th class="text-muted text-small text-uppercase">Desil</th>
                         <th class="text-muted text-small text-uppercase">Kelompok</th>
                         <th class="text-muted text-small text-uppercase">OPD</th>
@@ -156,17 +154,8 @@
                     name: 'nama'
                 },
                 {
-                    data: 'jk',
-                    name: 'jk'
-                },
-                {
-                    data: 'desa.nama',
+                    data: 'desa_kecamatan',
                     name: 'desa.nama',
-                    defaultContent: '-'
-                },
-                {
-                    data: 'kecamatan.nama',
-                    name: 'kecamatan.nama',
                     defaultContent: '-'
                 },
                 {
