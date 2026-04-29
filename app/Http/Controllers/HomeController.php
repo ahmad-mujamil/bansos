@@ -60,11 +60,26 @@ class HomeController extends Controller
                 : 0.0);
             $totalBlacklist = 0;
 
+            $pendudukTidakValid = $opdId
+                ? Penduduk::query()
+                    ->where('is_valid', false)
+                    ->whereNotNull('validated_at')
+                    ->whereHas('organisasiDetails.organisasi', fn ($q) => $q->where('opd_id', $opdId))
+                    ->with([
+                        'organisasiDetails' => fn ($q) => $q->whereHas('organisasi', fn ($qq) => $qq->where('opd_id', $opdId)),
+                        'organisasiDetails.organisasi:id,nama,opd_id',
+                        'validatedBy:id,nama',
+                    ])
+                    ->orderByDesc('validated_at')
+                    ->get()
+                : collect();
+
             return view('home-opd', compact(
                 'totalBlacklist',
                 'totalOrganisasi',
                 'totalBansos',
                 'totalPengajuan',
+                'pendudukTidakValid',
             ));
         }
 
