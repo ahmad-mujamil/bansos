@@ -154,9 +154,67 @@
                             </div>
                         </a>
                     </div>
-                
+
             </div>
         </div>
+
+        @if($pendudukTidakValid->isNotEmpty())
+            <div class="mb-5">
+                <h2 class="small-title mb-3">Penduduk Tidak Valid</h2>
+                <p class="text-muted mb-3">
+                    Penduduk yang terdaftar pada kelompok di OPD Anda dengan status verifikasi
+                    <span class="badge bg-danger">Tidak Valid</span>.
+                </p>
+
+                <div class="card mb-5">
+                    <div class="card-body">
+                        <table class="data-table data-table-pagination data-table-standard responsive nowrap stripe" id="datatable-tidak-valid">
+                            <thead>
+                                <tr>
+                                    <th class="text-muted text-small text-uppercase">Nama</th>
+                                    <th class="text-muted text-small text-uppercase">NIK</th>
+                                    <th class="text-muted text-small text-uppercase">Kelompok</th>
+                                    <th class="text-muted text-small text-uppercase">Catatan</th>
+                                    <th class="text-muted text-small text-uppercase">Diverifikasi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-alternate text-medium">
+                            @foreach($pendudukTidakValid as $p)
+                                @php
+                                    $kelompokNames = $p->organisasiDetails
+                                        ->map(fn ($d) => $d->organisasi?->nama)
+                                        ->filter()
+                                        ->unique()
+                                        ->values();
+                                    $catatan = trim((string) $p->catatan_validasi) !== ''
+                                        ? $p->catatan_validasi
+                                        : '-';
+                                @endphp
+                                <tr>
+                                    <td>{{ $p->nama }}</td>
+                                    <td>{{ $p->nik }}</td>
+                                    <td>
+                                        @forelse($kelompokNames as $nama)
+                                            <span class="badge bg-outline-primary me-1 mb-1">{{ $nama }}</span>
+                                        @empty
+                                            -
+                                        @endforelse
+                                    </td>
+                                    <td>{{ $catatan }}</td>
+                                    <td>
+                                        {{ $p->validated_at?->translatedFormat('d M Y H:i') }}
+                                        @if($p->validatedBy)
+                                            <div class="text-muted text-small">oleh {{ $p->validatedBy->nama }}</div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
         <!-- Stats End -->
 
         <!-- Charts Start -->
@@ -188,6 +246,32 @@
     </div>
     <!-- Page Content End -->
 @endsection
+@push('css')
+    <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
+@endpush
+@push('js_vendor')
+    <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
+    <script>
+        $(function () {
+            new DatatableExtend();
+            if ($('#datatable-tidak-valid').length) {
+                $('#datatable-tidak-valid').DataTable({
+                    language: {
+                        paginate: {
+                            previous: '<i class="cs-chevron-left"></i>',
+                            next: '<i class="cs-chevron-right"></i>',
+                        },
+                    },
+                    responsive: true,
+                    lengthChange: false,
+                    pageLength: 10,
+                    sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
+                });
+            }
+        });
+    </script>
+@endpush
 @push('js_page')
 {{--    <script src="{{ asset('js/cs/charts.extend.js') }}"></script>--}}
 {{--    <script src="{{ asset('js/vendor/Chart.bundle.min.js') }}"></script>--}}
