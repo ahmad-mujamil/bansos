@@ -34,9 +34,22 @@
                     <div><span class="badge bg-{{ $pengajuan->status?->badgeColor() ?? 'secondary' }}">{{ $pengajuan->status->getDescription() }}</span></div>
                 </div>
                 <div class="col-md-6">
+                    <div class="text-muted small">Jenis penerima bantuan</div>
+                    <div class="fw-semibold">{{ $pengajuan->jenis_penerima_bantuan?->getDescription() ?? '-' }}</div>
+                </div>
+                <div class="col-md-6">
                     <div class="text-muted small">Kelompok</div>
                     <div class="fw-semibold">{{ $pengajuan->organisasi?->nama ?? '-' }}</div>
                 </div>
+                @if($pengajuan->details->isNotEmpty() && $pengajuan->details->first()?->penduduk)
+                <div class="col-md-6">
+                    <div class="text-muted small">Penduduk (rincian)</div>
+                    <div class="fw-semibold">
+                        {{ $pengajuan->details->first()->penduduk->nama }}
+                        <span class="text-muted">— NIK {{ $pengajuan->details->first()->penduduk->nik }}</span>
+                    </div>
+                </div>
+                @endif
                 <div class="col-md-6">
                     <div class="text-muted small">Nilai</div>
                     <div class="fw-semibold">Rp {{ number_format($pengajuan->nilai, 0, ',', '.') }}</div>

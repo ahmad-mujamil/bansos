@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JenisOrganisasi;
+use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Models\Desa;
@@ -12,7 +13,9 @@ use App\Models\Organisasi;
 use App\Models\OrganisasiDetail;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
+use App\Models\PengajuanDetail;
 use App\Models\PengajuanLog;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +42,7 @@ class PengajuanOpdController extends Controller
 
         $jenis = $request->input('jenis');
 
-         $kelompokList = $this->kelompokListForOpd($opdId, $jenis);
+        $kelompokList = $this->kelompokListForOpd($opdId, $jenis);
 
         $jenisBantuanKelompokList = JenisBantuan::query()
             ->where('kategori', 'bantuan_kelompok')
@@ -49,7 +52,7 @@ class PengajuanOpdController extends Controller
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
         $selectedOrganisasiId = old('organisasi_id');
-        $simpanDiblokir = $selectedOrganisasiId
+        $kelompokSimpanDiblokir = $selectedOrganisasiId
             ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
             : false;
 
@@ -61,6 +64,20 @@ class PengajuanOpdController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nik']);
 
+        $jenisPenerimaKey = old('jenis_penerima_bantuan', JenisPenerimaBantuan::NON_INDIVIDU->value);
+        $jenisPenerimaEnum = JenisPenerimaBantuan::tryFrom($jenisPenerimaKey);
+        $selectedPendudukIndividuId = old('penduduk_id');
+        $pendudukIndividuBelumValid = false;
+        if (
+            $jenisPenerimaEnum !== null
+            && in_array($jenisPenerimaEnum, [JenisPenerimaBantuan::INDIVIDU, JenisPenerimaBantuan::KELUARGA], true)
+            && $selectedPendudukIndividuId
+        ) {
+            $pendudukIndividuBelumValid = ! (bool) Penduduk::query()->whereKey($selectedPendudukIndividuId)->value('is_valid');
+        }
+        $simpanDiblokir = $kelompokSimpanDiblokir || $pendudukIndividuBelumValid;
+        $detailPendudukForIndividu = null;
+
         return view('pages.pengajuan-opd.form', [
             'pengajuan' => null,
             'pendudukList' => $pendudukList,
@@ -69,7 +86,9 @@ class PengajuanOpdController extends Controller
             'jenis' => $jenis,
             'kecamatans' => $kecamatans,
             'simpanDiblokir' => $simpanDiblokir,
+            'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
+            'detailPendudukForIndividu' => $detailPendudukForIndividu,
         ]);
     }
 
@@ -77,6 +96,9 @@ class PengajuanOpdController extends Controller
     {
         $validated = $this->validatePengajuan($request);
         $this->validatePengajuanVerifikasi($request);
+
+        $jenisPenerima = JenisPenerimaBantuan::from($validated['jenis_penerima_bantuan']);
+        $isIndividuKeluarga = in_array($jenisPenerima, [JenisPenerimaBantuan::INDIVIDU, JenisPenerimaBantuan::KELUARGA], true);
 
         try {
             DB::beginTransaction();
@@ -88,11 +110,20 @@ class PengajuanOpdController extends Controller
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->nilai = $validated['nilai'];
             $pengajuan->opd_id = Auth::user()?->opd_id;
-            $pengajuan->organisasi_id = $validated['organisasi_id'];
+            $pengajuan->organisasi_id = $isIndividuKeluarga ? null : $validated['organisasi_id'];
+            $pengajuan->jenis_penerima_bantuan = $jenisPenerima;
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
             $pengajuan->status = PengajuanStatus::DRAFT;
             $pengajuan->is_pengajuan_opd = true;
             $pengajuan->save();
+
+            if ($isIndividuKeluarga) {
+                PengajuanDetail::query()->create([
+                    'pengajuan_id' => $pengajuan->id,
+                    'penduduk_id' => $validated['penduduk_id'],
+                    'nilai' => null,
+                ]);
+            }
 
             if ($request->hasFile('file_pengajuan')) {
                 $pengajuan->addMediaFromRequest('file_pengajuan')->toMediaCollection('pengajuan');
@@ -120,6 +151,7 @@ class PengajuanOpdController extends Controller
             'organisasi',
             'desa.kecamatan',
             'jenisBantuan',
+            'details.penduduk',
             'logs.user',
         ]);
 
@@ -167,7 +199,7 @@ class PengajuanOpdController extends Controller
 
         $user = Auth::user();
         $opdId = $user->opd_id;
-        $pengajuan->load(['desa.kecamatan', 'details']);
+        $pengajuan->load(['desa.kecamatan', 'details.penduduk']);
 
         $jenis = JenisPengajuan::BANTUAN_KELOMPOK->value;
         $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
@@ -182,7 +214,7 @@ class PengajuanOpdController extends Controller
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
         $selectedOrganisasiId = old('organisasi_id', $pengajuan->organisasi_id);
-        $simpanDiblokir = $selectedOrganisasiId
+        $kelompokSimpanDiblokir = $selectedOrganisasiId
             ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
             : false;
 
@@ -194,6 +226,22 @@ class PengajuanOpdController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nama', 'nik']);
 
+        $defaultJenisPenerima = $pengajuan->jenis_penerima_bantuan?->value
+            ?? JenisPenerimaBantuan::NON_INDIVIDU->value;
+        $jenisPenerimaKey = old('jenis_penerima_bantuan', $defaultJenisPenerima);
+        $jenisPenerimaEnum = JenisPenerimaBantuan::tryFrom($jenisPenerimaKey);
+        $detailPendudukForIndividu = $pengajuan->details->first()?->penduduk;
+        $selectedPendudukIndividuId = old('penduduk_id', $detailPendudukForIndividu?->id);
+        $pendudukIndividuBelumValid = false;
+        if (
+            $jenisPenerimaEnum !== null
+            && in_array($jenisPenerimaEnum, [JenisPenerimaBantuan::INDIVIDU, JenisPenerimaBantuan::KELUARGA], true)
+            && $selectedPendudukIndividuId
+        ) {
+            $pendudukIndividuBelumValid = ! (bool) Penduduk::query()->whereKey($selectedPendudukIndividuId)->value('is_valid');
+        }
+        $simpanDiblokir = $kelompokSimpanDiblokir || $pendudukIndividuBelumValid;
+
         return view('pages.pengajuan-opd.form', [
             'pengajuan' => $pengajuan,
             'kelompokList' => $kelompokList,
@@ -202,8 +250,10 @@ class PengajuanOpdController extends Controller
             'jenis' => $jenis,
             'kecamatans' => $kecamatans,
             'simpanDiblokir' => $simpanDiblokir,
+            'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
             'pendudukList' => $pendudukList,
+            'detailPendudukForIndividu' => $detailPendudukForIndividu,
         ]);
     }
 
@@ -222,13 +272,17 @@ class PengajuanOpdController extends Controller
         try {
             DB::beginTransaction();
             $hadFileBefore = $pengajuan->hasMedia('pengajuan');
-            $trackedKeys = ['judul', 'lokasi', 'desa_id', 'nilai', 'organisasi_id'];
+            $jenisPenerima = JenisPenerimaBantuan::from($validated['jenis_penerima_bantuan']);
+            $isIndividuKeluarga = in_array($jenisPenerima, [JenisPenerimaBantuan::INDIVIDU, JenisPenerimaBantuan::KELUARGA], true);
+
+            $trackedKeys = ['judul', 'lokasi', 'desa_id', 'nilai', 'organisasi_id', 'jenis_penerima_bantuan'];
             $before = [
                 'judul' => $pengajuan->judul,
                 'lokasi' => $pengajuan->lokasi,
                 'desa_id' => $pengajuan->desa_id,
                 'nilai' => $pengajuan->nilai,
                 'organisasi_id' => $pengajuan->organisasi_id,
+                'jenis_penerima_bantuan' => $pengajuan->jenis_penerima_bantuan?->value,
             ];
 
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
@@ -236,9 +290,19 @@ class PengajuanOpdController extends Controller
             $pengajuan->nilai = $validated['nilai'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
-            $pengajuan->organisasi_id = $validated['organisasi_id'];
+            $pengajuan->organisasi_id = $isIndividuKeluarga ? null : $validated['organisasi_id'];
+            $pengajuan->jenis_penerima_bantuan = $jenisPenerima;
             $pengajuan->is_pengajuan_opd = true;
             $pengajuan->save();
+
+            $pengajuan->details()->delete();
+            if ($isIndividuKeluarga) {
+                PengajuanDetail::query()->create([
+                    'pengajuan_id' => $pengajuan->id,
+                    'penduduk_id' => $validated['penduduk_id'],
+                    'nilai' => null,
+                ]);
+            }
 
             if ($request->hasFile('file_pengajuan')) {
                 $pengajuan->clearMediaCollection('pengajuan');
@@ -248,7 +312,9 @@ class PengajuanOpdController extends Controller
             $changes = [];
             foreach ($trackedKeys as $key) {
                 $from = $before[$key];
-                $to = $pengajuan->getAttribute($key);
+                $to = $key === 'jenis_penerima_bantuan'
+                    ? $pengajuan->jenis_penerima_bantuan?->value
+                    : $pengajuan->getAttribute($key);
                 $changed = $key === 'nilai'
                     ? (float) $from != (float) $to
                     : $from !== $to;
@@ -294,6 +360,35 @@ class PengajuanOpdController extends Controller
         return redirect()->route('pengajuan-opd.index');
     }
 
+    /**
+     * Select2: cari penduduk berdasarkan NIK atau nama (minimal 2 karakter).
+     */
+    public function searchPenduduk(Request $request): JsonResponse
+    {
+        $term = $request->string('q')->trim()->value();
+        if (mb_strlen($term) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        $penduduk = Penduduk::query()
+            ->where(function ($q) use ($term) {
+                $q->where('nik', 'like', '%'.$term.'%')
+                    ->orWhere('nama', 'like', '%'.$term.'%');
+            })
+            ->orderBy('nama')
+            ->limit(30)
+            ->get(['id', 'nama', 'nik', 'is_valid']);
+
+        $results = $penduduk->map(fn (Penduduk $p) => [
+            'id' => $p->id,
+            'text' => $p->nama.' — '.$p->nik,
+            'nama' => $p->nama,
+            'nik' => $p->nik,
+            'is_valid' => (bool) $p->is_valid,
+        ])->all();
+
+        return response()->json(['results' => $results]);
+    }
 
     private function kelompokListForOpd(string $opdId, ?string $jenis, ?string $alwaysIncludeOrganisasiId = null)
     {
@@ -302,7 +397,11 @@ class PengajuanOpdController extends Controller
         if ($jenis_pengajuan === null) {
             return [];
         }
-        $jenisOrganisasiValues = $jenis_pengajuan->getJenisOrganisasi();
+        $jenisOrganisasiValues = array_map(
+            static fn (JenisOrganisasi $o) => $o->value,
+            $jenis_pengajuan->getJenisOrganisasi(),
+        );
+
         return Organisasi::query()
             ->where('is_active', true)
             ->where('is_blacklist', false)
@@ -326,7 +425,7 @@ class PengajuanOpdController extends Controller
     private function generateKodePengajuan(): string
     {
         do {
-            $kode = 'PEN-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
+            $kode = 'PEN-'.now()->format('Ymd').'-'.strtoupper(Str::random(4));
         } while (Pengajuan::where('kode_pengajuan', $kode)->exists());
 
         return $kode;
@@ -336,18 +435,53 @@ class PengajuanOpdController extends Controller
     {
         return OrganisasiDetail::query()
             ->where('organisasi_id', $organisasiId)
-            ->whereHas('penduduk', fn($q) => $q->where('is_valid', false))
+            ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
             ->exists();
     }
 
     private function validatePengajuanVerifikasi(Request $request): void
     {
-        $organisasiId = (string) $request->input('organisasi_id');
-        if ($organisasiId !== '' && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
-            throw ValidationException::withMessages([
-                'organisasi_id' => ['Masih ada anggota kelompok yang data penduduknya belum diverifikasi.'],
-            ]);
+        $jenisPenerima = JenisPenerimaBantuan::tryFrom((string) $request->input('jenis_penerima_bantuan'));
+
+        if ($jenisPenerima === JenisPenerimaBantuan::NON_INDIVIDU) {
+            $organisasiId = (string) $request->input('organisasi_id');
+            if ($organisasiId !== '' && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
+                throw ValidationException::withMessages([
+                    'organisasi_id' => ['Masih ada anggota kelompok yang data penduduknya belum diverifikasi.'],
+                ]);
+            }
+
+            return;
         }
+
+        if (in_array($jenisPenerima, [JenisPenerimaBantuan::INDIVIDU, JenisPenerimaBantuan::KELUARGA], true)) {
+            $pendudukId = (string) $request->input('penduduk_id');
+            if ($pendudukId === '') {
+                return;
+            }
+            $isValid = (bool) Penduduk::query()->whereKey($pendudukId)->value('is_valid');
+            if (! $isValid) {
+                throw ValidationException::withMessages([
+                    'penduduk_id' => ['Penduduk yang dipilih belum terverifikasi (is_valid).'],
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function jenisOrganisasiValuesForPengajuan(?string $jenis): array
+    {
+        $jenisPengajuan = JenisPengajuan::tryFrom((string) $jenis);
+        if ($jenisPengajuan === null) {
+            return [];
+        }
+
+        return array_map(
+            static fn (JenisOrganisasi $o) => $o->value,
+            $jenisPengajuan->getJenisOrganisasi(),
+        );
     }
 
     private function validatePengajuan(Request $request): array
@@ -357,16 +491,28 @@ class PengajuanOpdController extends Controller
         $jenisOrgValues = $this->jenisOrganisasiValuesForPengajuan($request->input('jenis'));
 
         return $request->validate([
+            'jenis_penerima_bantuan' => ['required', Rule::enum(JenisPenerimaBantuan::class)],
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',
             'organisasi_id' => [
-                'required',
+                Rule::requiredIf(fn () => $request->input('jenis_penerima_bantuan') === JenisPenerimaBantuan::NON_INDIVIDU->value),
+                'nullable',
+                'uuid',
                 Rule::exists('organisasi', 'id')->where(function ($q) use ($opdId, $jenisOrgValues) {
                     $q->where('opd_id', $opdId);
                     if ($jenisOrgValues !== []) {
                         $q->whereIn('jenis', $jenisOrgValues);
                     }
                 }),
+            ],
+            'penduduk_id' => [
+                Rule::requiredIf(fn () => in_array($request->input('jenis_penerima_bantuan'), [
+                    JenisPenerimaBantuan::INDIVIDU->value,
+                    JenisPenerimaBantuan::KELUARGA->value,
+                ], true)),
+                'nullable',
+                'uuid',
+                'exists:penduduk,id',
             ],
             'lokasi' => 'nullable|string|max:255',
             'nilai' => 'required|numeric|min:0',

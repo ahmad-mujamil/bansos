@@ -16,6 +16,12 @@ class PengajuanDetail extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'nilai' => 'decimal:2',
+        ];
+    }
 
     public function pengajuan(): BelongsTo
     {
