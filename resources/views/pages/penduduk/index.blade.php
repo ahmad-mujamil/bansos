@@ -193,6 +193,14 @@
             table.ajax.reload();
         });
 
+        table.on('draw.dt', function () {
+            $('#datatable-serverside [data-bs-toggle="tooltip"]').each(function () {
+                const existing = bootstrap.Tooltip.getInstance(this);
+                if (existing) existing.dispose();
+                new bootstrap.Tooltip(this);
+            });
+        });
+
         function _extendDatatables() {
             new DatatableExtend();
         }

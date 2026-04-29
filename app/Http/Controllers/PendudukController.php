@@ -67,7 +67,11 @@ class PendudukController extends Controller
                     return '<span class="badge bg-success">Terverifikasi</span>';
                 }
                 if ($data->validated_at && !$data->is_valid) {
-                    return '<span class="badge bg-danger">Tidak Valid</span>';
+                    $catatan = trim((string) $data->catatan_validasi) !== ''
+                        ? $data->catatan_validasi
+                        : 'Tidak ada catatan';
+
+                    return '<span class="badge bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" style="cursor: help;" title="' . e($catatan) . '">Tidak Valid</span>';
                 }
                 return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
             })
