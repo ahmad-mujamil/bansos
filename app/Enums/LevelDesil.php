@@ -28,6 +28,7 @@ enum LevelDesil: int
             self::DESIL_8 => "Menengah",
             self::DESIL_9 => "Menengah Keatas",
             self::DESIL_10 => "Sejahtera",
+            default => "Tidak Diketahui",
 
         };
     }
