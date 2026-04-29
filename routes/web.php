@@ -116,7 +116,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     });
 
     // Verifikasi Penduduk
-    Route::middleware(['role:dukcapil,admin'])->group(function () {
+    Route::middleware(['role:dukcapil,admin, opd'])->group(function () {
         Route::get('verifikasi-penduduk', [App\Http\Controllers\VerifikasiPendudukController::class, 'index'])->name('verifikasi-penduduk.index');
         Route::get('verifikasi-penduduk/{penduduk}', [App\Http\Controllers\VerifikasiPendudukController::class, 'show'])->name('verifikasi-penduduk.show');
         Route::post('verifikasi-penduduk/{penduduk}/verifikasi', [App\Http\Controllers\VerifikasiPendudukController::class, 'verifikasi'])->name('verifikasi-penduduk.verifikasi');
