@@ -129,7 +129,7 @@ return [
             [
                 'id' => 'LAP_PENGAJUAN',
                 'url' => '/laporan-pengajuan',
-                'title' => 'Pengajuan Bansos',
+                'title' => 'Laporan Pengajuan',
             ],
             [
                 'id' => 'LAP_REALISASI',
