@@ -20,7 +20,11 @@ class PendudukController extends Controller
         $statusRequest = request('status', 'all');
 
         $data = Penduduk::query()
-            ->with(['kecamatan', 'desa'])
+            ->with([
+                'kecamatan',
+                'desa',
+                'organisasiDetails.organisasi.opd',
+            ])
             ->latest();
 
         if ($statusRequest === '1') {
@@ -59,7 +63,37 @@ class PendudukController extends Controller
                 }
                 return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
             })
-            ->rawColumns(['action', 'status_verifikasi'])
+            ->addColumn('kelompok', function ($data) {
+                $kelompok = $data->organisasiDetails
+                    ->map(fn ($d) => $d->organisasi?->nama)
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                if ($kelompok->isEmpty()) {
+                    return '<span class="text-muted">-</span>';
+                }
+
+                return $kelompok
+                    ->map(fn ($nama) => '<span class="badge bg-outline-primary me-1 mb-1">' . e($nama) . '</span>')
+                    ->implode('');
+            })
+            ->addColumn('opd', function ($data) {
+                $opd = $data->organisasiDetails
+                    ->map(fn ($d) => $d->organisasi?->opd?->nama)
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                if ($opd->isEmpty()) {
+                    return '<span class="text-muted">-</span>';
+                }
+
+                return $opd
+                    ->map(fn ($nama) => '<span class="badge bg-outline-info me-1 mb-1">' . e($nama) . '</span>')
+                    ->implode('');
+            })
+            ->rawColumns(['action', 'status_verifikasi', 'kelompok', 'opd'])
             ->toJson();
     }
 
