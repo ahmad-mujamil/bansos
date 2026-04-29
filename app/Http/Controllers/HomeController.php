@@ -66,8 +66,9 @@ class HomeController extends Controller
                     ->whereNotNull('validated_at')
                     ->whereHas('organisasiDetails.organisasi', fn ($q) => $q->where('opd_id', $opdId))
                     ->with([
-                        'organisasiDetails' => fn ($q) => $q->whereHas('organisasi', fn ($qq) => $qq->where('opd_id', $opdId)),
-                        'organisasiDetails.organisasi:id,nama,opd_id',
+                        'organisasiDetails' => fn ($q) => $q
+                            ->whereHas('organisasi', fn ($qq) => $qq->where('opd_id', $opdId))
+                            ->with(['organisasi' => fn ($qq) => $qq->where('opd_id', $opdId)]),
                         'validatedBy:id,nama',
                     ])
                     ->orderByDesc('validated_at')

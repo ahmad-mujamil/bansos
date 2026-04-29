@@ -181,10 +181,13 @@
                             <tbody class="text-alternate text-medium">
                             @foreach($pendudukTidakValid as $p)
                                 @php
-                                    $kelompokNames = $p->organisasiDetails
-                                        ->map(fn ($d) => $d->organisasi?->nama)
-                                        ->filter()
-                                        ->unique()
+                                    $kelompokItems = $p->organisasiDetails
+                                        ->filter(fn ($d) => $d->organisasi !== null)
+                                        ->map(fn ($d) => [
+                                            'nama' => $d->organisasi->nama,
+                                            'jabatan' => $d->jabatan?->getDescription() ?? null,
+                                        ])
+                                        ->unique('nama')
                                         ->values();
                                     $catatan = trim((string) $p->catatan_validasi) !== ''
                                         ? $p->catatan_validasi
@@ -194,10 +197,15 @@
                                     <td>{{ $p->nama }}</td>
                                     <td>{{ $p->nik }}</td>
                                     <td>
-                                        @forelse($kelompokNames as $nama)
-                                            <span class="badge bg-outline-primary me-1 mb-1">{{ $nama }}</span>
+                                        @forelse($kelompokItems as $k)
+                                            <div class="mb-1">
+                                                <span class="badge bg-primary">{{ $k['nama'] }}</span>
+                                                @if($k['jabatan'])
+                                                    <small class="text-muted ms-1">{{ $k['jabatan'] }}</small>
+                                                @endif
+                                            </div>
                                         @empty
-                                            -
+                                            <span class="text-muted">-</span>
                                         @endforelse
                                     </td>
                                     <td>{{ $catatan }}</td>
