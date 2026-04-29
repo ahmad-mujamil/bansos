@@ -38,6 +38,12 @@ class LaporanKelompokController extends Controller
             $q->where('organisasi.is_active', false);
         }
 
+        if (request('belum_verifikasi') === '1') {
+            $q->whereHas('organisasiDetail', fn ($d) =>
+                $d->whereHas('penduduk', fn ($p) => $p->where('is_valid', false))
+            );
+        }
+
         return $q->orderBy('opd.nama')->orderBy('organisasi.nama');
     }
 
@@ -98,10 +104,13 @@ class LaporanKelompokController extends Controller
             ->orderByRaw("FIELD(jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Admin', 'Anggota')")
             ->get()
             ->map(fn ($d) => [
-                'nik'     => $d->penduduk?->nik ?? '-',
-                'nama'    => $d->penduduk?->nama ?? '-',
-                'alamat'  => $d->penduduk?->alamat ?? '-',
-                'jabatan' => $d->jabatan?->value ?? '-',
+                'nik'               => $d->penduduk?->nik ?? '-',
+                'nama'              => $d->penduduk?->nama ?? '-',
+                'alamat'            => $d->penduduk?->alamat ?? '-',
+                'jabatan'           => $d->jabatan?->value ?? '-',
+                'status_verifikasi' => $d->penduduk?->labelStatusVerifikasi() ?? '-',
+                'is_valid'          => $d->penduduk?->is_valid,
+                'keterangan'        => $d->penduduk?->catatan_validasi ?? '-',
             ]);
 
         return response()->json($anggota);
