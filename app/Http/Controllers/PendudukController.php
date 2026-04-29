@@ -48,11 +48,19 @@ class PendudukController extends Controller
 
                 return $navActionStart . $edit . $delete . $navActionEnd;
             })
-            ->editColumn('jk', function ($data) {
-                return $data->jk?->getDescription();
-            })
             ->editColumn('level_desil', function ($data) {
                 return $data->level_desil?->getDescription();
+            })
+            ->addColumn('desa_kecamatan', function ($data) {
+                $desa = $data->desa?->nama;
+                $kecamatan = $data->kecamatan?->nama;
+
+                if (! $desa && ! $kecamatan) {
+                    return '-';
+                }
+
+                return '<div class="fw-bold">' . e($desa ?? '-') . '</div>'
+                    . '<small class="text-muted">' . e($kecamatan ?? '-') . '</small>';
             })
             ->addColumn('status_verifikasi', function ($data) {
                 if ($data->is_valid) {
@@ -93,7 +101,7 @@ class PendudukController extends Controller
                     ->map(fn ($nama) => '<span class="badge bg-outline-info me-1 mb-1">' . e($nama) . '</span>')
                     ->implode('');
             })
-            ->rawColumns(['action', 'status_verifikasi', 'kelompok', 'opd'])
+            ->rawColumns(['action', 'status_verifikasi', 'kelompok', 'opd', 'desa_kecamatan'])
             ->toJson();
     }
 
