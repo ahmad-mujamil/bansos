@@ -405,7 +405,7 @@ class PengajuanOpdController extends Controller
         return Organisasi::query()
             ->where('is_active', true)
             ->where('is_blacklist', false)
-            ->where('opd_id', $opdId)
+            // ->where('opd_id', $opdId)
             ->whereIn('jenis', $jenisOrganisasiValues)
             ->orderBy('nama')
             ->get(['id', 'nama']);
