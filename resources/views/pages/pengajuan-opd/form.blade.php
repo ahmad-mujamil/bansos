@@ -52,6 +52,16 @@
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
     $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
+    $detailPendudukForIndividu = $detailPendudukForIndividu ?? null;
+    $pendudukIndividuInitial = $detailPendudukForIndividu
+        ? ['id' => $detailPendudukForIndividu->id, 'is_valid' => (bool) $detailPendudukForIndividu->is_valid]
+        : null;
+    $jpbVal = old('jenis_penerima_bantuan', $pengajuan?->jenis_penerima_bantuan?->value ?? \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value);
+    $isNonIndividuJpb = $jpbVal === \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value;
+    $isIndividuKeluargaJpb = in_array($jpbVal, [\App\Enums\JenisPenerimaBantuan::INDIVIDU->value, \App\Enums\JenisPenerimaBantuan::KELUARGA->value], true);
+    $hideKelompokTarget = ! $isNonIndividuJpb;
+    $hidePendudukIndividuTarget = $isBansos || ! $isIndividuKeluargaJpb;
+    $hidePendudukBansosTarget = ! ($isBansos && $isIndividuKeluargaJpb);
     @endphp
 
     <form action="{{ $route }}" method="POST" class="needs-validation" id="formPengajuan" enctype="multipart/form-data">
@@ -63,32 +73,65 @@
                 <div class="row g-3">
                     <input type="hidden" name="jenis" value="{{ $jenis }}">
 
-                    <div class="col-md-6 col-sm-12" id="wrap-penduduk" style="{{ !$isBansos ? 'display:none;' : '' }}">
-                        <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
-                        <select name="penduduk_id" id="penduduk_id" class="form-select @error('penduduk_id') is-invalid @enderror">
-                            <option value="">Pilih Penduduk</option>
-                            @foreach($pendudukList as $p)
-                            <option value="{{ $p->id }}" {{ old('penduduk_id', $selectedPendudukId ?? null) == $p->id ? 'selected' : '' }}>{{ $p->nama }} ({{ $p->nik }})</option>
-                            @endforeach
-                        </select>
-                        @error('penduduk_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    <div class="col-12">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6 col-sm-12">
+                                <label class="form-label text-small text-uppercase fw-semibold" for="jenis_penerima_bantuan">Jenis penerima bantuan <span class="text-danger">*</span></label>
+                                <select name="jenis_penerima_bantuan" id="jenis_penerima_bantuan" class="form-select @error('jenis_penerima_bantuan') is-invalid @enderror" required>
+                                    @foreach(\App\Enums\JenisPenerimaBantuan::cases() as $jpb)
+                                        <option value="{{ $jpb->value }}" @selected(old('jenis_penerima_bantuan', $pengajuan?->jenis_penerima_bantuan?->value ?? \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value) === $jpb->value)>
+                                            {{ $jpb->getDescription() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('jenis_penerima_bantuan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                    <div class="col-md-12 col-sm-12" id="wrap-kelompok" style="{{ $isBansos ? 'display:none;' : '' }}">
+                            <div class="col-md-6 col-sm-12" id="wrap-kolom-penerima-target">
+                                @if($isBansos)
+                                    <div id="wrap-penduduk" class="{{ $hidePendudukBansosTarget ? 'd-none' : '' }}">
+                                        <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
+                                        <select name="penduduk_id" id="penduduk_id" class="form-select @error('penduduk_id') is-invalid @enderror">
+                                            <option value="">Pilih Penduduk</option>
+                                            @foreach($pendudukList as $p)
+                                            <option value="{{ $p->id }}" {{ old('penduduk_id', $selectedPendudukId ?? null) == $p->id ? 'selected' : '' }}>{{ $p->nama }} ({{ $p->nik }})</option>
+                                            @endforeach
+                                        </select>
+                                        @error('penduduk_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                @endif
 
+                                <div id="wrap-kelompok" class="{{ $hideKelompokTarget ? 'd-none' : '' }}">
+                                    <label class="form-label text-small text-uppercase" for="organisasi_id">Kelompok <span class="text-danger">*</span></label>
+                                    <select name="organisasi_id" id="organisasi_id" class="form-select @error('organisasi_id') is-invalid @enderror">
+                                        <option value="">Pilih Kelompok</option>
+                                        @foreach($kelompokList as $k)
+                                        <option value="{{ $k->id }}" {{ old('organisasi_id', $pengajuan?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('organisasi_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                        <label class="form-label text-small text-uppercase">Kelompok <span class="text-danger">*</span></label>
-                        <select name="organisasi_id" id="organisasi_id" class="form-select @error('organisasi_id') is-invalid @enderror" >
-                            <option value="">Pilih Kelompok</option>
-                            @foreach($kelompokList as $k)
-                            <option value="{{ $k->id }}" {{ old('organisasi_id', $pengajuan?->organisasi_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
-                            @endforeach
-                        </select>
-                        @error('organisasi_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                                <div id="wrap-penduduk-individu" class="{{ $hidePendudukIndividuTarget ? 'd-none' : '' }}">
+                                    <label class="form-label text-small text-uppercase fw-semibold" for="penduduk_id_individu">Penduduk (cari NIK / nama) <span class="text-danger">*</span></label>
+                                    <select name="penduduk_id" id="penduduk_id_individu" class="form-select @error('penduduk_id') is-invalid @enderror" data-placeholder="Ketik minimal 2 karakter NIK atau nama">
+                                        @if($detailPendudukForIndividu)
+                                            <option value="{{ $detailPendudukForIndividu->id }}" selected>{{ $detailPendudukForIndividu->nama }} — {{ $detailPendudukForIndividu->nik }}</option>
+                                        @endif
+                                    </select>
+                                    @error('penduduk_id')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Pencarian berdasarkan NIK atau nama penduduk.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     @if($isBantuanKelompok && $anggotaBelumTerverifikasi->isNotEmpty())
@@ -248,6 +291,8 @@
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
                     @if($isBansos)
                         Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @elseif(old('jenis_penerima_bantuan', $pengajuan?->jenis_penerima_bantuan?->value ?? \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value) !== \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value)
+                        Penduduk yang dipilih belum terverifikasi (is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
                     @else
                         Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.
                     @endif
@@ -280,19 +325,40 @@
         var jenisPengajuan = '{{ $jenis }}';
         var pendudukIsValidMap = @json($pendudukIsValidMap);
         var kelompokSimpanDiblokir = {{ $kelompokSimpanDiblokir ? 'true' : 'false' }};
+        var NON_INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value }}';
+        var INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::INDIVIDU->value }}';
+        var KELUARGA_JPB = '{{ \App\Enums\JenisPenerimaBantuan::KELUARGA->value }}';
+        var pendudukIndividuInitial = @json($pendudukIndividuInitial);
+        window._pendudukIndividuIsValid = null;
 
         function updateSimpanBlokir() {
             var blokir = false;
             var hint = '';
+            var jp = $('#jenis_penerima_bantuan').val();
+
             if (jenisPengajuan === BANSOS) {
                 var pid = $('#penduduk_id').val();
                 if (pid && pendudukIsValidMap[pid] !== true) {
                     blokir = true;
                     hint = 'Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.';
                 }
-            } else if (kelompokSimpanDiblokir) {
+            } else if (jp === NON_INDIVIDU_JPB && kelompokSimpanDiblokir) {
                 blokir = true;
                 hint = 'Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.';
+            } else if (jp === INDIVIDU_JPB || jp === KELUARGA_JPB) {
+                var pidI = $('#penduduk_id_individu').val();
+                if (pidI) {
+                    var ok = null;
+                    if (pendudukIndividuInitial && String(pendudukIndividuInitial.id) === String(pidI)) {
+                        ok = pendudukIndividuInitial.is_valid;
+                    } else if (typeof window._pendudukIndividuIsValid === 'boolean') {
+                        ok = window._pendudukIndividuIsValid;
+                    }
+                    if (ok === false) {
+                        blokir = true;
+                        hint = 'Penduduk yang dipilih belum terverifikasi (is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.';
+                    }
+                }
             }
             $('#btnSimpanPengajuan').prop('disabled', blokir).attr('aria-disabled', blokir ? 'true' : 'false');
             var $hint = $('#hintSimpanDiblokir');
@@ -344,10 +410,11 @@
             });
         }
 
-        $('#jenis').select2({
+        $('#jenis_penerima_bantuan').select2({
             theme: 'bootstrap4',
-            placeholder: 'Pilih Jenis',
-            allowClear: false
+            placeholder: 'Pilih jenis penerima',
+            allowClear: false,
+            width: '100%'
         });
         if ($('#jenis_bantuan_id').length) {
             $('#jenis_bantuan_id').select2({
@@ -356,19 +423,110 @@
                 allowClear: true
             });
         }
+
+        function togglePenerimaBantuan() {
+            var jp = $('#jenis_penerima_bantuan').val();
+            var isNonIndividu = (jp === NON_INDIVIDU_JPB);
+            var isIndividuAtauKeluarga = (jp === INDIVIDU_JPB || jp === KELUARGA_JPB);
+            var isBansosFlow = (jenisPengajuan === BANSOS);
+
+            if (isBansosFlow && $('#wrap-penduduk').length) {
+                if (isNonIndividu) {
+                    $('#wrap-penduduk').addClass('d-none');
+                    $('#wrap-kelompok').removeClass('d-none');
+                    $('#wrap-penduduk-individu').addClass('d-none');
+                    $('#penduduk_id').prop('disabled', true).prop('required', false);
+                    $('#organisasi_id').prop('disabled', false).prop('required', true);
+                    $('#penduduk_id_individu').prop('disabled', true).prop('required', false);
+                } else if (isIndividuAtauKeluarga) {
+                    $('#wrap-penduduk').removeClass('d-none');
+                    $('#wrap-kelompok').addClass('d-none');
+                    $('#wrap-penduduk-individu').addClass('d-none');
+                    $('#penduduk_id').prop('disabled', false).prop('required', true);
+                    $('#organisasi_id').prop('disabled', true).prop('required', false);
+                    $('#penduduk_id_individu').prop('disabled', true).prop('required', false);
+                }
+                if ($('#wrap-jenis-bantuan').length) {
+                    $('#wrap-jenis-bantuan').toggle(jenisPengajuan === BANTUAN_KELOMPOK);
+                }
+                if ($('#jenis_bantuan_id').length) {
+                    $('#jenis_bantuan_id').prop('required', jenisPengajuan === BANTUAN_KELOMPOK);
+                }
+                return;
+            }
+
+            if ($('#wrap-penduduk').length) {
+                $('#wrap-penduduk').addClass('d-none');
+                $('#penduduk_id').prop('disabled', true);
+            }
+
+            if (isNonIndividu) {
+                $('#wrap-kelompok').removeClass('d-none');
+                $('#wrap-penduduk-individu').addClass('d-none');
+                $('#organisasi_id').prop('disabled', false).prop('required', true);
+                $('#penduduk_id_individu').prop('disabled', true).prop('required', false);
+            } else if (isIndividuAtauKeluarga) {
+                $('#wrap-kelompok').addClass('d-none');
+                $('#wrap-penduduk-individu').removeClass('d-none');
+                $('#organisasi_id').prop('disabled', true).prop('required', false);
+                $('#penduduk_id_individu').prop('disabled', false).prop('required', true);
+            }
+
+            if ($('#wrap-jenis-bantuan').length) {
+                $('#wrap-jenis-bantuan').toggle(jenisPengajuan === BANTUAN_KELOMPOK);
+            }
+            if ($('#jenis_bantuan_id').length) {
+                $('#jenis_bantuan_id').prop('required', jenisPengajuan === BANTUAN_KELOMPOK);
+            }
+        }
+
+        togglePenerimaBantuan();
+
         $('#organisasi_id').select2({
             theme: 'bootstrap4',
             placeholder: 'Pilih Kelompok',
             allowClear: true
         });
-        $('#penduduk_id').select2({
+        if ($('#penduduk_id').length) {
+            $('#penduduk_id').select2({
+                theme: 'bootstrap4',
+                placeholder: 'Pilih Penduduk',
+                allowClear: true
+            });
+            $('#penduduk_id').on('change', function() {
+                updateSimpanBlokir();
+            });
+        }
+
+        $('#penduduk_id_individu').select2({
             theme: 'bootstrap4',
-            placeholder: 'Pilih Penduduk',
-            allowClear: true
+            placeholder: 'Ketik minimal 2 karakter NIK atau nama',
+            allowClear: true,
+            width: '100%',
+            minimumInputLength: 2,
+            ajax: {
+                url: "{{ route('pengajuan-opd.penduduk-search') }}",
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term || '' };
+                },
+                processResults: function (data) {
+                    return data;
+                }
+            }
         });
-        $('#penduduk_id').on('change', function() {
+        $('#penduduk_id_individu').on('select2:select', function (e) {
+            window._pendudukIndividuIsValid = e.params.data.is_valid === true;
             updateSimpanBlokir();
         });
+        $('#penduduk_id_individu').on('select2:clear', function () {
+            window._pendudukIndividuIsValid = null;
+            updateSimpanBlokir();
+        });
+        if (pendudukIndividuInitial) {
+            window._pendudukIndividuIsValid = pendudukIndividuInitial.is_valid === true;
+        }
+
         $('#kecamatan_id').select2({
             theme: 'bootstrap4',
             placeholder: 'Pilih Kecamatan',
@@ -405,26 +563,26 @@
             }
         });
 
-        function toggleJenis() {
-            var jenis = $('#jenis').val();
-            var isBansos = (jenis === BANSOS);
-            var isBantuanKelompok = (jenis === BANTUAN_KELOMPOK);
-
-            $('#wrap-kelompok').toggle(!isBansos);
-            $('#wrap-penduduk').toggle(isBansos);
-            $('#wrap-jenis-bantuan').toggle(isBantuanKelompok);
-            $('#jenis_bantuan_id').prop('required', isBantuanKelompok);
-            $('#organisasi_id').prop('required', !isBansos);
-            $('#penduduk_id').prop('required', isBansos);
-        }
-
-        $('#jenis').on('change', toggleJenis);
-        toggleJenis();
+        $('#jenis_penerima_bantuan').on('change', function () {
+            togglePenerimaBantuan();
+            updateSimpanBlokir();
+        });
         updateSimpanBlokir();
 
         $('#formPengajuan').on('submit', function(e) {
+            $('#organisasi_id').prop('disabled', false);
+            $('#penduduk_id_individu').prop('disabled', false);
+            var jp = $('#jenis_penerima_bantuan').val();
+            if (jp === NON_INDIVIDU_JPB) {
+                $('#penduduk_id_individu').prop('disabled', true);
+            } else {
+                $('#organisasi_id').prop('disabled', true);
+            }
+
             if ($('#btnSimpanPengajuan').prop('disabled')) {
                 e.preventDefault();
+                $('#organisasi_id').prop('disabled', $('#jenis_penerima_bantuan').val() !== NON_INDIVIDU_JPB);
+                $('#penduduk_id_individu').prop('disabled', $('#jenis_penerima_bantuan').val() === NON_INDIVIDU_JPB);
                 return;
             }
             e.preventDefault();
@@ -437,7 +595,20 @@
                 confirmButtonText: 'Ya, {{ $pengajuan ? "perbarui" : "simpan" }}',
                 cancelButtonText: 'Batal'
             }).then(function(result) {
-                if (result.isConfirmed) form.submit();
+                if (result.isConfirmed) {
+                    $('#organisasi_id').prop('disabled', false);
+                    $('#penduduk_id_individu').prop('disabled', false);
+                    var jpx = $('#jenis_penerima_bantuan').val();
+                    if (jpx === NON_INDIVIDU_JPB) {
+                        $('#penduduk_id_individu').prop('disabled', true);
+                    } else {
+                        $('#organisasi_id').prop('disabled', true);
+                    }
+                    form.submit();
+                } else {
+                    $('#organisasi_id').prop('disabled', $('#jenis_penerima_bantuan').val() !== NON_INDIVIDU_JPB);
+                    $('#penduduk_id_individu').prop('disabled', $('#jenis_penerima_bantuan').val() === NON_INDIVIDU_JPB);
+                }
             });
         });
     });

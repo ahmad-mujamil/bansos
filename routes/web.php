@@ -125,6 +125,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     Route::middleware(['role:opd'])->group(function () {
         Route::get('/pengajuan-opd', [App\Http\Controllers\PengajuanOpdController::class, 'index'])->name('pengajuan-opd.index');
         Route::get('/pengajuan-opd/create', [App\Http\Controllers\PengajuanOpdController::class, 'create'])->name('pengajuan-opd.create');
+        Route::get('/pengajuan-opd/penduduk-search', [App\Http\Controllers\PengajuanOpdController::class, 'searchPenduduk'])->name('pengajuan-opd.penduduk-search');
         Route::post('/pengajuan-opd', [App\Http\Controllers\PengajuanOpdController::class, 'store'])->name('pengajuan-opd.store');
         Route::get('/pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'show'])->name('pengajuan-opd.show');
         Route::get('/pengajuan-opd/{pengajuan}/edit', [App\Http\Controllers\PengajuanOpdController::class, 'edit'])->name('pengajuan-opd.edit');
