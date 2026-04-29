@@ -83,7 +83,7 @@
 
                 <!-- Table Start -->
                 <table
-                    class="data-table data-table-pagination data-table-standard responsive nowrap stripe"
+                    class="data-table data-table-pagination data-table-standard responsive nowrap stripe penduduk-table"
                     id="datatable-serverside">
                     <thead>
                     <tr>
@@ -112,6 +112,26 @@
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <style>
+        .penduduk-table td,
+        .penduduk-table th {
+            padding: 0.4rem 0.5rem;
+            vertical-align: middle;
+            font-size: 0.82rem;
+        }
+        .penduduk-table .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.5em;
+            font-weight: 500;
+        }
+        .penduduk-table small {
+            font-size: 0.72rem;
+        }
+        .penduduk-table .breadcrumb {
+            margin-bottom: 0;
+            font-size: 0.78rem;
+        }
+    </style>
 @endpush
 @push('js_vendor')
     <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
