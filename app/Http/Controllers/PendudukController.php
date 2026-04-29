@@ -86,6 +86,15 @@ class PendudukController extends Controller
         return view('pages.penduduk.create', compact( 'jenis_kelamin', 'status_perkawinan', 'level_desil','penduduk'));
     }
 
+     public function show(Penduduk $penduduk)
+    {
+        $jenis_kelamin = JenisKelamin::cases();
+        $status_perkawinan = StatusPerkawinan::cases();
+        $level_desil = LevelDesil::cases();
+
+        return view('pages.penduduk.create', compact( 'jenis_kelamin', 'status_perkawinan', 'level_desil','penduduk'));
+    }
+
     public function update(PendudukRequest $request, Penduduk $penduduk): ?\Illuminate\Http\RedirectResponse
     {
         try {

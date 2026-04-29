@@ -60,7 +60,7 @@ return [
             ],
             [
                 'id' => 'PENDUDUK',
-                'icon' => 'users',
+                'icon' => 'user',
                 'url' => '/penduduk',
                 'title' => 'Penduduk',
             ],
