@@ -38,6 +38,12 @@
                                     <option value="nonaktif">Nonaktif</option>
                                 </select>
                             </div>
+                            <div class="flex-grow-1" style="min-width: 12rem;">
+                                <select id="filter-belum-verifikasi" class="form-select form-select-sm">
+                                    <option value="">Semua Anggota</option>
+                                    <option value="1">Ada Anggota Belum Terverifikasi</option>
+                                </select>
+                            </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm" style="min-width: 10rem;">
                                 <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-laporan-kelompok" />
                                 <span class="search-magnifier-icon"><i data-acorn-icon="search"></i></span>
@@ -142,8 +148,9 @@
 
         const $filterOpd = $('#filter-opd');
         const $filterStatus = $('#filter-status');
+        const $filterBelumVerifikasi = $('#filter-belum-verifikasi');
 
-        [$filterOpd, $filterStatus].forEach(function ($el) {
+        [$filterOpd, $filterStatus, $filterBelumVerifikasi].forEach(function ($el) {
             if ($el.length) {
                 $el.select2({ theme: 'bootstrap4', width: '100%' });
             }
@@ -170,6 +177,7 @@
                 data: function (d) {
                     if ($filterOpd.length) d.opd_id = $filterOpd.val();
                     d.status = $filterStatus.val();
+                    d.belum_verifikasi = $filterBelumVerifikasi.val();
                 },
             },
             columns: [
@@ -204,12 +212,22 @@
 
         $filterOpd.on('change', function () { tableLaporanKelompok.ajax.reload(); });
         $filterStatus.on('change', function () { tableLaporanKelompok.ajax.reload(); });
+        $filterBelumVerifikasi.on('change', function () { tableLaporanKelompok.ajax.reload(); });
 
         const baseAnggotaUrl = "{!! url('laporan-kelompok') !!}";
 
+        function verifikasiBadge(a) {
+            if (a.is_valid === null || a.is_valid === undefined) {
+                return '<span class="badge bg-warning text-dark">' + a.status_verifikasi + '</span>';
+            }
+            return a.is_valid
+                ? '<span class="badge bg-success">' + a.status_verifikasi + '</span>'
+                : '<span class="badge bg-danger">' + a.status_verifikasi + '</span>';
+        }
+
         function anggotaRowHtml(anggota) {
             if (!anggota.length) {
-                return '<tr><td colspan="5" class="text-center text-muted fst-italic py-2">Belum ada anggota</td></tr>';
+                return '<tr><td colspan="7" class="text-center text-muted fst-italic py-2">Belum ada anggota</td></tr>';
             }
             return anggota.map(function (a, i) {
                 return '<tr>' +
@@ -218,6 +236,8 @@
                     '<td>' + a.nama + '</td>' +
                     '<td>' + a.alamat + '</td>' +
                     '<td><span class="badge bg-secondary">' + a.jabatan + '</span></td>' +
+                    '<td>' + verifikasiBadge(a) + '</td>' +
+                    '<td class="text-muted text-small">' + (a.keterangan !== '-' ? a.keterangan : '') + '</td>' +
                 '</tr>';
             }).join('');
         }
@@ -248,6 +268,8 @@
                             '<th>Nama</th>' +
                             '<th>Alamat</th>' +
                             '<th>Jabatan</th>' +
+                            '<th>Status Verifikasi</th>' +
+                            '<th>Keterangan</th>' +
                         '</tr></thead>' +
                         '<tbody>' + anggotaRowHtml(data) + '</tbody>' +
                     '</table>'
