@@ -34,18 +34,28 @@
             <div class="card-body">
                 <!--  Controls Start -->
                 <div class="row">
-                    <div class="col-12 col-sm-5 col-lg-3 col-xxl-2 mb-3">
-                        <div class="d-inline-block float-md-start me-1 mb-1 search-input-container w-100 border border-separator bg-foreground search-sm">
-                            <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-serverside" />
-                            <span class="search-magnifier-icon">
-                              <i data-acorn-icon="search"></i>
-                            </span>
-                            <span class="search-delete-icon d-none">
-                              <i data-acorn-icon="close"></i>
-                            </span>
+                    <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 mb-3">
+                        <div class="d-flex gap-2 w-100 align-items-center">
+                            <div class="flex-grow-1">
+                                <select id="filter-status-verifikasi" class="form-select form-select-sm">
+                                    <option value="all" selected>Semua Status</option>
+                                    <option value="1">Terverifikasi</option>
+                                    <option value="0">Belum Diverifikasi</option>
+                                    <option value="2">Tidak Valid</option>
+                                </select>
+                            </div>
+                            <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm">
+                                <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-serverside" />
+                                <span class="search-magnifier-icon">
+                                  <i data-acorn-icon="search"></i>
+                                </span>
+                                <span class="search-delete-icon d-none">
+                                  <i data-acorn-icon="close"></i>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-7 col-lg-9 col-xxl-10 text-end mb-3">
+                    <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 text-end mb-3">
                         <div class="d-inline-block">
                             <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm datatable-print" type="button" data-datatable="#datatable-serverside">
                                 <i data-acorn-icon="print"></i>
@@ -83,6 +93,7 @@
                         <th class="text-muted text-small text-uppercase">Desa</th>
                         <th class="text-muted text-small text-uppercase">Kecamatan</th>
                         <th class="text-muted text-small text-uppercase">Desil</th>
+                        <th class="text-muted text-small text-uppercase">Status Verifikasi</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                     </tr>
                     </thead>
@@ -99,13 +110,21 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css')}}" />
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
 @endpush
 @push('js_vendor')
     <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
     <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
     <script>
+        $('#filter-status-verifikasi').select2({
+            theme: 'bootstrap4',
+            width: '100%',
+        });
+
         _extendDatatables()
-        $('#datatable-serverside').DataTable({
+        const table = $('#datatable-serverside').DataTable({
             language: {
                 paginate: {
                     previous: '<i class="cs-chevron-left"></i>',
@@ -118,7 +137,12 @@
             responsive: true,
             lengthChange: false,
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
-            ajax: "{!! route('penduduk.index') !!}",
+            ajax: {
+                url: "{!! route('penduduk.index') !!}",
+                data: function (d) {
+                    d.status = $('#filter-status-verifikasi').val();
+                }
+            },
             columns: [
                 {
                     data: 'nik',
@@ -147,12 +171,22 @@
                     name: 'level_desil'
                 },
                 {
+                    data: 'status_verifikasi',
+                    name: 'is_valid',
+                    orderable: true,
+                    searchable: false
+                },
+                {
                     data: 'action',
                     name: 'action',
                     orderable: false,
                     searchable: false
                 }
             ]
+        });
+
+        $('#filter-status-verifikasi').on('change', function () {
+            table.ajax.reload();
         });
 
         function _extendDatatables() {

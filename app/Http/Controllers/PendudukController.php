@@ -17,9 +17,19 @@ class PendudukController extends Controller
 {
     private function data(): \Illuminate\Http\JsonResponse
     {
+        $statusRequest = request('status', 'all');
+
         $data = Penduduk::query()
             ->with(['kecamatan', 'desa'])
             ->latest();
+
+        if ($statusRequest === '1') {
+            $data->where('is_valid', true);
+        } elseif ($statusRequest === '0') {
+            $data->where('is_valid', false)->whereNull('validated_at');
+        } elseif ($statusRequest === '2') {
+            $data->where('is_valid', false)->whereNotNull('validated_at');
+        }
 
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
@@ -40,7 +50,16 @@ class PendudukController extends Controller
             ->editColumn('level_desil', function ($data) {
                 return $data->level_desil?->getDescription();
             })
-            ->rawColumns(['action'])
+            ->addColumn('status_verifikasi', function ($data) {
+                if ($data->is_valid) {
+                    return '<span class="badge bg-success">Terverifikasi</span>';
+                }
+                if ($data->validated_at && !$data->is_valid) {
+                    return '<span class="badge bg-danger">Tidak Valid</span>';
+                }
+                return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
+            })
+            ->rawColumns(['action', 'status_verifikasi'])
             ->toJson();
     }
 
