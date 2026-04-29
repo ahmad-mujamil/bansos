@@ -75,7 +75,7 @@
 
                     <div class="col-12">
                         <div class="row g-3 align-items-end">
-                            <div class="col-md-6 col-sm-12">
+                            <div class="col-md-6 col-sm-12 {{ $isBansos ? '' : 'd-none' }}">
                                 <label class="form-label text-small text-uppercase fw-semibold" for="jenis_penerima_bantuan">Jenis penerima bantuan <span class="text-danger">*</span></label>
                                 <select name="jenis_penerima_bantuan" id="jenis_penerima_bantuan" class="form-select @error('jenis_penerima_bantuan') is-invalid @enderror" required>
                                     @foreach(\App\Enums\JenisPenerimaBantuan::cases() as $jpb)
@@ -89,7 +89,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6 col-sm-12" id="wrap-kolom-penerima-target">
+                            <div class="{{ $isBansos ? 'col-md-6 col-sm-12' : 'col-12' }}" id="wrap-kolom-penerima-target">
                                 @if($isBansos)
                                     <div id="wrap-penduduk" class="{{ $hidePendudukBansosTarget ? 'd-none' : '' }}">
                                         <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
