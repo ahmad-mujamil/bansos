@@ -79,6 +79,11 @@ class Organisasi extends Model
             ]);
     }
 
+    public function pengajuans(): HasMany
+    {
+        return $this->hasMany(Pengajuan::class, 'organisasi_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
