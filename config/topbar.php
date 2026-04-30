@@ -132,6 +132,11 @@ return [
                 'title' => 'Laporan Pengajuan',
             ],
             [
+                'id' => 'LAP_PENERIMA_BANTUAN',
+                'url' => '/laporan-penerima',
+                'title' => 'Penerima Bantuan',
+            ],
+            [
                 'id' => 'LAP_REALISASI',
                 'url' => '/laporan-realisasi',
                 'title' => 'Realisasi',

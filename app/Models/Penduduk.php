@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\PengajuanDetail;
 
 class Penduduk extends Model
 {
@@ -45,6 +46,11 @@ class Penduduk extends Model
     public function organisasiDetails(): HasMany
     {
         return $this->hasMany(OrganisasiDetail::class, 'penduduk_id');
+    }
+
+    public function pengajuanDetails(): HasMany
+    {
+        return $this->hasMany(PengajuanDetail::class, 'penduduk_id');
     }
 
     public function validatedBy(): BelongsTo
