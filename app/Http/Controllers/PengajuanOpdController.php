@@ -62,7 +62,11 @@ class PengajuanOpdController extends Controller
 
         $pendudukList = Penduduk::query()
             ->orderBy('nama')
-            ->get(['id', 'nama', 'nik']);
+            ->get(['id', 'nama', 'nik', 'is_valid']);
+
+        $pendudukIsValidMap = $pendudukList
+            ->mapWithKeys(fn (Penduduk $p) => [$p->id => (bool) $p->is_valid])
+            ->all();
 
         $jenisPenerimaKey = old('jenis_penerima_bantuan', JenisPenerimaBantuan::NON_INDIVIDU->value);
         $jenisPenerimaEnum = JenisPenerimaBantuan::tryFrom($jenisPenerimaKey);
@@ -81,6 +85,7 @@ class PengajuanOpdController extends Controller
         return view('pages.pengajuan-opd.form', [
             'pengajuan' => null,
             'pendudukList' => $pendudukList,
+            'pendudukIsValidMap' => $pendudukIsValidMap,
             'kelompokList' => $kelompokList,
             'jenisBantuanKelompokList' => $jenisBantuanKelompokList,
             'jenis' => $jenis,
@@ -224,7 +229,11 @@ class PengajuanOpdController extends Controller
 
         $pendudukList = Penduduk::query()
             ->orderBy('nama')
-            ->get(['id', 'nama', 'nik']);
+            ->get(['id', 'nama', 'nik', 'is_valid']);
+
+        $pendudukIsValidMap = $pendudukList
+            ->mapWithKeys(fn (Penduduk $p) => [$p->id => (bool) $p->is_valid])
+            ->all();
 
         $defaultJenisPenerima = $pengajuan->jenis_penerima_bantuan?->value
             ?? JenisPenerimaBantuan::NON_INDIVIDU->value;
@@ -253,6 +262,7 @@ class PengajuanOpdController extends Controller
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
             'pendudukList' => $pendudukList,
+            'pendudukIsValidMap' => $pendudukIsValidMap,
             'detailPendudukForIndividu' => $detailPendudukForIndividu,
         ]);
     }
