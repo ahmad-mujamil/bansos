@@ -117,6 +117,7 @@
             serverSide: true,
             responsive: true,
             lengthChange: true,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
             // sDom: '<"row align-items-center gy-2 mb-2"<"col-12 col-md-auto"l><"col-12 col-md text-md-end"i>><"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
             ajax: "{!! route('pengguna.index') !!}",
             columns: [

@@ -112,8 +112,9 @@
             processing: true,
             serverSide: true,
             responsive: true,
-            lengthChange: false,
-            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
+            lengthChange: true,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
             ajax: "{!! route('bast.index') !!}",
             columns: [
                 { data: 'nomor', name: 'nomor' },

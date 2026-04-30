@@ -141,6 +141,12 @@ return [
                 'url' => '/laporan-kelompok',
                 'title' => 'Rekap Kelompok',
             ],
+            [
+                'id' => 'LAP_ANGGOTA_KELOMPOK',
+                'icon' => 'user',
+                'url' => '/laporan-anggota-kelompok',
+                'title' => 'Anggota Kelompok',
+            ],
         ],
     ],
 
