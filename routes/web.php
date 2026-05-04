@@ -159,6 +159,9 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('laporan-kelompok/preview', [App\Http\Controllers\LaporanKelompokController::class, 'preview'])->name('laporan-kelompok.preview');
         Route::get('laporan-kelompok/export', [App\Http\Controllers\LaporanKelompokController::class, 'export'])->name('laporan-kelompok.export');
         Route::get('laporan-kelompok/{organisasi}/anggota', [App\Http\Controllers\LaporanKelompokController::class, 'anggota'])->name('laporan-kelompok.anggota');
+        Route::get('laporan-penerima', [App\Http\Controllers\LaporanPenerimaController::class, 'index'])->name('laporan-penerima.index');
+        Route::get('laporan-penerima/export', [App\Http\Controllers\LaporanPenerimaController::class, 'export'])->name('laporan-penerima.export');
+        Route::get('laporan-penerima/{penduduk}/penerimaan', [App\Http\Controllers\LaporanPenerimaController::class, 'penerimaan'])->name('laporan-penerima.penerimaan');
     });
 
     // Realisasi (dokumentasi laporan kegiatan; pengajuan yang sudah punya BAST)
