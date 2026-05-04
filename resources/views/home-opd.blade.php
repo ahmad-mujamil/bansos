@@ -272,9 +272,10 @@
                         },
                     },
                     responsive: true,
-                    lengthChange: false,
+                    lengthChange: true,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
                     pageLength: 10,
-                    sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
+                    sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
                 });
             }
         });

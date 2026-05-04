@@ -116,6 +116,7 @@
             serverSide: true,
             responsive: true,
             lengthChange: true,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
             ajax: "{!! route('opd.index') !!}",
             columns: [
                 { data: 'nama', name: 'nama' },
