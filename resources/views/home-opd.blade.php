@@ -154,9 +154,75 @@
                             </div>
                         </a>
                     </div>
-                
+
             </div>
         </div>
+
+        @if($pendudukTidakValid->isNotEmpty())
+            <div class="mb-5">
+                <h2 class="small-title mb-3">Penduduk Tidak Valid</h2>
+                <p class="text-muted mb-3">
+                    Penduduk yang terdaftar pada kelompok di OPD Anda dengan status verifikasi
+                    <span class="badge bg-danger">Tidak Valid</span>.
+                </p>
+
+                <div class="card mb-5">
+                    <div class="card-body">
+                        <table class="data-table data-table-pagination data-table-standard responsive nowrap stripe" id="datatable-tidak-valid">
+                            <thead>
+                                <tr>
+                                    <th class="text-muted text-small text-uppercase">Nama</th>
+                                    <th class="text-muted text-small text-uppercase">NIK</th>
+                                    <th class="text-muted text-small text-uppercase">Kelompok</th>
+                                    <th class="text-muted text-small text-uppercase">Catatan</th>
+                                    <th class="text-muted text-small text-uppercase">Diverifikasi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-alternate text-medium">
+                            @foreach($pendudukTidakValid as $p)
+                                @php
+                                    $kelompokItems = $p->organisasiDetails
+                                        ->filter(fn ($d) => $d->organisasi !== null)
+                                        ->map(fn ($d) => [
+                                            'nama' => $d->organisasi->nama,
+                                            'jabatan' => $d->jabatan?->getDescription() ?? null,
+                                        ])
+                                        ->unique('nama')
+                                        ->values();
+                                    $catatan = trim((string) $p->catatan_validasi) !== ''
+                                        ? $p->catatan_validasi
+                                        : '-';
+                                @endphp
+                                <tr>
+                                    <td>{{ $p->nama }}</td>
+                                    <td>{{ $p->nik }}</td>
+                                    <td>
+                                        @forelse($kelompokItems as $k)
+                                            <div class="mb-1">
+                                                <span class="badge bg-primary">{{ $k['nama'] }}</span>
+                                                @if($k['jabatan'])
+                                                    <small class="text-muted ms-1">{{ $k['jabatan'] }}</small>
+                                                @endif
+                                            </div>
+                                        @empty
+                                            <span class="text-muted">-</span>
+                                        @endforelse
+                                    </td>
+                                    <td>{{ $catatan }}</td>
+                                    <td>
+                                        {{ $p->validated_at?->translatedFormat('d M Y H:i') }}
+                                        @if($p->validatedBy)
+                                            <div class="text-muted text-small">oleh {{ $p->validatedBy->nama }}</div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
         <!-- Stats End -->
 
         <!-- Charts Start -->
@@ -188,6 +254,33 @@
     </div>
     <!-- Page Content End -->
 @endsection
+@push('css')
+    <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
+@endpush
+@push('js_vendor')
+    <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
+    <script>
+        $(function () {
+            new DatatableExtend();
+            if ($('#datatable-tidak-valid').length) {
+                $('#datatable-tidak-valid').DataTable({
+                    language: {
+                        paginate: {
+                            previous: '<i class="cs-chevron-left"></i>',
+                            next: '<i class="cs-chevron-right"></i>',
+                        },
+                    },
+                    responsive: true,
+                    lengthChange: true,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+                    pageLength: 10,
+                    sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
+                });
+            }
+        });
+    </script>
+@endpush
 @push('js_page')
 {{--    <script src="{{ asset('js/cs/charts.extend.js') }}"></script>--}}
 {{--    <script src="{{ asset('js/vendor/Chart.bundle.min.js') }}"></script>--}}

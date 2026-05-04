@@ -91,9 +91,10 @@
             processing: true,
             serverSide: true,
             responsive: true,
-            lengthChange: false,
+            lengthChange: true,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
             order: [[3, 'asc']],
-            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row"<"col-12"p>>',
+            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
             ajax: "{!! route('kelola.slider.index') !!}",
             columns: [
                 {data: 'gambar', name: 'gambar', orderable: false, searchable: false},

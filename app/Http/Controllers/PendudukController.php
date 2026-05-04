@@ -51,6 +51,10 @@ class PendudukController extends Controller
             ->editColumn('level_desil', function ($data) {
                 return $data->level_desil?->getDescription();
             })
+            ->addColumn('nik_nama', function ($data) {
+                return '<div class="fw-bold">' . e($data->nama) . '</div>'
+                    . '<small class="text-muted">' . e($data->nik) . '</small>';
+            })
             ->addColumn('desa_kecamatan', function ($data) {
                 $desa = $data->desa?->nama;
                 $kecamatan = $data->kecamatan?->nama;
@@ -75,37 +79,31 @@ class PendudukController extends Controller
                 }
                 return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
             })
-            ->addColumn('kelompok', function ($data) {
-                $kelompok = $data->organisasiDetails
-                    ->map(fn ($d) => $d->organisasi?->nama)
-                    ->filter()
-                    ->unique()
+            ->addColumn('kelompok_opd', function ($data) {
+                $items = $data->organisasiDetails
+                    ->filter(fn ($d) => $d->organisasi !== null)
+                    ->map(fn ($d) => [
+                        'kelompok' => $d->organisasi->nama,
+                        'opd' => $d->organisasi->opd?->nama,
+                    ])
+                    ->unique('kelompok')
                     ->values();
 
-                if ($kelompok->isEmpty()) {
+                if ($items->isEmpty()) {
                     return '<span class="text-muted">-</span>';
                 }
 
-                return $kelompok
-                    ->map(fn ($nama) => '<span class="badge bg-outline-primary me-1 mb-1">' . e($nama) . '</span>')
-                    ->implode('');
+                return $items->map(function ($item) {
+                    $opd = $item['opd']
+                        ? '<small class="text-muted d-block">' . e($item['opd']) . '</small>'
+                        : '';
+                    return '<div class="mb-1">'
+                        . '<span class="badge bg-outline-primary">' . e($item['kelompok']) . '</span>'
+                        . $opd
+                        . '</div>';
+                })->implode('');
             })
-            ->addColumn('opd', function ($data) {
-                $opd = $data->organisasiDetails
-                    ->map(fn ($d) => $d->organisasi?->opd?->nama)
-                    ->filter()
-                    ->unique()
-                    ->values();
-
-                if ($opd->isEmpty()) {
-                    return '<span class="text-muted">-</span>';
-                }
-
-                return $opd
-                    ->map(fn ($nama) => '<span class="badge bg-outline-info me-1 mb-1">' . e($nama) . '</span>')
-                    ->implode('');
-            })
-            ->rawColumns(['action', 'status_verifikasi', 'kelompok', 'opd', 'desa_kecamatan'])
+            ->rawColumns(['action', 'status_verifikasi', 'kelompok_opd', 'desa_kecamatan', 'nik_nama'])
             ->toJson();
     }
 

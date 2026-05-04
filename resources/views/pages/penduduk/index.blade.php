@@ -87,12 +87,10 @@
                     id="datatable-serverside">
                     <thead>
                     <tr>
-                        <th class="text-muted text-small text-uppercase">NIK</th>
-                        <th class="text-muted text-small text-uppercase">Nama</th>
+                        <th class="text-muted text-small text-uppercase">Nama / NIK</th>
                         <th class="text-muted text-small text-uppercase">Desa / Kecamatan</th>
                         <th class="text-muted text-small text-uppercase">Desil</th>
-                        <th class="text-muted text-small text-uppercase">Kelompok</th>
-                        <th class="text-muted text-small text-uppercase">OPD</th>
+                        <th class="text-muted text-small text-uppercase">Kelompok / OPD</th>
                         <th class="text-muted text-small text-uppercase">Status Verifikasi</th>
                         <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                     </tr>
@@ -166,12 +164,9 @@
             },
             columns: [
                 {
-                    data: 'nik',
-                    name: 'nik'
-                },
-                {
-                    data: 'nama',
-                    name: 'nama'
+                    data: 'nik_nama',
+                    name: 'nama',
+                    defaultContent: '-'
                 },
                 {
                     data: 'desa_kecamatan',
@@ -183,14 +178,8 @@
                     name: 'level_desil'
                 },
                 {
-                    data: 'kelompok',
+                    data: 'kelompok_opd',
                     name: 'organisasiDetails.organisasi.nama',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'opd',
-                    name: 'organisasiDetails.organisasi.opd.nama',
                     orderable: false,
                     searchable: false
                 },
