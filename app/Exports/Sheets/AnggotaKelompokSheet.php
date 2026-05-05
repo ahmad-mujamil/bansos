@@ -6,12 +6,14 @@ use App\Models\OrganisasiDetail;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class AnggotaKelompokSheet implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithTitle
+class AnggotaKelompokSheet implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithTitle, WithColumnFormatting
 {
     public function __construct(private Collection $kelompoks) {}
 
@@ -24,7 +26,7 @@ class AnggotaKelompokSheet implements FromCollection, WithHeadings, ShouldAutoSi
     {
         return [
             'No', 'Nama Kelompok', 'OPD', 'NIK', 'Nama Anggota',
-            'Jabatan', 'Status Verifikasi',
+            'Jabatan', 'Status Verifikasi', 'Catatan Verifikasi',
         ];
     }
 
@@ -48,10 +50,11 @@ class AnggotaKelompokSheet implements FromCollection, WithHeadings, ShouldAutoSi
                     $no++,
                     $kelompok->nama,
                     $kelompok->opd?->nama ?? '-',
-                    $detail->penduduk?->nik ?? '-',
+                    (string) ($detail->penduduk?->nik ?? '-'),
                     $detail->penduduk?->nama ?? '-',
                     $detail->jabatan?->value ?? '-',
                     $detail->penduduk?->labelStatusVerifikasi() ?? '-',
+                    $detail->penduduk?->catatan_validasi ?? '-',
                 ]);
             }
         }
@@ -63,6 +66,13 @@ class AnggotaKelompokSheet implements FromCollection, WithHeadings, ShouldAutoSi
     {
         return [
             1 => ['font' => ['bold' => true]],
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'D' => NumberFormat::FORMAT_TEXT,
         ];
     }
 }
