@@ -131,6 +131,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('/pengajuan-opd/{pengajuan}/edit', [App\Http\Controllers\PengajuanOpdController::class, 'edit'])->name('pengajuan-opd.edit');
         Route::put('/pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'update'])->name('pengajuan-opd.update');
         Route::post('/pengajuan-opd/{pengajuan}/submit', [App\Http\Controllers\PengajuanOpdController::class, 'submit'])->name('pengajuan-opd.submit');
+        Route::delete('/pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'destroy'])->name('pengajuan-opd.destroy');
     });
 
     // Verifikasi Pengajuan
