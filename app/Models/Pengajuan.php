@@ -95,6 +95,15 @@ class Pengajuan extends Model implements HasMedia
         return $this->status === PengajuanStatus::DRAFT;
     }
 
+    public function canDelete(): bool
+    {
+        if (in_array($this->status, [PengajuanStatus::DISETUJUI, PengajuanStatus::DITOLAK], true)) {
+            return false;
+        }
+
+        return ! $this->verifikasiPengajuan()->exists();
+    }
+
     public function pemeriksa(): HasMany
     {
         return $this->hasMany(PengajuanPemeriksa::class);
