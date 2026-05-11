@@ -77,7 +77,7 @@
                 </div>
 
                 <div class="col-12 mt-3">
-                    <h3 class="small-title mb-2">Data Pemeriksa (3 orang)</h3>
+                    <h3 class="small-title mb-2">Data Pemeriksa</h3>
                     <div class="table-responsive border rounded">
                         <table class="table table-sm table-borderless align-middle mb-0">
                             <thead>
@@ -85,7 +85,10 @@
                                     <th class="ps-3 py-2" style="width: 2.5rem;">#</th>
                                     <th class="py-2">Nama</th>
                                     <th class="py-2" style="width: 11rem;">NIP</th>
-                                    <th class="pe-3 py-2">Jabatan</th>
+                                    <th class="py-2">Jabatan</th>
+                                    @if (count($pemeriksa) > \App\Models\PengajuanPemeriksa::MIN_VERIFIKASI_COUNT)
+                                        <th class="pe-3 py-2 text-end" style="width: 5.5rem;">Aksi</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -111,15 +114,33 @@
                                             >
                                             @error("pemeriksa.$index.nip") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </td>
-                                        <td class="pe-3 py-2">
+                                        <td class="py-2">
                                             <label class="visually-hidden" for="pemeriksa-{{ $index }}-jabatan">Jabatan pemeriksa {{ $index + 1 }}</label>
                                             <input type="text" id="pemeriksa-{{ $index }}-jabatan" class="form-control form-control-sm" wire:model="pemeriksa.{{ $index }}.jabatan" autocomplete="organization-title">
                                             @error("pemeriksa.$index.jabatan") <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                         </td>
+                                        @if (count($pemeriksa) > \App\Models\PengajuanPemeriksa::MIN_VERIFIKASI_COUNT)
+                                            <td class="pe-3 py-2 text-end align-middle">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    wire:click="removePemeriksaAt({{ $index }})"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @if (count($pemeriksa) < \App\Models\PengajuanPemeriksa::MAX_VERIFIKASI_COUNT)
+                            <button type="button" class="btn btn-sm btn-outline-secondary" wire:click="addPemeriksa">
+                                Tambah pemeriksa
+                            </button>
+                        @endif
                     </div>
                     @error('pemeriksa') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
