@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\RupaBantuan;
+use App\Models\PengajuanPemeriksa;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -47,7 +48,7 @@ class VerifikasiPengajuanRequest extends FormRequest
                 'max:1000',
             ],
 
-            'pemeriksa' => ['required', 'array', 'size:3'],
+            'pemeriksa' => ['required', 'array', 'min:'.PengajuanPemeriksa::MIN_VERIFIKASI_COUNT, 'max:'.PengajuanPemeriksa::MAX_VERIFIKASI_COUNT],
             'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
             'pemeriksa.*.nip' => ['required', 'string', 'max:18'],
             'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
@@ -67,7 +68,8 @@ class VerifikasiPengajuanRequest extends FormRequest
             'items.*.satuan.required_with' => 'Nama barang, spesifikasi, harga satuan, dan qty harus diisi jika satuan tersebut dipilih.',
             'items.*.spesifikasi.required_with' => 'Nama barang, satuan, harga satuan, dan qty harus diisi jika spesifikasi tersebut dipilih.',
             'items.*.harga_satuan.required_with' => 'Nama barang, satuan, spesifikasi, dan qty harus diisi jika harga satuan tersebut dipilih.',
-
+            'pemeriksa.min' => 'Minimal '.PengajuanPemeriksa::MIN_VERIFIKASI_COUNT.' data pemeriksa harus diisi.',
+            'pemeriksa.max' => 'Pemeriksa paling banyak '.PengajuanPemeriksa::MAX_VERIFIKASI_COUNT.' orang.',
         ];
     }
 }

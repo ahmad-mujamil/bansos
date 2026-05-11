@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PengajuanPemeriksa extends Model
 {
+    public const MIN_VERIFIKASI_COUNT = 3;
+    public const MAX_VERIFIKASI_COUNT = 20;
+
     use HasUuids;
 
     protected $table = 'pengajuan_pemeriksa';
