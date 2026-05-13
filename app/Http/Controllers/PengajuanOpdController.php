@@ -177,6 +177,7 @@ class PengajuanOpdController extends Controller
             $pengajuan->user_id = Auth::id();
             $pengajuan->kode_pengajuan = $this->generateKodePengajuan();
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->nilai = $validated['nilai'];
@@ -362,6 +363,7 @@ class PengajuanOpdController extends Controller
             ];
 
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->nilai = $validated['nilai'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
@@ -591,6 +593,7 @@ class PengajuanOpdController extends Controller
         $jenisOrgValues = $this->jenisOrganisasiValuesForPengajuan($request->input('jenis'));
 
         return $request->validate([
+            'jenis' => ['required', Rule::enum(JenisPengajuan::class)],
             'jenis_penerima_bantuan' => ['required', Rule::enum(JenisPenerimaBantuan::class)],
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',

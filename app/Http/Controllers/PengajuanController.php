@@ -98,6 +98,7 @@ class PengajuanController extends Controller
             $pengajuan->user_id = auth()->id();
             $pengajuan->kode_pengajuan = $this->generateKodePengajuan();
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->nilai = $validated['nilai'];
@@ -259,6 +260,7 @@ class PengajuanController extends Controller
             ];
 
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->nilai = $validated['nilai'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
@@ -410,6 +412,7 @@ class PengajuanController extends Controller
     private function validatePengajuan(Request $request): array
     {
         $rules = [
+            'jenis' => ['required', \Illuminate\Validation\Rule::enum(JenisPengajuan::class)],
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',
             'opd_id' => 'required|exists:opd,id',
