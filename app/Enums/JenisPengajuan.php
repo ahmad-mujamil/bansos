@@ -37,4 +37,21 @@ enum JenisPengajuan: string
             ],
         };
     }
+
+    public static function fromJenisOrganisasi(JenisOrganisasi|string|null $jenis): ?self
+    {
+        if ($jenis === null) {
+            return null;
+        }
+        $jenis = $jenis instanceof JenisOrganisasi ? $jenis : JenisOrganisasi::tryFrom($jenis);
+        if ($jenis === null) {
+            return null;
+        }
+        foreach (self::cases() as $case) {
+            if (in_array($jenis, $case->getJenisOrganisasi(), true)) {
+                return $case;
+            }
+        }
+        return null;
+    }
 }

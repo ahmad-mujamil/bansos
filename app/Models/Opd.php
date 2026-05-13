@@ -24,5 +24,19 @@ class Opd extends Model
     {
         return $this->hasMany(Organisasi::class);
     }
+
+    public function getSingkatanAttribute(): string
+    {
+        $stopwords = ['dan', 'di', 'ke', 'atau', 'serta', 'pada'];
+        $words = preg_split('/\s+/', trim((string) $this->nama)) ?: [];
+        $initials = '';
+        foreach ($words as $word) {
+            if ($word === '' || in_array(mb_strtolower($word), $stopwords, true)) {
+                continue;
+            }
+            $initials .= mb_strtoupper(mb_substr($word, 0, 1));
+        }
+        return $initials !== '' ? $initials : (string) $this->nama;
+    }
 }
 
