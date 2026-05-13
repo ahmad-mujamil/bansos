@@ -23,10 +23,7 @@ class LaporanPengajuanController extends Controller
                 'verifikasiPengajuan.user',
                 'verifiedBy',
                 'opd',
-            ])
-            ->whereHas('jenisBantuan', function ($q) {
-                $q->where('kategori', KategoriBantuan::BANTUAN_KELOMPOK);
-            });
+            ]);
 
         $user = Auth::user();
         if ($user->role === RoleUser::OPD) {
@@ -52,7 +49,7 @@ class LaporanPengajuanController extends Controller
             $query->where('status', $statusRequest);
         }
 
-        $yesNo = fn (?bool $v) => $v
+        $yesNo = fn(?bool $v) => $v
             ? '<span class="text-success">Ya</span>'
             : '<span class="text-danger">Tidak</span>';
 
@@ -69,22 +66,22 @@ class LaporanPengajuanController extends Controller
                 if ($org->desa?->kecamatan?->nama) {
                     $parts[] = $org->desa->kecamatan->nama;
                 }
-                $wilayah = $parts !== [] ? ' <span class="text-muted">('.e(implode(', ', $parts)).')</span>' : '';
+                $wilayah = $parts !== [] ? ' <span class="text-muted">(' . e(implode(', ', $parts)) . ')</span>' : '';
 
-                return '<span class="fw-semibold">'.e($org->nama).'</span>'.$wilayah;
+                return '<span class="fw-semibold">' . e($org->nama) . '</span>' . $wilayah;
             })
-            ->addColumn('kode_pengajuan', fn (Pengajuan $row) => e($row->kode_pengajuan))
-            ->addColumn('judul', fn (Pengajuan $row) => e($row->judul ?? '-'))
-            ->addColumn('jenis_bantuan', fn (Pengajuan $row) => e($row->jenisBantuan?->nama ?? '-'))
-            ->addColumn('nilai_usulan', fn (Pengajuan $row) => 'Rp '.number_format((float) $row->nilai, 0, ',', '.'))
-            ->addColumn('opd', fn (Pengajuan $row) => e($row->opd?->nama ?? '-'))
+            ->addColumn('kode_pengajuan', fn(Pengajuan $row) => e($row->kode_pengajuan))
+            ->addColumn('judul', fn(Pengajuan $row) => e($row->judul ?? '-'))
+            ->addColumn('jenis_bantuan', fn(Pengajuan $row) => e($row->jenisBantuan?->nama ?? '-'))
+            ->addColumn('nilai_usulan', fn(Pengajuan $row) => 'Rp ' . number_format((float) $row->nilai, 0, ',', '.'))
+            ->addColumn('opd', fn(Pengajuan $row) => e($row->opd?->nama ?? '-'))
             ->addColumn('status', function (Pengajuan $row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
 
-                return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
+                return '<span class="badge bg-' . $badge . '">' . e($status?->getDescription() ?? '-') . '</span>';
             })
-            ->addColumn('tanggal_pengajuan', fn (Pengajuan $row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
+            ->addColumn('tanggal_pengajuan', fn(Pengajuan $row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
             ->addColumn('keputusan', function (Pengajuan $row) {
                 if (! in_array($row->status, [PengajuanStatus::DISETUJUI, PengajuanStatus::DITOLAK], true)) {
                     return '<span class="text-muted">—</span>';
@@ -100,18 +97,18 @@ class LaporanPengajuanController extends Controller
                     return '<span class="text-muted">—</span>';
                 }
 
-                return 'Rp '.number_format((float) $v, 0, ',', '.');
+                return 'Rp ' . number_format((float) $v, 0, ',', '.');
             })
-            ->addColumn('vk', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kriteria))
-            ->addColumn('va', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_administrasi))
-            ->addColumn('vks', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kesesuaian))
-            ->addColumn('vpp', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->sesuai_program_pemda))
+            ->addColumn('vk', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kriteria))
+            ->addColumn('va', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_administrasi))
+            ->addColumn('vks', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kesesuaian))
+            ->addColumn('vpp', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->sesuai_program_pemda))
             ->addColumn('catatan_verifikasi', function (Pengajuan $row) {
                 $c = $row->verifikasiPengajuan?->catatan;
 
                 return $c ? e(Str::limit($c, 80)) : '<span class="text-muted">—</span>';
             })
-            ->addColumn('verifikator', fn (Pengajuan $row) => e($row->verifikasiPengajuan?->user?->nama
+            ->addColumn('verifikator', fn(Pengajuan $row) => e($row->verifikasiPengajuan?->user?->nama
                 ?? $row->verifiedBy?->nama
                 ?? '-'))
             ->addColumn('tanggal_verifikasi', function (Pengajuan $row) {
