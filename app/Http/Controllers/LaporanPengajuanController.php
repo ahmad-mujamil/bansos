@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\KategoriBantuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Models\Pengajuan;
@@ -148,8 +147,7 @@ class LaporanPengajuanController extends Controller
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->loadMissing('jenisBantuan');
-        $this->authorizeLaporanKelompok($pengajuan);
+        $this->authorizeLaporan($pengajuan);
 
         /** @var \Illuminate\Contracts\View\View $view */
         $view = app(VerifikasiPengajuanController::class)->show($pengajuan);
@@ -160,13 +158,8 @@ class LaporanPengajuanController extends Controller
         ]);
     }
 
-    private function authorizeLaporanKelompok(Pengajuan $pengajuan): void
+    private function authorizeLaporan(Pengajuan $pengajuan): void
     {
-        $jenis = $pengajuan->jenisBantuan;
-        if (! $jenis || $jenis->kategori !== KategoriBantuan::BANTUAN_KELOMPOK) {
-            abort(404);
-        }
-
         $user = Auth::user();
         if ($user->role === RoleUser::SUPER || $user->role === RoleUser::ADMIN) {
             return;
