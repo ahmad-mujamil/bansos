@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JenisPengajuan;
+use App\Enums\KategoriBantuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
-use App\Exports\LaporanPengajuanExport;
 use App\Models\Pengajuan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class LaporanPengajuanController extends Controller
@@ -22,11 +20,13 @@ class LaporanPengajuanController extends Controller
                 'jenisBantuan',
                 'user',
                 'desa.kecamatan',
-                'details.penduduk',
                 'verifikasiPengajuan.user',
                 'verifiedBy',
                 'opd',
-            ]);
+            ])
+            ->whereHas('jenisBantuan', function ($q) {
+                $q->where('kategori', KategoriBantuan::BANTUAN_KELOMPOK);
+            });
 
         $user = Auth::user();
         if ($user->role === RoleUser::OPD) {
@@ -52,61 +52,39 @@ class LaporanPengajuanController extends Controller
             $query->where('status', $statusRequest);
         }
 
-        $kategoriRequest = (string) request('kategori', JenisPengajuan::BANSOS->value);
-        $kategoriEnum = JenisPengajuan::tryFrom($kategoriRequest);
-        if ($kategoriRequest !== 'all' && $kategoriEnum !== null) {
-            $query->where('kategori_pengajuan', $kategoriEnum->value);
-        }
-
-        $yesNo = fn(?bool $v) => $v
+        $yesNo = fn (?bool $v) => $v
             ? '<span class="text-success">Ya</span>'
             : '<span class="text-danger">Tidak</span>';
 
         return DataTables::of($query)
             ->addColumn('kelompok', function (Pengajuan $row) {
                 $org = $row->organisasi;
-                if ($org) {
-                    $parts = [];
-                    if ($org->desa?->nama) {
-                        $parts[] = $org->desa->nama;
-                    }
-                    if ($org->desa?->kecamatan?->nama) {
-                        $parts[] = $org->desa->kecamatan->nama;
-                    }
-                    $wilayah = $parts !== [] ? ' <span class="text-muted">(' . e(implode(', ', $parts)) . ')</span>' : '';
-
-                    return '<span class="fw-semibold">' . e($org->nama) . '</span>' . $wilayah;
-                }
-
-                $penduduk = $row->details->first()?->penduduk;
-                if ($penduduk) {
-                    $nik = $penduduk->nik ? ' <span class="text-muted">(' . e($penduduk->nik) . ')</span>' : '';
-
-                    return '<span class="fw-semibold">' . e($penduduk->nama) . '</span>' . $nik;
-                }
-
-                return '-';
-            })
-            ->addColumn('kode_judul', fn(Pengajuan $row) => '<span class="fw-semibold">' . e($row->kode_pengajuan) . '</span><br><span class="text-muted text-small">' . e($row->judul ?? '-') . '</span>')
-            ->addColumn('jenis_bantuan', fn(Pengajuan $row) => e(
-                $row->kategori_pengajuan?->getDescription()
-                    ?? JenisPengajuan::fromJenisOrganisasi($row->organisasi?->jenis)?->getDescription()
-                    ?? '-'
-            ))
-            ->addColumn('nilai_usulan', fn(Pengajuan $row) => 'Rp ' . number_format((float) $row->nilai, 0, ',', '.'))
-            ->addColumn('opd', function (Pengajuan $row) {
-                if (! $row->opd) {
+                if (! $org) {
                     return '-';
                 }
-                return '<span title="' . e($row->opd->nama) . '">' . e(Str::limit($row->opd->nama, 15)) . '</span>';
+                $parts = [];
+                if ($org->desa?->nama) {
+                    $parts[] = $org->desa->nama;
+                }
+                if ($org->desa?->kecamatan?->nama) {
+                    $parts[] = $org->desa->kecamatan->nama;
+                }
+                $wilayah = $parts !== [] ? ' <span class="text-muted">('.e(implode(', ', $parts)).')</span>' : '';
+
+                return '<span class="fw-semibold">'.e($org->nama).'</span>'.$wilayah;
             })
+            ->addColumn('kode_pengajuan', fn (Pengajuan $row) => e($row->kode_pengajuan))
+            ->addColumn('judul', fn (Pengajuan $row) => e($row->judul ?? '-'))
+            ->addColumn('jenis_bantuan', fn (Pengajuan $row) => e($row->jenisBantuan?->nama ?? '-'))
+            ->addColumn('nilai_usulan', fn (Pengajuan $row) => 'Rp '.number_format((float) $row->nilai, 0, ',', '.'))
+            ->addColumn('opd', fn (Pengajuan $row) => e($row->opd?->nama ?? '-'))
             ->addColumn('status', function (Pengajuan $row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
 
-                return '<span class="badge bg-' . $badge . '">' . e($status?->getDescription() ?? '-') . '</span>';
+                return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
             })
-            ->addColumn('tanggal_pengajuan', fn(Pengajuan $row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
+            ->addColumn('tanggal_pengajuan', fn (Pengajuan $row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
             ->addColumn('keputusan', function (Pengajuan $row) {
                 if (! in_array($row->status, [PengajuanStatus::DISETUJUI, PengajuanStatus::DITOLAK], true)) {
                     return '<span class="text-muted">—</span>';
@@ -122,18 +100,18 @@ class LaporanPengajuanController extends Controller
                     return '<span class="text-muted">—</span>';
                 }
 
-                return 'Rp ' . number_format((float) $v, 0, ',', '.');
+                return 'Rp '.number_format((float) $v, 0, ',', '.');
             })
-            ->addColumn('vk', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kriteria))
-            ->addColumn('va', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_administrasi))
-            ->addColumn('vks', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kesesuaian))
-            ->addColumn('vpp', fn(Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->sesuai_program_pemda))
+            ->addColumn('vk', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kriteria))
+            ->addColumn('va', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_administrasi))
+            ->addColumn('vks', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->lulus_kesesuaian))
+            ->addColumn('vpp', fn (Pengajuan $row) => $yesNo($row->verifikasiPengajuan?->sesuai_program_pemda))
             ->addColumn('catatan_verifikasi', function (Pengajuan $row) {
                 $c = $row->verifikasiPengajuan?->catatan;
 
                 return $c ? e(Str::limit($c, 80)) : '<span class="text-muted">—</span>';
             })
-            ->addColumn('verifikator', fn(Pengajuan $row) => e($row->verifikasiPengajuan?->user?->nama
+            ->addColumn('verifikator', fn (Pengajuan $row) => e($row->verifikasiPengajuan?->user?->nama
                 ?? $row->verifiedBy?->nama
                 ?? '-'))
             ->addColumn('tanggal_verifikasi', function (Pengajuan $row) {
@@ -148,8 +126,6 @@ class LaporanPengajuanController extends Controller
             })
             ->rawColumns([
                 'kelompok',
-                'kode_judul',
-                'opd',
                 'status',
                 'keputusan',
                 'nilai_rekomendasi',
@@ -173,19 +149,10 @@ class LaporanPengajuanController extends Controller
         return view('pages.laporan-pengajuan.index');
     }
 
-    public function exportExcel()
-    {
-        $kategori = (string) request('kategori', JenisPengajuan::BANSOS->value);
-        $status = (string) request('status', 'all');
-
-        $filename = 'laporan-pengajuan-' . $kategori . '-' . now()->format('Ymd-His') . '.xlsx';
-
-        return Excel::download(new LaporanPengajuanExport($kategori, $status), $filename);
-    }
-
     public function show(Pengajuan $pengajuan)
     {
-        $this->authorizeLaporan($pengajuan);
+        $pengajuan->loadMissing('jenisBantuan');
+        $this->authorizeLaporanKelompok($pengajuan);
 
         /** @var \Illuminate\Contracts\View\View $view */
         $view = app(VerifikasiPengajuanController::class)->show($pengajuan);
@@ -196,8 +163,13 @@ class LaporanPengajuanController extends Controller
         ]);
     }
 
-    private function authorizeLaporan(Pengajuan $pengajuan): void
+    private function authorizeLaporanKelompok(Pengajuan $pengajuan): void
     {
+        $jenis = $pengajuan->jenisBantuan;
+        if (! $jenis || $jenis->kategori !== KategoriBantuan::BANTUAN_KELOMPOK) {
+            abort(404);
+        }
+
         $user = Auth::user();
         if ($user->role === RoleUser::SUPER || $user->role === RoleUser::ADMIN) {
             return;
