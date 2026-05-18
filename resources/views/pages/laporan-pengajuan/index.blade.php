@@ -19,18 +19,45 @@
 
         <div class="card mb-5">
             <div class="card-body">
-              
+                <div class="laporan-tabs d-flex flex-wrap gap-3 mb-4" role="tablist" id="filter-kategori-tabs">
+                    <button type="button"
+                        class="laporan-tab laporan-tab-bansos active"
+                        data-kategori="{{ \App\Enums\JenisPengajuan::BANSOS->value }}"
+                        role="tab"
+                        aria-selected="true">
+                        <span class="laporan-tab-icon"><i data-acorn-icon="user"></i></span>
+                        <span class="laporan-tab-label">
+                            <span class="laporan-tab-title">Bansos</span>
+                            <span class="laporan-tab-sub">Bantuan Individu</span>
+                        </span>
+                    </button>
+                    <button type="button"
+                        class="laporan-tab laporan-tab-hibah"
+                        data-kategori="{{ \App\Enums\JenisPengajuan::HIBAH->value }}"
+                        role="tab"
+                        aria-selected="false">
+                        <span class="laporan-tab-icon"><i data-acorn-icon="gift"></i></span>
+                        <span class="laporan-tab-label">
+                            <span class="laporan-tab-title">Hibah</span>
+                            <span class="laporan-tab-sub">Bantuan Hibah</span>
+                        </span>
+                    </button>
+                    <button type="button"
+                        class="laporan-tab laporan-tab-kelompok"
+                        data-kategori="{{ \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value }}"
+                        role="tab"
+                        aria-selected="false">
+                        <span class="laporan-tab-icon"><i data-acorn-icon="building"></i></span>
+                        <span class="laporan-tab-label">
+                            <span class="laporan-tab-title">Bantuan Kelompok</span>
+                            <span class="laporan-tab-sub">Bantuan Organisasi</span>
+                        </span>
+                    </button>
+                </div>
+
                 <div class="row">
                     <div class="col-12 col-sm-6 col-lg-6 col-xxl-5 mb-3">
                         <div class="d-flex gap-2 w-100 align-items-center">
-                            <div class="flex-grow-1">
-                                <select id="filter-kategori-laporan" class="form-select form-select-sm">
-                                    <option value="all">Semua jenis</option>
-                                    <option value="{{ \App\Enums\JenisPengajuan::BANSOS->value }}" selected>Bansos</option>
-                                    <option value="{{ \App\Enums\JenisPengajuan::HIBAH->value }}">Hibah</option>
-                                    <option value="{{ \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value }}">Bantuan Kelompok</option>
-                                </select>
-                            </div>
                             <div class="flex-grow-1">
                                 <select id="filter-status-laporan" class="form-select form-select-sm">
                                     <option value="all" selected>Semua status</option>
@@ -99,15 +126,116 @@
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
     <style>
-        #filter-status-laporan + .select2-container--bootstrap4 .select2-selection--single,
-        #filter-kategori-laporan + .select2-container--bootstrap4 .select2-selection--single {
+        #filter-status-laporan + .select2-container--bootstrap4 .select2-selection--single {
             height: 31px;
         }
-        #filter-status-laporan + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered,
-        #filter-kategori-laporan + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        #filter-status-laporan + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
             line-height: 31px;
             padding-top: 0;
             padding-bottom: 0;
+        }
+
+        .laporan-tabs {
+            padding: 0.25rem 0;
+        }
+        .laporan-tab {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.85rem;
+            border: 1.5px solid #e9ecef;
+            background: #ffffff;
+            color: #6c757d;
+            cursor: pointer;
+            min-width: 220px;
+            text-align: left;
+            transition: transform 0.18s ease, box-shadow 0.18s ease,
+                        background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+        .laporan-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        }
+        .laporan-tab:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+        }
+        .laporan-tab-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 0.6rem;
+            background: #f1f3f5;
+            color: #495057;
+            flex-shrink: 0;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+        .laporan-tab-icon i {
+            width: 20px;
+            height: 20px;
+        }
+        .laporan-tab-label {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .laporan-tab-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+        }
+        .laporan-tab-sub {
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Bansos — blue */
+        .laporan-tab-bansos:hover { border-color: #3b82f6; color: #1d4ed8; }
+        .laporan-tab-bansos:hover .laporan-tab-icon { background: #dbeafe; color: #1d4ed8; }
+        .laporan-tab-bansos.active {
+            color: #ffffff;
+            border-color: transparent;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+        }
+
+        /* Hibah — purple/pink */
+        .laporan-tab-hibah:hover { border-color: #a855f7; color: #7c3aed; }
+        .laporan-tab-hibah:hover .laporan-tab-icon { background: #f3e8ff; color: #7c3aed; }
+        .laporan-tab-hibah.active {
+            color: #ffffff;
+            border-color: transparent;
+            background: linear-gradient(135deg, #c084fc 0%, #7c3aed 100%);
+            box-shadow: 0 10px 22px rgba(124, 58, 237, 0.28);
+        }
+
+        /* Bantuan Kelompok — green/teal */
+        .laporan-tab-kelompok:hover { border-color: #10b981; color: #047857; }
+        .laporan-tab-kelompok:hover .laporan-tab-icon { background: #d1fae5; color: #047857; }
+        .laporan-tab-kelompok.active {
+            color: #ffffff;
+            border-color: transparent;
+            background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+            box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28);
+        }
+
+        .laporan-tab.active .laporan-tab-icon {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+        }
+        .laporan-tab.active .laporan-tab-sub {
+            opacity: 0.85;
+        }
+
+        @media (max-width: 575.98px) {
+            .laporan-tab { min-width: 0; flex: 1 1 100%; }
         }
     </style>
 @endpush
@@ -122,10 +250,10 @@
             theme: 'bootstrap4',
             width: '100%',
         });
-        $('#filter-kategori-laporan').select2({
-            theme: 'bootstrap4',
-            width: '100%',
-        });
+
+        function getActiveKategori() {
+            return $('#filter-kategori-tabs .laporan-tab.active').data('kategori') ?? 'all';
+        }
 
         _extendDatatables();
         const tableLaporan = $('#datatable-laporan-pengajuan').DataTable({
@@ -147,7 +275,7 @@
                 url: "{!! route('laporan-pengajuan.index') !!}",
                 data: function (d) {
                     d.status = $('#filter-status-laporan').val();
-                    d.kategori = $('#filter-kategori-laporan').val();
+                    d.kategori = getActiveKategori();
                 },
             },
             columns: [
@@ -174,14 +302,22 @@
         $('#filter-status-laporan').on('change', function () {
             tableLaporan.ajax.reload();
         });
-        $('#filter-kategori-laporan').on('change', function () {
+        $('#filter-kategori-tabs').on('click', '.laporan-tab', function () {
+            const $this = $(this);
+            if ($this.hasClass('active')) {
+                return;
+            }
+            $('#filter-kategori-tabs .laporan-tab')
+                .removeClass('active')
+                .attr('aria-selected', 'false');
+            $this.addClass('active').attr('aria-selected', 'true');
             tableLaporan.ajax.reload();
         });
 
         $('#btn-export-excel').on('click', function (e) {
             e.preventDefault();
             const params = new URLSearchParams({
-                kategori: $('#filter-kategori-laporan').val() ?? 'all',
+                kategori: getActiveKategori(),
                 status: $('#filter-status-laporan').val() ?? 'all',
             });
             window.location.href = "{{ route('laporan-pengajuan.export') }}?" + params.toString();

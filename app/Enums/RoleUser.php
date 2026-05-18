@@ -9,6 +9,7 @@ enum RoleUser: string
     case OPD = 'opd';
     case USER = 'user';
     case DUKCAPIL = 'dukcapil';
+    case BENDAHARA = 'bendahara';
 
     public function getDescription(): string
     {
@@ -18,6 +19,7 @@ enum RoleUser: string
             self::OPD => 'OPD',
             self::USER => 'User/Masyarakat',
             self::DUKCAPIL => 'Dukcapil',
+            self::BENDAHARA => 'Bendahara',
         };
     }
 
@@ -47,6 +49,11 @@ enum RoleUser: string
             ],
             self::DUKCAPIL => [
                 'SIDE_VERIFIKASI', 'VERIFY_PENDUDUK',
+            ],
+            self::BENDAHARA => [
+                'LAPORAN', 'LAP_PENGAJUAN', 'LAP_REALISASI','LAP_KELOMPOK','LAP_PENERIMA_BANTUAN',
+                "MONITORING_DAN_REALISASI",'MONITORING','REALISASI_BANTUAN','CARI_PENDUDUK_NIK',
+                'BAST_DAN_BLACKLIST', 'BLACKLIST', 'BAST',
             ],
         };
     }
