@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\KategoriBantuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
+use App\Exports\LaporanPengajuanExport;
 use App\Models\Pengajuan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class LaporanPengajuanController extends Controller
@@ -147,6 +149,15 @@ class LaporanPengajuanController extends Controller
         }
 
         return view('pages.laporan-pengajuan.index');
+    }
+
+    public function exportExcel()
+    {
+        $kategori = (string) request('kategori', 'all');
+        $status = (string) request('status', 'all');
+        $filename = 'laporan-pengajuan-'.date('YmdHis').'.xlsx';
+
+        return Excel::download(new LaporanPengajuanExport($kategori, $status), $filename);
     }
 
     public function show(Pengajuan $pengajuan)
