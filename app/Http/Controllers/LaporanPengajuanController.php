@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\KategoriBantuan;
+use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Exports\LaporanPengajuanExport;
@@ -25,10 +25,7 @@ class LaporanPengajuanController extends Controller
                 'verifikasiPengajuan.user',
                 'verifiedBy',
                 'opd',
-            ])
-            ->whereHas('jenisBantuan', function ($q) {
-                $q->where('kategori', KategoriBantuan::BANTUAN_KELOMPOK);
-            });
+            ]);
 
         $user = Auth::user();
         if ($user->role === RoleUser::OPD) {
@@ -48,7 +45,19 @@ class LaporanPengajuanController extends Controller
             PengajuanStatus::DITOLAK->value,
         ];
 
+        $kategoriRequest = (string) request('kategori', JenisPengajuan::BANSOS->value);
+
         $query = $this->baseQuery();
+
+        if ($kategoriRequest !== 'all' && JenisPengajuan::tryFrom($kategoriRequest) !== null) {
+            $query->where(function ($q) use ($kategoriRequest) {
+                $q->where('kategori_pengajuan', $kategoriRequest)
+                    ->orWhere(function ($q2) use ($kategoriRequest) {
+                        $q2->whereNull('kategori_pengajuan')
+                            ->whereHas('jenisBantuan', fn ($jb) => $jb->where('kategori', $kategoriRequest));
+                    });
+            });
+        }
 
         if ($statusRequest !== 'all' && in_array($statusRequest, $allowed, true)) {
             $query->where('status', $statusRequest);
@@ -77,6 +86,14 @@ class LaporanPengajuanController extends Controller
             })
             ->addColumn('kode_pengajuan', fn (Pengajuan $row) => e($row->kode_pengajuan))
             ->addColumn('judul', fn (Pengajuan $row) => e($row->judul ?? '-'))
+            ->addColumn('kode_judul', function (Pengajuan $row) {
+                $kode = '<span class="fw-semibold">'.e($row->kode_pengajuan).'</span>';
+                $judul = $row->judul
+                    ? '<div class="text-muted text-small">'.e(Str::limit($row->judul, 60)).'</div>'
+                    : '';
+
+                return $kode.$judul;
+            })
             ->addColumn('jenis_bantuan', fn (Pengajuan $row) => e($row->jenisBantuan?->nama ?? '-'))
             ->addColumn('nilai_usulan', fn (Pengajuan $row) => 'Rp '.number_format((float) $row->nilai, 0, ',', '.'))
             ->addColumn('opd', fn (Pengajuan $row) => e($row->opd?->nama ?? '-'))
@@ -128,6 +145,7 @@ class LaporanPengajuanController extends Controller
             })
             ->rawColumns([
                 'kelompok',
+                'kode_judul',
                 'status',
                 'keputusan',
                 'nilai_rekomendasi',
@@ -163,7 +181,7 @@ class LaporanPengajuanController extends Controller
     public function show(Pengajuan $pengajuan)
     {
         $pengajuan->loadMissing('jenisBantuan');
-        $this->authorizeLaporanKelompok($pengajuan);
+        $this->authorizeLaporan($pengajuan);
 
         /** @var \Illuminate\Contracts\View\View $view */
         $view = app(VerifikasiPengajuanController::class)->show($pengajuan);
@@ -174,13 +192,8 @@ class LaporanPengajuanController extends Controller
         ]);
     }
 
-    private function authorizeLaporanKelompok(Pengajuan $pengajuan): void
+    private function authorizeLaporan(Pengajuan $pengajuan): void
     {
-        $jenis = $pengajuan->jenisBantuan;
-        if (! $jenis || $jenis->kategori !== KategoriBantuan::BANTUAN_KELOMPOK) {
-            abort(404);
-        }
-
         $user = Auth::user();
         if ($user->role === RoleUser::SUPER || $user->role === RoleUser::ADMIN) {
             return;
