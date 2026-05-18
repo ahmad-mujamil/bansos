@@ -22,17 +22,83 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Yajra\DataTables\Facades\DataTables;
 
 class PengajuanOpdController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengajuan = Pengajuan::query()
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
+        if ($request->ajax()) {
+            return $this->data();
+        }
 
-        return view('pages.pengajuan-opd.index', compact('pengajuan'));
+        return view('pages.pengajuan-opd.index');
+    }
+
+    private function data()
+    {
+        $statusRequest = (string) request('status', 'all');
+        $allowedStatuses = [
+            PengajuanStatus::DRAFT->value,
+            PengajuanStatus::DIAJUKAN->value,
+            PengajuanStatus::DISETUJUI->value,
+            PengajuanStatus::DITOLAK->value,
+        ];
+
+        $query = Pengajuan::query()
+            ->with(['organisasi', 'verifikasiPengajuan'])
+            ->where('user_id', Auth::id())
+            ->latest();
+
+        if ($statusRequest !== 'all' && in_array($statusRequest, $allowedStatuses, true)) {
+            $query->where('status', $statusRequest);
+        }
+
+        return DataTables::of($query)
+            ->addColumn('kode_pengajuan', fn ($row) => e($row->kode_pengajuan))
+            ->addColumn('kelompok', fn ($row) => e($row->organisasi?->nama ?? '-'))
+            ->addColumn('judul', fn ($row) => e($row->judul ?? '-'))
+            ->addColumn('status', function ($row) {
+                $status = $row->status;
+                $badge = $status?->badgeColor() ?? 'secondary';
+
+                return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
+            })
+            ->addColumn('tanggal', fn ($row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
+            ->addColumn('action', function ($row) {
+                $csrf = csrf_token();
+                $show = route('pengajuan-opd.show', $row->id);
+                $html = "<div class='d-flex gap-1'>";
+                $html .= "<a href='{$show}' class='btn btn-sm btn-outline-primary'>Lihat</a>";
+
+                if ($row->canEdit()) {
+                    $edit = route('pengajuan-opd.edit', $row->id);
+                    $html .= "<a href='{$edit}' class='btn btn-sm btn-outline-secondary'>Edit</a>";
+                }
+
+                if ($row->canSubmit()) {
+                    $submit = route('pengajuan-opd.submit', $row->id);
+                    $html .= "<form action='{$submit}' method='POST' class='form-ajukan-pengajuan'>"
+                        ."<input type='hidden' name='_token' value='{$csrf}'>"
+                        ."<button type='submit' class='btn btn-sm btn-success'>Ajukan</button>"
+                        ."</form>";
+                }
+
+                if ($row->canDelete()) {
+                    $destroy = route('pengajuan-opd.destroy', $row->id);
+                    $html .= "<form action='{$destroy}' method='POST' class='form-hapus-pengajuan'>"
+                        ."<input type='hidden' name='_token' value='{$csrf}'>"
+                        ."<input type='hidden' name='_method' value='DELETE'>"
+                        ."<button type='submit' class='btn btn-sm btn-danger'>Hapus</button>"
+                        ."</form>";
+                }
+
+                $html .= '</div>';
+
+                return $html;
+            })
+            ->rawColumns(['status', 'action'])
+            ->toJson();
     }
 
     public function create(Request $request)
@@ -111,6 +177,7 @@ class PengajuanOpdController extends Controller
             $pengajuan->user_id = Auth::id();
             $pengajuan->kode_pengajuan = $this->generateKodePengajuan();
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->lokasi = $validated['lokasi'] ?? null;
             $pengajuan->nilai = $validated['nilai'];
@@ -296,6 +363,7 @@ class PengajuanOpdController extends Controller
             ];
 
             $pengajuan->jenis_bantuan_id = $validated['jenis_bantuan_id'] ?? null;
+            $pengajuan->kategori_pengajuan = JenisPengajuan::from($validated['jenis']);
             $pengajuan->judul = $validated['judul'];
             $pengajuan->nilai = $validated['nilai'];
             $pengajuan->desa_id = $validated['desa_id'] ?? null;
@@ -366,6 +434,30 @@ class PengajuanOpdController extends Controller
         $pengajuan->update(['status' => PengajuanStatus::DIAJUKAN]);
         $this->logPengajuan($pengajuan, 'status_changed', $oldStatus, PengajuanStatus::DIAJUKAN->value);
         toast()->success('Berhasil', 'Pengajuan OPD berhasil diajukan.');
+
+        return redirect()->route('pengajuan-opd.index');
+    }
+
+    public function destroy(Pengajuan $pengajuan)
+    {
+        $this->authorizeUser($pengajuan);
+        if (! $pengajuan->canDelete()) {
+            toast()->warning('Tidak dapat dihapus', 'Pengajuan yang sudah diverifikasi tidak dapat dihapus.');
+
+            return redirect()->route('pengajuan-opd.index');
+        }
+
+        try {
+            DB::beginTransaction();
+            $pengajuan->details()->delete();
+            $pengajuan->clearMediaCollection('pengajuan');
+            $pengajuan->delete();
+            DB::commit();
+            toast()->success('Berhasil', 'Pengajuan OPD berhasil dihapus.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            toast()->error('Gagal', $e->getMessage());
+        }
 
         return redirect()->route('pengajuan-opd.index');
     }
@@ -501,6 +593,7 @@ class PengajuanOpdController extends Controller
         $jenisOrgValues = $this->jenisOrganisasiValuesForPengajuan($request->input('jenis'));
 
         return $request->validate([
+            'jenis' => ['required', Rule::enum(JenisPengajuan::class)],
             'jenis_penerima_bantuan' => ['required', Rule::enum(JenisPenerimaBantuan::class)],
             'jenis_bantuan_id' => 'nullable|exists:jenis_bantuan,id',
             'judul' => 'required|string|max:255',

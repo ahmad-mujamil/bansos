@@ -373,11 +373,12 @@
         <div class="row lvl-1 bold" style="margin-top: 8px;">B. Pemeriksa</div>
 
         <div class="lvl-2">
+            @php($pemeriksaKolom = max(\App\Models\PengajuanPemeriksa::MIN_VERIFIKASI_COUNT, $pemeriksa->count()))
             <table class="table table-pemeriksa">
                 <thead>
                     <tr>
                         <th class="pemeriksa-corner" scope="col"></th>
-                        @for ($n = 1; $n <= 3; $n++)
+                        @for ($n = 1; $n <= $pemeriksaKolom; $n++)
                             <th class="pemeriksa-head" scope="col">Pemeriksa {{ $n }}</th>
                         @endfor
                     </tr>
@@ -385,25 +386,25 @@
                 <tbody>
                     <tr>
                         <td class="pemeriksa-label-col" style="width: 60px;">Nama</td>
-                        @for ($i = 0; $i < 3; $i++)
+                        @for ($i = 0; $i < $pemeriksaKolom; $i++)
                             <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->nama ?? '' }}</td>
                         @endfor
                     </tr>
                     <tr>
                         <td class="pemeriksa-label-col" style="width: 60px;">NIP</td>
-                        @for ($i = 0; $i < 3; $i++)
+                        @for ($i = 0; $i < $pemeriksaKolom; $i++)
                             <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->nip ?? '' }}</td>
                         @endfor
                     </tr>
                     <tr>
                         <td class="pemeriksa-label-col" style="width: 60px;">Jabatan</td>
-                        @for ($i = 0; $i < 3; $i++)
+                        @for ($i = 0; $i < $pemeriksaKolom; $i++)
                             <td class="pemeriksa-value">{{ $pemeriksa->get($i)?->jabatan ?? '' }}</td>
                         @endfor
                     </tr>
                     <tr class="pemeriksa-paraf-row">
                         <td class="pemeriksa-label-col" style="width: 60px;">Paraf</td>
-                        @for ($i = 0; $i < 3; $i++)
+                        @for ($i = 0; $i < $pemeriksaKolom; $i++)
                             <td class="pemeriksa-value pemeriksa-paraf-cell">&nbsp;</td>
                         @endfor
                     </tr>

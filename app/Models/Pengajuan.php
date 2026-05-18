@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\JenisPenerimaBantuan;
+use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,7 @@ class Pengajuan extends Model implements HasMedia
         return [
             'status' => PengajuanStatus::class,
             'jenis_penerima_bantuan' => JenisPenerimaBantuan::class,
+            'kategori_pengajuan' => JenisPengajuan::class,
             'verified_at' => 'datetime',
         ];
     }
@@ -93,6 +95,15 @@ class Pengajuan extends Model implements HasMedia
     public function canSubmit(): bool
     {
         return $this->status === PengajuanStatus::DRAFT;
+    }
+
+    public function canDelete(): bool
+    {
+        if (in_array($this->status, [PengajuanStatus::DISETUJUI, PengajuanStatus::DITOLAK], true)) {
+            return false;
+        }
+
+        return ! $this->verifikasiPengajuan()->exists();
     }
 
     public function pemeriksa(): HasMany

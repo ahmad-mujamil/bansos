@@ -131,6 +131,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('/pengajuan-opd/{pengajuan}/edit', [App\Http\Controllers\PengajuanOpdController::class, 'edit'])->name('pengajuan-opd.edit');
         Route::put('/pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'update'])->name('pengajuan-opd.update');
         Route::post('/pengajuan-opd/{pengajuan}/submit', [App\Http\Controllers\PengajuanOpdController::class, 'submit'])->name('pengajuan-opd.submit');
+        Route::delete('/pengajuan-opd/{pengajuan}', [App\Http\Controllers\PengajuanOpdController::class, 'destroy'])->name('pengajuan-opd.destroy');
     });
 
     // Verifikasi Pengajuan
@@ -152,6 +153,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     // Laporan (rekap pengajuan kelompok + hasil verifikasi)
     Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::get('laporan-pengajuan', [App\Http\Controllers\LaporanPengajuanController::class, 'index'])->name('laporan-pengajuan.index');
+        Route::get('laporan-pengajuan/export', [App\Http\Controllers\LaporanPengajuanController::class, 'exportExcel'])->name('laporan-pengajuan.export');
         Route::get('laporan-pengajuan/{pengajuan}', [App\Http\Controllers\LaporanPengajuanController::class, 'show'])->name('laporan-pengajuan.show');
         Route::get('laporan-anggota-kelompok', [App\Http\Controllers\LaporanAnggotaKelompokController::class, 'index'])->name('laporan-anggota-kelompok.index');
         Route::get('laporan-realisasi', [App\Http\Controllers\LaporanRealisasiController::class, 'index'])->name('laporan-realisasi.index');

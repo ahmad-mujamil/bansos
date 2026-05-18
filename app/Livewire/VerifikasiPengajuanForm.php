@@ -41,7 +41,7 @@ class VerifikasiPengajuanForm extends Component
     public string $lokasi_pengesahan = 'Gerung';
 
     /**
-     * Tiga pemeriksa wajib diisi (nama, NIP, jabatan per orang).
+     * Daftar pemeriksa dinamis (minimal {@see PengajuanPemeriksa::MIN_VERIFIKASI_COUNT}, maksimal {@see PengajuanPemeriksa::MAX_VERIFIKASI_COUNT}); setiap baris wajib lengkap.
      *
      * @var array<int, array{nama: string, nip: string, jabatan: string}>
      */
@@ -86,6 +86,29 @@ class VerifikasiPengajuanForm extends Component
         ];
     }
 
+    public function addPemeriksa(): void
+    {
+        if (count($this->pemeriksa) >= PengajuanPemeriksa::MAX_VERIFIKASI_COUNT) {
+            return;
+        }
+
+        $this->pemeriksa[] = $this->blankPemeriksa();
+    }
+
+    public function removePemeriksaAt(int $index): void
+    {
+        if (count($this->pemeriksa) <= PengajuanPemeriksa::MIN_VERIFIKASI_COUNT) {
+            return;
+        }
+
+        if (! array_key_exists($index, $this->pemeriksa)) {
+            return;
+        }
+
+        unset($this->pemeriksa[$index]);
+        $this->pemeriksa = array_values($this->pemeriksa);
+    }
+
     /**
      * @return array{nama: string, nip: string, jabatan: string}
      */
@@ -110,7 +133,7 @@ class VerifikasiPengajuanForm extends Component
             'disahkan_oleh' => ['nullable', 'string', 'max:255'],
             'disahkan_nip' => ['nullable', 'string', 'max:18'],
             'lokasi_pengesahan' => ['required', 'string', 'max:255'],
-            'pemeriksa' => ['required', 'array', 'size:3'],
+            'pemeriksa' => ['required', 'array', 'min:'.PengajuanPemeriksa::MIN_VERIFIKASI_COUNT, 'max:'.PengajuanPemeriksa::MAX_VERIFIKASI_COUNT],
             'pemeriksa.*.nama' => ['required', 'string', 'max:255'],
             'pemeriksa.*.nip' => ['required', 'digits_between:1,18'],
             'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
@@ -144,6 +167,8 @@ class VerifikasiPengajuanForm extends Component
     {
         return [
             'rupa_bantuan.required' => 'Rupa bantuan wajib dipilih jika semua verifikasi lulus.',
+            'pemeriksa.min' => 'Minimal '.PengajuanPemeriksa::MIN_VERIFIKASI_COUNT.' data pemeriksa harus diisi.',
+            'pemeriksa.max' => 'Pemeriksa paling banyak '.PengajuanPemeriksa::MAX_VERIFIKASI_COUNT.' orang.',
             'pemeriksa.*.nip.digits_between' => 'NIP pemeriksa harus berupa angka paling banyak 18 digit.',
         ];
     }

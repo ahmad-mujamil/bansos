@@ -22,49 +22,59 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card mb-5">
         <div class="card-body">
-            @if($pengajuan->isEmpty())
-                <p class="text-muted mb-0">Belum ada pengajuan OPD.</p>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Kode</th>
-                                <th>Kelompok</th>
-                                <th>Judul</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($pengajuan as $p)
-                                <tr>
-                                    <td>{{ $p->kode_pengajuan }}</td>
-                                    <td>{{ $p->organisasi?->nama ?? '-' }}</td>
-                                    <td>{{ $p->judul }}</td>
-                                    <td><span class="badge bg-{{ $p->status?->badgeColor() ?? 'secondary' }}">{{ $p->status->getDescription() }}</span></td>
-                                    <td>{{ $p->created_at->translatedFormat('d M Y') }}</td>
-                                    <td class="d-flex gap-1">
-                                        <a href="{{ route('pengajuan-opd.show', $p) }}" class="btn btn-sm btn-outline-primary">Lihat</a>
-                                        @if($p->canEdit())
-                                            <a href="{{ route('pengajuan-opd.edit', $p) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                        @endif
-                                        @if($p->canSubmit())
-                                            <form action="{{ route('pengajuan-opd.submit', $p) }}" method="POST" class="form-ajukan-pengajuan">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success">Ajukan</button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            <div class="row">
+                <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 mb-3">
+                    <div class="d-flex gap-2 w-100 align-items-center">
+                        <div class="flex-grow-1">
+                            <select id="filter-status-pengajuan-opd" class="form-select form-select-sm">
+                                <option value="all" selected>Semua Status</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DRAFT->value }}">Draft</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DIAJUKAN->value }}">Diajukan</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DISETUJUI->value }}">Disetujui</option>
+                                <option value="{{ \App\Enums\PengajuanStatus::DITOLAK->value }}">Ditolak</option>
+                            </select>
+                        </div>
+                        <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm">
+                            <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-pengajuan-opd" />
+                            <span class="search-magnifier-icon"><i data-acorn-icon="search"></i></span>
+                            <span class="search-delete-icon d-none"><i data-acorn-icon="close"></i></span>
+                        </div>
+                    </div>
                 </div>
-            @endif
+                <div class="col-12 col-sm-6 col-lg-6 col-xxl-6 text-end mb-3">
+                    <div class="d-inline-block">
+                        <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm datatable-print" type="button" data-datatable="#datatable-pengajuan-opd">
+                            <i data-acorn-icon="print"></i>
+                        </button>
+                        <div class="d-inline-block datatable-export" data-datatable="#datatable-pengajuan-opd">
+                            <button class="btn btn-icon btn-icon-only btn-outline-muted btn-sm dropdown" data-bs-toggle="dropdown" type="button" data-bs-offset="0,3">
+                                <i data-acorn-icon="download"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-sm dropdown-menu-end">
+                                <button class="dropdown-item export-copy" type="button">Copy</button>
+                                <button class="dropdown-item export-excel" type="button">Excel</button>
+                                <button class="dropdown-item export-cvs" type="button">Cvs</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="data-table data-table-pagination data-table-standard responsive nowrap stripe" id="datatable-pengajuan-opd">
+                <thead>
+                    <tr>
+                        <th class="text-muted text-small text-uppercase">Kode</th>
+                        <th class="text-muted text-small text-uppercase">Kelompok</th>
+                        <th class="text-muted text-small text-uppercase">Judul</th>
+                        <th class="text-muted text-small text-uppercase">Status</th>
+                        <th class="text-muted text-small text-uppercase">Tanggal</th>
+                        <th class="text-muted text-small text-uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-alternate text-medium"></tbody>
+            </table>
         </div>
     </div>
 
@@ -158,26 +168,103 @@
 </div>
 @endsection
 
+@push('css')
+    <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    <style>
+        #filter-status-pengajuan-opd + .select2-container--bootstrap4 .select2-selection--single {
+            height: 31px;
+        }
+        #filter-status-pengajuan-opd + .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            line-height: 31px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    </style>
+@endpush
+
 @push('js_vendor')
-<script src="{{ $cdn ?? asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+    <script src="{{ $cdn ?? asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+    <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
+    <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
 @endpush
 
 @push('js_page')
 <script>
-    document.querySelectorAll('form.form-ajukan-pengajuan').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var f = this;
-            Swal.fire({
-                title: 'Ajukan Pengajuan',
-                text: 'Apakah Anda yakin ingin mengajukan pengajuan ini?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, ajukan',
-                cancelButtonText: 'Batal'
-            }).then(function(result) {
-                if (result.isConfirmed) f.submit();
-            });
+    $('#filter-status-pengajuan-opd').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+    });
+
+    new DatatableExtend();
+
+    const tablePengajuanOpd = $('#datatable-pengajuan-opd').DataTable({
+        language: {
+            paginate: {
+                previous: '<i class="cs-chevron-left"></i>',
+                next: '<i class="cs-chevron-right"></i>',
+            },
+            emptyTable: 'Belum ada pengajuan OPD.',
+            zeroRecords: 'Tidak ada data yang cocok.',
+        },
+        buttons: ['copy', 'excel', 'csv', 'print'],
+        processing: true,
+        serverSide: true,
+        responsive: true,
+        lengthChange: true,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        order: [[4, 'desc']],
+        sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
+        ajax: {
+            url: "{!! route('pengajuan-opd.index') !!}",
+            data: function(d) {
+                d.status = $('#filter-status-pengajuan-opd').val();
+            }
+        },
+        columns: [
+            { data: 'kode_pengajuan', name: 'kode_pengajuan' },
+            { data: 'kelompok', name: 'kelompok', orderable: false, searchable: false },
+            { data: 'judul', name: 'judul' },
+            { data: 'status', name: 'status' },
+            { data: 'tanggal', name: 'created_at' },
+            { data: 'action', name: 'action', orderable: false, searchable: false },
+        ],
+    });
+
+    $('#filter-status-pengajuan-opd').on('change', function() {
+        tablePengajuanOpd.ajax.reload();
+    });
+
+    $(document).on('submit', 'form.form-ajukan-pengajuan', function(e) {
+        e.preventDefault();
+        const f = this;
+        Swal.fire({
+            title: 'Ajukan Pengajuan',
+            text: 'Apakah Anda yakin ingin mengajukan pengajuan ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, ajukan',
+            cancelButtonText: 'Batal'
+        }).then(function(result) {
+            if (result.isConfirmed) f.submit();
+        });
+    });
+
+    $(document).on('submit', 'form.form-hapus-pengajuan', function(e) {
+        e.preventDefault();
+        const f = this;
+        Swal.fire({
+            title: 'Hapus Pengajuan',
+            text: 'Pengajuan yang dihapus tidak dapat dikembalikan. Lanjutkan?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#dc3545'
+        }).then(function(result) {
+            if (result.isConfirmed) f.submit();
         });
     });
 </script>
