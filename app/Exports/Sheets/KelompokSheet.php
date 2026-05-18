@@ -2,6 +2,7 @@
 
 namespace App\Exports\Sheets;
 
+use App\Enums\JenisOrganisasi;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -35,7 +36,7 @@ class KelompokSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             $row->nama,
             $row->nomor ?? '-',
             $row->tgl_pembentukan?->format('d/m/Y') ?? '-',
-            $row->jenisKelompokMasyarakat?->nama ?? '-',
+            JenisOrganisasi::tryFrom((string) $row->jenis)?->getDescription() ?? '-',
             $row->opd?->nama ?? '-',
             $row->kecamatan?->nama ?? '-',
             $row->desa?->nama ?? '-',
