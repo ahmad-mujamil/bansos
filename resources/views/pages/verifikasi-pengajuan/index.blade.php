@@ -229,6 +229,32 @@
             $modalUploadBa.modal('show');
         });
 
+        $('#datatable-serverside tbody').on('click', '.btn-batal-verifikasi', function () {
+            const url = $(this).data('url');
+            Swal.fire({
+                title: 'Batal Verifikasi?',
+                text: 'Pengajuan akan kembali ke status Diajukan dan data verifikasi akan dihapus.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Batalkan',
+                cancelButtonText: 'Tidak',
+                confirmButtonColor: '#dc3545',
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+
         function _extendDatatables() {
             new DatatableExtend();
         }

@@ -76,6 +76,8 @@ class VerifikasiPengajuanController extends Controller
                     } else {
                         $action .= " <a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Download BA Verifikasi (template)'>Download BA</a>";
                         $action .= $actionUpload;
+                        $batalUrl = route('verifikasi-pengajuan.batal-verifikasi', $row->id);
+                        $action .= " <button type='button' class='btn btn-sm btn-outline-danger ms-1 btn-batal-verifikasi' data-id='{$row->id}' data-url='{$batalUrl}' title='Batal Verifikasi'>Batal</button>";
                     }
                 }
 
@@ -246,6 +248,63 @@ class VerifikasiPengajuanController extends Controller
 
             return redirect()->back()->withInput();
         }
+    }
+
+    public function batalVerifikasi(Pengajuan $pengajuan): RedirectResponse
+    {
+        $processed = in_array($pengajuan->status, [
+            PengajuanStatus::DISETUJUI,
+            PengajuanStatus::DITOLAK,
+        ], true);
+
+        if (! $processed) {
+            toast()->error('Gagal', 'Pengajuan belum diverifikasi.');
+            return redirect()->route('verifikasi-pengajuan.index');
+        }
+
+        $verifikasi = $pengajuan->verifikasiPengajuan;
+
+        if ($verifikasi && $verifikasi->getFirstMedia('ba-verifikasi')) {
+            toast()->error('Gagal', 'BA Verifikasi sudah diunggah. Pembatalan tidak dapat dilakukan.');
+            return redirect()->route('verifikasi-pengajuan.index');
+        }
+
+        $oldStatus = $pengajuan->status;
+
+        try {
+            DB::beginTransaction();
+
+            if ($verifikasi) {
+                BantuanUang::where('verifikasi_pengajuan_id', $verifikasi->id)->delete();
+                BantuanBarangJasa::where('verifikasi_pengajuan_id', $verifikasi->id)->delete();
+                $verifikasi->delete();
+            }
+
+            PengajuanPemeriksa::where('pengajuan_id', $pengajuan->id)->delete();
+
+            $pengajuan->status = PengajuanStatus::DIAJUKAN;
+            $pengajuan->verified_at = null;
+            $pengajuan->verified_by = null;
+            $pengajuan->save();
+
+            PengajuanLog::create([
+                'pengajuan_id' => $pengajuan->id,
+                'user_id' => Auth::id(),
+                'action' => 'batal_verifikasi',
+                'status_from' => $oldStatus?->value,
+                'status_to' => PengajuanStatus::DIAJUKAN->value,
+                'catatan' => 'Verifikasi dibatalkan untuk perbaikan data.',
+            ]);
+
+            DB::commit();
+
+            toast()->success('Berhasil', 'Verifikasi berhasil dibatalkan. Pengajuan kembali ke status Diajukan.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            toast()->error('Gagal', $e->getMessage());
+        }
+
+        return redirect()->route('verifikasi-pengajuan.index');
     }
 
     public function uploadBa(Request $request, Pengajuan $pengajuan): RedirectResponse
