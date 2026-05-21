@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PendudukRequest;
+use App\Models\HistoryVerifikasiPenduduk;
 use App\Models\Penduduk;
 use App\Models\Kecamatan;
 use App\Models\Desa;
@@ -10,6 +11,7 @@ use App\Enums\JenisKelamin;
 use App\Enums\StatusPerkawinan;
 use App\Enums\LevelDesil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -55,6 +57,13 @@ class PendudukController extends Controller
                 return '<div class="fw-bold">' . e($data->nama) . '</div>'
                     . '<small class="text-muted">' . e($data->nik) . '</small>';
             })
+            ->filterColumn('nik_nama', function ($query, $keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nama', 'like', "%{$keyword}%")
+                      ->orWhere('nik', 'like', "%{$keyword}%");
+                });
+            })
+            ->orderColumn('nik_nama', 'nama $1')
             ->addColumn('desa_kecamatan', function ($data) {
                 $desa = $data->desa?->nama;
                 $kecamatan = $data->kecamatan?->nama;
@@ -130,11 +139,20 @@ class PendudukController extends Controller
     {
         try {
             DB::beginTransaction();
-            Penduduk::query()->create($request->validated());
+            $penduduk = Penduduk::query()->create($request->validated());
+
+            HistoryVerifikasiPenduduk::create([
+                'penduduk_id' => $penduduk->id,
+                'user_id'     => Auth::id(),
+                'action'      => 'input',
+                'catatan'     => 'Data penduduk diinput',
+            ]);
+
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
             return redirect()->route('penduduk.index');
         } catch (\Throwable $th) {
+            DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }
@@ -162,11 +180,33 @@ class PendudukController extends Controller
     {
         try {
             DB::beginTransaction();
-            $penduduk->update($request->validated());
+
+            $wasRejected = $penduduk->validated_at && ! $penduduk->is_valid;
+
+            $data = $request->validated();
+            if ($wasRejected) {
+                $data['is_valid']         = false;
+                $data['validated_at']     = null;
+                $data['validated_by']     = null;
+                $data['catatan_validasi'] = null;
+            }
+
+            $penduduk->update($data);
+
+            HistoryVerifikasiPenduduk::create([
+                'penduduk_id' => $penduduk->id,
+                'user_id'     => Auth::id(),
+                'action'      => 'perbaikan',
+                'catatan'     => $wasRejected
+                    ? 'Data diperbaiki setelah ditolak, menunggu verifikasi ulang'
+                    : 'Data penduduk diperbarui',
+            ]);
+
             DB::commit();
             toast()->success('Yeeayy !!', 'Data berhasil disimpan');
             return redirect()->route('penduduk.index');
         } catch (\Throwable $th) {
+            DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
         }

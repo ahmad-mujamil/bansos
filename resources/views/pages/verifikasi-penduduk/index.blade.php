@@ -36,6 +36,7 @@
                                     <option value="1">Terverifikasi</option>
                                     <option value="0">Belum Diverifikasi</option>
                                     <option value="2">Ditolak</option>
+                                    <option value="3">Sudah Perbaikan</option>
                                 </select>
                             </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm">

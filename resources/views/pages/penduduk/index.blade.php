@@ -45,7 +45,7 @@
                                 </select>
                             </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm">
-                                <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-serverside" />
+                                <input class="form-control form-control-sm datatable-search" placeholder="Cari nama atau NIK" data-datatable="#datatable-serverside" />
                                 <span class="search-magnifier-icon">
                                   <i data-acorn-icon="search"></i>
                                 </span>
@@ -165,7 +165,7 @@
             columns: [
                 {
                     data: 'nik_nama',
-                    name: 'nama',
+                    name: 'nik_nama',
                     defaultContent: '-'
                 },
                 {
