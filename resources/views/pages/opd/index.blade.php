@@ -122,7 +122,7 @@
                 { data: 'nama', name: 'nama' },
                 { data: 'kepala_opd', name: 'kepala_opd', defaultContent: '-' },
                 { data: 'no_telp', name: 'no_telp', defaultContent: '-' },
-                { data: 'organisasi_count', name: 'organisasi_count', defaultContent: '-' },
+                { data: 'organisasi_count', name: 'organisasi_count', defaultContent: '-', searchable: false, orderable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ],
             render: function(data, type, row, meta) {
