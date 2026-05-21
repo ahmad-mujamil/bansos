@@ -49,7 +49,7 @@
                 $route = request()->routeIs('penduduk.create') ? route('penduduk.store') : route('penduduk.update',$penduduk->id??'');
                 $method = request()->routeIs('penduduk.create') ? 'POST' : 'PUT';
             @endphp
-            <form novalidate enctype="multipart/form-data" action="{{ $route }}" method="POST" class="needs-validation">
+            <form novalidate enctype="multipart/form-data" action="{{ $route }}" method="POST">
                 @csrf
                 @method($method)
                 <div class="card-body">

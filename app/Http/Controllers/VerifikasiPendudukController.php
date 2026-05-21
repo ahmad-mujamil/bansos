@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HistoryVerifikasiPenduduk;
 use App\Models\Penduduk;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,17 +18,22 @@ class VerifikasiPendudukController extends Controller
 
         $query = Penduduk::query()
             ->with(['kecamatan', 'desa', 'validatedBy'])
+            ->withCount(['historyVerifikasi as perbaikan_count' => fn ($q) => $q->where('action', 'perbaikan')])
             ->latest();
 
         if ($statusRequest === '1') {
             $query->where('is_valid', true);
         } elseif ($statusRequest === '0') {
-            $query->where('is_valid', false);
-            $query->whereNull('validated_at');
-        }
-        elseif ($statusRequest === '2') {
+            $query->where('is_valid', false)
+                ->whereNull('validated_at')
+                ->whereDoesntHave('historyVerifikasi', fn ($q) => $q->where('action', 'perbaikan'));
+        } elseif ($statusRequest === '2') {
             $query->where('is_valid', false);
             $query->whereNotNull('validated_at');
+        } elseif ($statusRequest === '3') {
+            $query->where('is_valid', false)
+                ->whereNull('validated_at')
+                ->whereHas('historyVerifikasi', fn ($q) => $q->where('action', 'perbaikan'));
         }
 
         return DataTables::of($query)
@@ -36,7 +42,10 @@ class VerifikasiPendudukController extends Controller
                     return '<span class="badge bg-success">Terverifikasi</span>';
                 }
                 if ($row->validated_at && !$row->is_valid) {
-                    return '<span class="badge bg-danger">Tidak Valid</span>';
+                    return '<span class="badge bg-danger">Ditolak</span>';
+                }
+                if (($row->perbaikan_count ?? 0) > 0) {
+                    return '<span class="badge bg-info text-dark">Sudah Perbaikan</span>';
                 }
                 return '<span class="badge bg-warning text-dark">Belum Diverifikasi</span>';
             })
@@ -61,7 +70,7 @@ class VerifikasiPendudukController extends Controller
 
     public function show(Penduduk $penduduk)
     {
-        $penduduk->load(['desa.kecamatan', 'validatedBy']);
+        $penduduk->load(['desa.kecamatan', 'validatedBy', 'historyVerifikasi.user']);
 
         return view('pages.verifikasi-penduduk.show', compact('penduduk'));
     }
@@ -81,6 +90,14 @@ class VerifikasiPendudukController extends Controller
                 'validated_at'     => now(),
                 'validated_by'     => Auth::id(),
                 'catatan_validasi' => $validated['catatan_validasi'] ?? null,
+            ]);
+
+            HistoryVerifikasiPenduduk::create([
+                'penduduk_id' => $penduduk->id,
+                'user_id'     => Auth::id(),
+                'action'      => 'verifikasi',
+                'status'      => $validated['is_valid'] ? 'diverifikasi' : 'ditolak',
+                'catatan'     => $validated['catatan_validasi'] ?? null,
             ]);
 
             DB::commit();

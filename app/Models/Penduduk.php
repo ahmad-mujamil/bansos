@@ -58,6 +58,11 @@ class Penduduk extends Model
         return $this->belongsTo(User::class, 'validated_by');
     }
 
+    public function historyVerifikasi(): HasMany
+    {
+        return $this->hasMany(HistoryVerifikasiPenduduk::class, 'penduduk_id')->latest();
+    }
+
     public function labelStatusVerifikasi(): string
     {
         if ($this->is_valid) {

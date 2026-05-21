@@ -178,5 +178,55 @@
         <!-- Form Verifikasi End -->
         </div>
     </div>
+
+    <!-- History Verifikasi Start -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h2 class="small-title mb-4">Riwayat Verifikasi</h2>
+                    @if ($penduduk->historyVerifikasi->isEmpty())
+                        <div class="text-muted">Belum ada riwayat verifikasi.</div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 180px;">Waktu</th>
+                                        <th style="width: 160px;">Aksi</th>
+                                        <th style="width: 140px;">Status</th>
+                                        <th>Catatan</th>
+                                        <th style="width: 200px;">Oleh</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($penduduk->historyVerifikasi as $history)
+                                        <tr>
+                                            <td>{{ $history->created_at?->translatedFormat('d M Y H:i') }}</td>
+                                            <td>
+                                                <span class="badge {{ $history->badgeClass() }}">
+                                                    {{ $history->actionLabel() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if ($history->statusLabel())
+                                                    <span class="fw-semibold">{{ $history->statusLabel() }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $history->catatan ?? '-' }}</td>
+                                            <td>{{ $history->user?->nama ?? $history->user?->email ?? '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- History Verifikasi End -->
 </div>
 @endsection

@@ -8,12 +8,14 @@ use App\Enums\JenisPengajuan;
 use App\Enums\JenisOrganisasi;
 use App\Models\JenisKelompokMasyarakat;
 use App\Http\Requests\KelompokMasyarakatRequest;
+use App\Models\HistoryVerifikasiPenduduk;
 use App\Models\Kecamatan;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDetail;
 use App\Models\OrganisasiDokumen;
 use App\Models\Penduduk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -79,11 +81,21 @@ class KelompokMasyarakatController extends Controller
                     'desa_id' => $row['desa_id'],
                     'is_valid' => false,
                     'validated_at' => null,
+                    'validated_by' => null,
+                    'catatan_validasi' => null,
+                ]);
+
+                HistoryVerifikasiPenduduk::create([
+                    'penduduk_id' => $pendudukByNik->id,
+                    'user_id'     => Auth::id(),
+                    'action'      => 'perbaikan',
+                    'catatan'     => 'Data diperbaiki via kelompok masyarakat setelah ditolak, menunggu verifikasi ulang',
                 ]);
             }
             return $pendudukByNik;
         }
-        return Penduduk::query()->create([
+
+        $penduduk = Penduduk::query()->create([
             'nik' => $row['nik'],
             'nama' => $row['nama'],
             'jk' => $row['jk'],
@@ -91,6 +103,15 @@ class KelompokMasyarakatController extends Controller
             'desa_id' => $row['desa_id'],
             'alamat' => '-',
         ]);
+
+        HistoryVerifikasiPenduduk::create([
+            'penduduk_id' => $penduduk->id,
+            'user_id'     => Auth::id(),
+            'action'      => 'input',
+            'catatan'     => 'Data penduduk diinput via kelompok masyarakat',
+        ]);
+
+        return $penduduk;
     }
 
     private function getQuery()
