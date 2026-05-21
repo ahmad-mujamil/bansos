@@ -308,8 +308,14 @@
     <div class="kop-hr"></div>
 
     <div class="title" style="text-transform: capitalize;">
-        Berita Acara Hasil Verifikasi Usulan Permohonan Belanja Barang
-        Diserahkan Kepada Masyarakat Tahun Anggaran {{ $tahunAnggaran }}
+        @if ($pengajuan->kategori_pengajuan === \App\Enums\JenisPengajuan::BANSOS)
+            Berita Acara Hasil Verifikasi Usulan Permohonan Bantuan Sosial Tahun Anggaran {{ $tahunAnggaran }}
+        @elseif ($pengajuan->kategori_pengajuan === \App\Enums\JenisPengajuan::HIBAH)
+            Berita Acara Hasil Verifikasi Usulan Permohonan Bantuan Hibah Tahun Anggaran {{ $tahunAnggaran }}
+        @else
+            Berita Acara Hasil Verifikasi Usulan Permohonan Belanja Barang
+            Diserahkan Kepada Masyarakat Tahun Anggaran {{ $tahunAnggaran }}
+        @endif
     </div>
 
     <div class="section">
@@ -339,7 +345,7 @@
                 </tr>
                 <tr>
                     <td class="num">4.</td>
-                    <td class="lbl">Jenis Barang</td>
+                    <td class="lbl">Jenis Barang/Bantuan</td>
                     <td class="sep">:</td>
                     <td class="bold">{{ $jenisBarang }}</td>
                 </tr>
