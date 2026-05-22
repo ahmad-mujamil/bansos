@@ -24,7 +24,7 @@ class KelompokSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wit
     {
         return [
             'No', 'Nama Kelompok', 'Nomor SK', 'Tanggal Pembentukan',
-            'Jenis Kelompok', 'OPD', 'Kecamatan', 'Desa/Kelurahan',
+            'Jenis', 'Jenis Kelompok Masyarakat', 'OPD', 'Kecamatan', 'Desa/Kelurahan',
             'Jumlah Anggota', 'Status',
         ];
     }
@@ -37,6 +37,7 @@ class KelompokSheet implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             $row->nomor ?? '-',
             $row->tgl_pembentukan?->format('d/m/Y') ?? '-',
             JenisOrganisasi::tryFrom((string) $row->jenis)?->getDescription() ?? '-',
+            $row->jenisKelompokMasyarakat?->nama ?? '-',
             $row->opd?->nama ?? '-',
             $row->kecamatan?->nama ?? '-',
             $row->desa?->nama ?? '-',
