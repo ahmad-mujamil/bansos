@@ -186,7 +186,7 @@ class VerifikasiPengajuanController extends Controller
                     throw new \RuntimeException('Rupa bantuan wajib dipilih untuk pengajuan yang disetujui.');
                 }
 
-                if ($rupa === RupaBantuan::UANG->value) {
+                if ($rupa === RupaBantuan::UANG->value && ! $pengajuan->organisasi_id) {
                     $details = $request->validated('detail') ?? [];
 
                     if (count($details) < 1) {
