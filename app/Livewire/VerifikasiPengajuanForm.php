@@ -142,7 +142,7 @@ class VerifikasiPengajuanForm extends Component
         if ($this->allPassed()) {
             $rules['rupa_bantuan'] = ['required', Rule::in(array_map(fn (RupaBantuan $e) => $e->value, RupaBantuan::cases()))];
 
-            if ($this->rupa_bantuan === RupaBantuan::UANG->value) {
+            if ($this->rupa_bantuan === RupaBantuan::UANG->value && ! $this->pengajuan->organisasi_id) {
                 $rules['detail'] = ['required', 'array', 'min:1'];
                 $rules['detail.*.penduduk_id'] = ['required', 'uuid'];
                 $rules['detail.*.nilai'] = ['required', 'numeric', 'min:0'];

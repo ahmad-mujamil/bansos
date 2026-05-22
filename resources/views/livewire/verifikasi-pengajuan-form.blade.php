@@ -185,7 +185,7 @@
                     @error('catatan') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                 </div>
 
-                @if($rupa_bantuan === \App\Enums\RupaBantuan::UANG->value)
+                @if($rupa_bantuan === \App\Enums\RupaBantuan::UANG->value && ! $pengajuan->organisasi_id)
                     <div class="col-12 mt-4">
                         <h3 class="small-title mb-2">Detail Bantuan Uang</h3>
                         @if($pengajuan->details->isEmpty())
