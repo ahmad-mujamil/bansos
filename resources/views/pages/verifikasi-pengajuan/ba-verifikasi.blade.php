@@ -274,7 +274,7 @@
 
 <body>
     @php
-        $opd = $pengajuan->organisasi?->opd;
+        $opd = $pengajuan->organisasi?->opd ?? $pengajuan->opd;
         $logoPath = public_path('img/logo-only.png');
         $logoSrc = is_file($logoPath)
             ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))
