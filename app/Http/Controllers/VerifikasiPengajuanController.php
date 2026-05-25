@@ -398,7 +398,9 @@ class VerifikasiPengajuanController extends Controller
             ?? $pengajuan->user?->email
             ?? '-';
 
-        $namaKelompok = $pengajuan->organisasi?->nama ?: '-';
+        $namaKelompok = $pengajuan->organisasi?->nama
+            ?? $pengajuan->details()->first()?->penduduk?->nama
+            ?? '-';
         $kepalaSkpd = $verifikasi->disahkan_oleh ?? '-';
         $nipKepalaSkpd = $verifikasi->disahkan_nip ?? '-';
         $jumlahUsulan = 0;
