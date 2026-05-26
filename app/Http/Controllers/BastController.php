@@ -6,6 +6,7 @@ use App\Enums\PengajuanStatus;
 use App\Http\Requests\BastRequest;
 use App\Models\Bast;
 use App\Models\Pengajuan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -49,9 +50,12 @@ class BastController extends Controller
 
     public function create()
     {
+        $opdId = Auth::user()->opd_id;
+
         $pengajuan = Pengajuan::query()
             ->whereHas('verifikasiPengajuan')
             ->where('status', PengajuanStatus::DISETUJUI->value)
+            ->when($opdId !== null, fn ($q) => $q->where('opd_id', $opdId))
             ->latest()
             ->get();
 

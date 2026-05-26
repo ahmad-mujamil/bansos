@@ -5,7 +5,8 @@
       "Bash(php -l app/Imports/PendudukImport.php app/Exports/PendudukTemplateExport.php app/Http/Controllers/PendudukController.php routes/web.php)",
       "Bash(php -l app/Imports/PendudukImport.php app/Exports/PendudukTemplateExport.php app/Exports/Sheets/PendudukTemplateSheet.php app/Exports/Sheets/ReferensiWilayahSheet.php)",
       "Bash(php -l app/Imports/PendudukImport.php app/Http/Controllers/PendudukController.php)",
-      "Bash(php -l app/Imports/PendudukImport.php)"
+      "Bash(php -l app/Imports/PendudukImport.php)",
+      "Bash(php -l app/Http/Controllers/BastController.php)"
     ],
     "additionalDirectories": [
       "/Users/zanulharir/Web/Laravel/bansos/app"
