@@ -327,7 +327,7 @@
             <table class="proposal-list">
                 <tr>
                     <td class="num">1.</td>
-                    <td class="lbl">Nama Kelompok</td>
+                    <td class="lbl">Nama {{ $isIndividu ? 'Individu' : 'Kelompok' }}</td>
                     <td class="sep">:</td>
                     <td class="bold">{{ $namaKelompok }}</td>
                 </tr>
