@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PendudukTemplateExport;
 use App\Http\Requests\PendudukRequest;
+use App\Imports\PendudukImport;
 use App\Models\HistoryVerifikasiPenduduk;
 use App\Models\Penduduk;
 use App\Models\Kecamatan;
@@ -13,6 +15,7 @@ use App\Enums\LevelDesil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class PendudukController extends Controller
@@ -209,6 +212,45 @@ class PendudukController extends Controller
             DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
             return back()->withInput();
+        }
+    }
+
+    public function downloadTemplate(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        return Excel::download(new PendudukTemplateExport(), 'template-import-penduduk.xlsx');
+    }
+
+    public function import(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ], [
+            'file.required' => 'File excel wajib diunggah.',
+            'file.mimes'    => 'File harus berformat xlsx, xls, atau csv.',
+            'file.max'      => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        try {
+            $import = new PendudukImport();
+            Excel::import($import, $request->file('file'));
+
+            $skippedNote = $import->skippedDuplicates > 0
+                ? " ({$import->skippedDuplicates} baris dilewati karena NIK duplikat)"
+                : '';
+
+            if (! empty($import->errors)) {
+                $message = $import->imported > 0
+                    ? "{$import->imported} data berhasil diimport, sebagian baris bermasalah{$skippedNote}."
+                    : "Tidak ada data yang berhasil diimport{$skippedNote}.";
+                toast()->warning('Sebagian baris bermasalah', $message);
+                return redirect()->route('penduduk.index')->with('importErrors', $import->errors);
+            }
+
+            toast()->success('Yeeayy !!', "{$import->imported} data penduduk berhasil diimport{$skippedNote}.");
+            return redirect()->route('penduduk.index');
+        } catch (\Throwable $th) {
+            toast()->error('Oppss !!', 'Gagal import: '.$th->getMessage());
+            return redirect()->route('penduduk.index');
         }
     }
 

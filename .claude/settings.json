@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/zanulharir/Web/Laravel/bansos/app/Imports)",
+      "Bash(php -l app/Imports/PendudukImport.php app/Exports/PendudukTemplateExport.php app/Http/Controllers/PendudukController.php routes/web.php)",
+      "Bash(php -l app/Imports/PendudukImport.php app/Exports/PendudukTemplateExport.php app/Exports/Sheets/PendudukTemplateSheet.php app/Exports/Sheets/ReferensiWilayahSheet.php)",
+      "Bash(php -l app/Imports/PendudukImport.php app/Http/Controllers/PendudukController.php)",
+      "Bash(php -l app/Imports/PendudukImport.php)"
+    ],
+    "additionalDirectories": [
+      "/Users/zanulharir/Web/Laravel/bansos/app"
+    ]
+  }
+}

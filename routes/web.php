@@ -180,6 +180,12 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::resource('bast', App\Http\Controllers\BastController::class);
     });
 
+    // Penduduk - Import & Template Excel (admin only)
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('penduduk-import/template', [App\Http\Controllers\PendudukController::class, 'downloadTemplate'])->name('penduduk.template');
+        Route::post('penduduk-import', [App\Http\Controllers\PendudukController::class, 'import'])->name('penduduk.import');
+    });
+
     // MASTER DATA
     Route::middleware(['role:super,admin,opd'])->group(function () {
         Route::resource('kecamatan', App\Http\Controllers\KecamatanController::class);
