@@ -401,6 +401,8 @@ class VerifikasiPengajuanController extends Controller
         $namaKelompok = $pengajuan->organisasi?->nama
             ?? $pengajuan->details()->first()?->penduduk?->nama
             ?? '-';
+
+        $isIndividu =  $pengajuan->organisasi_id === null;
         $kepalaSkpd = $verifikasi->disahkan_oleh ?? '-';
         $nipKepalaSkpd = $verifikasi->disahkan_nip ?? '-';
         $jumlahUsulan = 0;
@@ -445,6 +447,7 @@ class VerifikasiPengajuanController extends Controller
             'tahunAnggaran' => $tahunAnggaran,
             'alamat' => $alamat,
             'pemohon' => $pemohon,
+            'isIndividu' => $isIndividu,
             'namaKelompok' => $namaKelompok,
             'kepalaSkpd' => $kepalaSkpd,
             'nipKepalaSkpd' => $nipKepalaSkpd,
