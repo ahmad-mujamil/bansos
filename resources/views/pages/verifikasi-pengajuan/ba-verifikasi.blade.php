@@ -6,13 +6,13 @@
     <title>BA Verifikasi</title>
     <style>
         @page {
-            margin: 36pt 44pt 48pt 44pt;
+            margin: 32pt 40pt 48pt 40pt;
         }
 
         body {
             font-family: "Times New Roman", Times, serif;
             font-size: 12px;
-            line-height: 1.35;
+            line-height: 1.3;
         }
 
         /* Footer tiap halaman (Dompdf mengulang elemen position: fixed) */
@@ -220,10 +220,11 @@
 
         /* Tanda tangan: blok mepet ke kanan */
         .ttd-wrap {
-            margin-top: 28px;
+            margin-top: 20px;
             width: 100%;
             text-align: right;
             padding-right: 0;
+            page-break-inside: avoid;
         }
 
         .ttd-inner {
@@ -250,8 +251,8 @@
 
         /* Ruang kosong untuk tanda tangan basah antara jabatan dan nama */
         .ttd-ruang-tanda-tangan {
-            min-height: 52px;
-            height: 52px;
+            min-height: 44px;
+            height: 44px;
         }
 
         .ttd-kepala-nama {
