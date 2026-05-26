@@ -18,9 +18,19 @@
                 </div>
                 <!-- Title End -->
                 <!-- Top Buttons Start -->
-                <div class="col-12 col-md-5 d-flex align-items-start justify-content-end">
+                <div class="col-12 col-md-7 d-flex align-items-start justify-content-end flex-wrap gap-2">
+                    @if(auth()->user()->role === \App\Enums\RoleUser::ADMIN)
+                        <a href="{{ route('penduduk.template') }}" class="btn btn-outline-success btn-icon btn-icon-start">
+                            <i data-acorn-icon="download"></i>
+                            <span>Template</span>
+                        </a>
+                        <button type="button" class="btn btn-outline-info btn-icon btn-icon-start" data-bs-toggle="modal" data-bs-target="#importPendudukModal">
+                            <i data-acorn-icon="upload"></i>
+                            <span>Import Excel</span>
+                        </button>
+                    @endif
                     <!-- Add New Button Start -->
-                    <a href="{{ route('penduduk.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start w-100 w-md-auto">
+                    <a href="{{ route('penduduk.create') }}" class="btn btn-outline-primary btn-icon btn-icon-start">
                         <i data-acorn-icon="plus"></i>
                         <span>Tambah Data</span>
                     </a>
@@ -104,6 +114,58 @@
         <!-- Content Start -->
     </div>
     <!-- Page Content End -->
+
+    @if(auth()->user()->role === \App\Enums\RoleUser::ADMIN)
+        <!-- Import Modal Start -->
+        <div class="modal fade" id="importPendudukModal" tabindex="-1" aria-labelledby="importPendudukModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form action="{{ route('penduduk.import') }}" method="POST" enctype="multipart/form-data" class="modal-content">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importPendudukModalLabel">Import Data Penduduk</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 small">
+                            Unduh <a href="{{ route('penduduk.template') }}" class="fw-bold">template Excel</a> terlebih dahulu, isi sesuai format, lalu unggah file di sini.
+                        </div>
+                        <div class="mb-3">
+                            <label for="importFile" class="form-label">File Excel (xlsx, xls, csv) — maks 5MB</label>
+                            <input type="file" name="file" id="importFile" accept=".xlsx,.xls,.csv" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-muted" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Import Modal End -->
+
+        @if(session('importErrors'))
+            <div class="modal fade show" id="importErrorsModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);" aria-modal="true" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Detail Baris yang Dilewati</h5>
+                            <button type="button" class="btn-close" onclick="document.getElementById('importErrorsModal').remove()" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="mb-0">
+                                @foreach(session('importErrors') as $err)
+                                    <li class="small text-danger">{{ $err }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-muted" onclick="document.getElementById('importErrorsModal').remove()">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endif
 @endsection
 
 @push('css')
