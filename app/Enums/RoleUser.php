@@ -52,8 +52,7 @@ enum RoleUser: string
             ],
             self::BENDAHARA => [
                 'LAPORAN', 'LAP_PENGAJUAN', 'LAP_REALISASI','LAP_KELOMPOK','LAP_PENERIMA_BANTUAN',
-                "MONITORING_DAN_REALISASI",'MONITORING','REALISASI_BANTUAN','CARI_PENDUDUK_NIK',
-                'BAST_DAN_BLACKLIST', 'BLACKLIST', 'BAST',
+                "MONITORING_DAN_REALISASI",'MONITORING','REALISASI_BANTUAN','CARI_PENDUDUK_NIK'
             ],
         };
     }
