@@ -104,7 +104,7 @@
 
         makeParticle() {
             const palette = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-            const radius = 1.2 + Math.random() * 2.3;
+            const radius = 0.6 + Math.random() * 1.2;
             const angle = Math.random() * Math.PI * 2;
             const speed = this.opts.speed * (0.4 + Math.random() * 1.2);
             return {
@@ -186,7 +186,7 @@
                 // Pulse radius
                 if (pulse) {
                     p.pulse += p.pulseSpeed;
-                    p.r = p.baseR + Math.sin(p.pulse) * 0.6;
+                    p.r = p.baseR + Math.sin(p.pulse) * 0.25;
                 }
             }
 
@@ -232,12 +232,13 @@
                 const p = this.particles[i];
 
                 // Soft glow
-                const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+                const glowR = p.r * 6;
+                const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
                 grad.addColorStop(0, p.glow);
                 grad.addColorStop(1, 'rgba(255,255,255,0)');
                 ctx.fillStyle = grad;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Core

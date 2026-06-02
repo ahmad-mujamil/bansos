@@ -1,81 +1,112 @@
 @extends('layouts.layout_full')
 
 @section('content_left')
-    <div class="login-hero h-100 position-relative overflow-hidden">
+    @php
+        $totalKelompok      = (int) collect($organisasiAktif)->sum();
+        $klpKelompok        = (int) ($organisasiAktif['KLP'] ?? 0);
+        $yysKelompok        = (int) ($organisasiAktif['YYS'] ?? 0);
+        $dllKelompok        = max(0, $totalKelompok - $klpKelompok - $yysKelompok);
+    @endphp
+    <div class="login-hero position-relative overflow-hidden"
+         style="min-height: 100vh !important; height: 100vh !important; width: 100% !important; display: block !important; background-color: #2563eb !important; background-image: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 30%, #3b82f6 65%, #93c5fd 100%) !important;">
+        {{-- Background gradient (layer cadangan) --}}
         <div class="login-hero-bg"></div>
-        <div class="login-hero-blob login-hero-blob-1"></div>
-        <div class="login-hero-blob login-hero-blob-2"></div>
-        <div class="login-hero-blob login-hero-blob-3"></div>
 
-        {{-- Floating particles --}}
-        <div class="login-particles" aria-hidden="true">
-            @for($i = 1; $i <= 18; $i++)
-                <span class="particle particle-{{ $i }}"></span>
-            @endfor
+        {{-- Pola batik/tenun dekoratif kiri-atas --}}
+        <div class="login-hero-batik" aria-hidden="true"></div>
+
+        {{-- Garis sirkuit / network dekoratif --}}
+        <svg class="login-hero-circuit" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden="true">
+            <g stroke="#ffffff" stroke-width="1" fill="none" opacity="0.45">
+                <path d="M40 80 L160 80 L180 100 L320 100"/>
+                <path d="M60 140 L140 140 L160 160 L260 160"/>
+                <path d="M30 220 L180 220 L210 250"/>
+                <path d="M380 60 L470 60 L490 80 L560 80"/>
+                <circle cx="40"  cy="80"  r="3" fill="#ffffff"/>
+                <circle cx="60"  cy="140" r="3" fill="#ffffff"/>
+                <circle cx="30"  cy="220" r="3" fill="#ffffff"/>
+                <circle cx="320" cy="100" r="3" fill="#ffffff"/>
+                <circle cx="260" cy="160" r="3" fill="#ffffff"/>
+                <circle cx="210" cy="250" r="3" fill="#ffffff"/>
+                <circle cx="380" cy="60"  r="3" fill="#ffffff"/>
+                <circle cx="560" cy="80"  r="3" fill="#ffffff"/>
+            </g>
+        </svg>
+
+        {{-- Foto pejabat (Bupati / Wakil Bupati) --}}
+        <div class="login-hero-officials"
+             role="img"
+             aria-label="Bupati dan Wakil Bupati Lombok Barat"></div>
+
+        {{-- Logo Daerah (top right) --}}
+        <div class="login-hero-logo-daerah">
+            <img src="{{ asset('img/login/lombok-barat-logo.png') }}"
+                 alt="Logo Kabupaten Lombok Barat"
+                 onerror="this.style.display='none'"/>
         </div>
 
-        {{-- Twinkling stars --}}
-        <div class="login-stars" aria-hidden="true">
-            @for($i = 1; $i <= 14; $i++)
-                <span class="star star-{{ $i }}"></span>
-            @endfor
-        </div>
+        {{-- Gelombang dekoratif di bawah --}}
+        <svg class="login-hero-wave" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 120 C 200 60, 400 180, 600 120 S 1000 60, 1200 120 L 1200 200 L 0 200 Z"
+                  fill="#1d4ed8" opacity="0.35"/>
+            <path d="M0 150 C 200 100, 400 200, 600 150 S 1000 100, 1200 150 L 1200 200 L 0 200 Z"
+                  fill="#1e3a8a" opacity="0.4"/>
+        </svg>
 
-        <div class="position-relative h-100 d-flex flex-column justify-content-center px-5 py-5" style="z-index: 2;">
-            {{-- Brand --}}
-            <div class="login-hero-brand mb-5">
+        {{-- Content area --}}
+        <div class="login-hero-content">
+            <div class="login-hero-brand mb-4">
                 <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill login-hero-pill">
-                    <i data-acorn-icon="user-plus" data-acorn-size="16"></i>
-                    <span class="text-uppercase fw-bold" style="letter-spacing: 0.12em; font-size: 0.7rem;">BKAD · Lombok Barat</span>
+                    <i data-acorn-icon="user-plus" data-acorn-size="14"></i>
+                    <span class="fw-bold" style="font-size: 0.78rem;">BKAD - LOMBOK BARAT</span>
                 </div>
-                <h1 class="text-white fw-bold mt-4 mb-2" style="font-size: 2.25rem; line-height: 1.15;">
+                <h1 class="login-hero-title mt-3 mb-2">
                     Bergabung Sebagai<br/>Pengguna Baru
                 </h1>
-                <p class="text-white mb-0" style="opacity: 0.85; max-width: 480px;">
-                    Daftarkan diri Anda sebagai individu, kelompok masyarakat, atau organisasi untuk mengakses layanan bantuan terpadu Kabupaten Lombok Barat.
+                <p class="login-hero-subtitle mb-0">
+                    Daftarkan diri Anda untuk mengakses layanan bantuan terpadu Kabupaten Lombok Barat — bantuan sosial, hibah, dan bantuan kelompok masyarakat.
                 </p>
             </div>
 
-            {{-- Benefits / Stats --}}
             <div>
-                <div class="text-uppercase fw-bold text-white mb-3" style="letter-spacing: 0.1em; font-size: 0.72rem; opacity: 0.85;">
-                    Apa yang Anda Dapatkan?
+                <div class="login-hero-section-label mb-3">
+                    Organisasi / Kelompok Aktif
                 </div>
-                <div class="row g-3">
-                    <div class="col-12 col-sm-6">
-                        <div class="login-stat-card d-flex align-items-start gap-3">
-                            <span class="login-stat-icon flex-shrink-0"><i data-acorn-icon="send" data-acorn-size="18"></i></span>
-                            <div>
-                                <div class="text-white fw-bold mb-1" style="font-size: 0.95rem;">Pengajuan Mudah</div>
-                                <div class="login-stat-label" style="font-size: 0.72rem; text-transform: none; letter-spacing: 0;">Ajukan bantuan secara online tanpa perlu antri.</div>
+                <div class="row g-3 login-hero-stats">
+                    <div class="col-6">
+                        <div class="login-stat-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="login-stat-label">Total Kelompok</span>
+                                <span class="login-stat-icon"><i data-acorn-icon="file-text" data-acorn-size="16"></i></span>
                             </div>
+                            <div class="login-stat-value">{{ number_format($totalKelompok) }}</div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6">
-                        <div class="login-stat-card d-flex align-items-start gap-3">
-                            <span class="login-stat-icon flex-shrink-0"><i data-acorn-icon="eye" data-acorn-size="18"></i></span>
-                            <div>
-                                <div class="text-white fw-bold mb-1" style="font-size: 0.95rem;">Pantau Status</div>
-                                <div class="login-stat-label" style="font-size: 0.72rem; text-transform: none; letter-spacing: 0;">Lacak progres pengajuan kapan saja secara real-time.</div>
+                    <div class="col-6">
+                        <div class="login-stat-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="login-stat-label">Kelompok Masyarakat</span>
+                                <span class="login-stat-icon"><i data-acorn-icon="send" data-acorn-size="16"></i></span>
                             </div>
+                            <div class="login-stat-value">{{ number_format($klpKelompok) }}</div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6">
-                        <div class="login-stat-card d-flex align-items-start gap-3">
-                            <span class="login-stat-icon flex-shrink-0"><i data-acorn-icon="shield" data-acorn-size="18"></i></span>
-                            <div>
-                                <div class="text-white fw-bold mb-1" style="font-size: 0.95rem;">Data Aman</div>
-                                <div class="login-stat-label" style="font-size: 0.72rem; text-transform: none; letter-spacing: 0;">Privasi & keamanan data terjamin sesuai standar.</div>
+                    <div class="col-6">
+                        <div class="login-stat-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="login-stat-label">Yayasan</span>
+                                <span class="login-stat-icon"><i data-acorn-icon="check-circle" data-acorn-size="16"></i></span>
                             </div>
+                            <div class="login-stat-value">{{ number_format($yysKelompok) }}</div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6">
-                        <div class="login-stat-card d-flex align-items-start gap-3">
-                            <span class="login-stat-icon flex-shrink-0"><i data-acorn-icon="check-circle" data-acorn-size="18"></i></span>
-                            <div>
-                                <div class="text-white fw-bold mb-1" style="font-size: 0.95rem;">Verifikasi Cepat</div>
-                                <div class="login-stat-label" style="font-size: 0.72rem; text-transform: none; letter-spacing: 0;">Proses verifikasi terstandar dan transparan.</div>
+                    <div class="col-6">
+                        <div class="login-stat-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="login-stat-label">DLL</span>
+                                <span class="login-stat-icon"><i data-acorn-icon="building" data-acorn-size="16"></i></span>
                             </div>
+                            <div class="login-stat-value">{{ number_format($dllKelompok) }}</div>
                         </div>
                     </div>
                 </div>
@@ -87,28 +118,12 @@
 @section('content_right')
     <!-- Right Side Start -->
     <div class="sw-lg-70 min-h-100 bg-foreground d-flex justify-content-center align-items-center py-5 login-right-panel">
-        <div class="register-card-wrapper">
-            <div class="register-card">
-                {{-- Accent top bar --}}
-                <div class="register-card-accent"></div>
+        <div class="login-form-wrapper">
 
-                {{-- Header with icon --}}
-                <div class="register-card-header">
-                    <div class="sh-11 register-logo-wrap">
-                        <a href="">
-                            <img src="{{ asset('img/logo/logo-wide.png') }}" alt="logo" class="img-fluid login-logo"/>
-                        </a>
-                    </div>
-                </div>
+            <h2 class="login-form-title">Buat Akun Baru</h2>
+            <p class="login-form-subtitle">Lengkapi data berikut untuk mendaftar sebagai pengguna baru.</p>
 
-                <div class="mb-2 text-center px-3">
-                    <h5 class="fw-bold mb-1" style="color: #0f172a;">Buat Akun Baru</h5>
-                    <p class="text-muted mb-0" style="font-size: 0.82rem;">
-                        Lengkapi data berikut untuk mendaftar.
-                    </p>
-                </div>
-
-                <div class="register-card-body">
+            <div class="mt-4">
                     {{-- Wizard Stepper --}}
                     <div class="wizard-stepper" data-wizard-stepper>
                         <div class="wizard-step-item active" data-step-indicator="1">
@@ -316,19 +331,17 @@
                             </button>
                         </div>
                     </form>
-                </div>
+            </div>
 
-                <div class="text-center px-3 pb-3 pt-2">
-                    <p class="text-small text-muted mb-2">
-                        Sudah punya akun?
-                        <a href="{{ route('login') }}" class="fw-semibold">Masuk di sini</a>
-                    </p>
-                    <div class="pt-2" style="border-top: 1px dashed #e5e7eb;">
-                        <span class="text-muted" style="font-size: 0.72rem;">
-                            &copy; 2026 Pemerintah Kabupaten Lombok Barat
-                        </span>
-                    </div>
-                </div>
+            <div class="login-divider"><span>atau</span></div>
+
+            <p class="text-center mb-0 login-register-prompt">
+                Sudah punya akun?
+                <a href="{{ route('login') }}" class="fw-bold">Masuk di sini</a>
+            </p>
+
+            <div class="text-center mt-4 pt-3 login-footer-meta">
+                &copy; 2026 Pemerintah Kabupaten Lombok Barat
             </div>
         </div>
     </div>
@@ -337,154 +350,165 @@
 
 @push('css')
 <style>
-    /* === Login Hero (Left Side) === */
-    .login-hero { color: #fff; }
+    /* === Login Hero (Left Side) — Blue Theme === */
+    .login-hero {
+        color: #0f172a;
+        min-height: 100vh;
+        background-color: #2563eb;
+        background-image:
+            radial-gradient(circle at 85% 30%, rgba(255,255,255,0.5) 0, transparent 55%),
+            linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 30%, #3b82f6 65%, #93c5fd 100%);
+    }
     .login-hero-bg {
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, #1e40af 0%, #2563eb 35%, #3b82f6 70%, #1d4ed8 100%);
+        background:
+            radial-gradient(circle at 85% 30%, rgba(255,255,255,0.5) 0, transparent 55%),
+            linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 30%, #3b82f6 65%, #93c5fd 100%);
         z-index: 0;
     }
-    .login-hero-bg::after {
-        content: '';
+    .login-hero-batik {
         position: absolute;
-        inset: 0;
-        background-image:
-            radial-gradient(circle at 20% 10%, rgba(255,255,255,0.10) 0, transparent 35%),
-            radial-gradient(circle at 85% 80%, rgba(255,255,255,0.08) 0, transparent 40%);
-    }
-    .login-hero-blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(40px);
-        opacity: 0.55;
-        pointer-events: none;
-        z-index: 0;
-    }
-    .login-hero-blob-1 {
-        width: 320px; height: 320px;
-        background: radial-gradient(circle, #60a5fa 0%, rgba(96,165,250,0) 70%);
-        top: -80px; right: -80px;
-    }
-    .login-hero-blob-2 {
-        width: 380px; height: 380px;
-        background: radial-gradient(circle, #a78bfa 0%, rgba(167,139,250,0) 70%);
-        bottom: -120px; left: -120px;
-    }
-    .login-hero-blob-3 {
-        width: 220px; height: 220px;
-        background: radial-gradient(circle, #22d3ee 0%, rgba(34,211,238,0) 70%);
-        top: 40%; right: 8%;
-        opacity: 0.35;
-    }
-    .login-hero-pill {
-        background: rgba(255,255,255,0.18);
-        color: #ffffff;
-        border: 1px solid rgba(255,255,255,0.25);
-        backdrop-filter: blur(8px);
-    }
-
-    /* === Floating Particles === */
-    .login-particles,
-    .login-stars {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
+        top: -40px;
+        left: -40px;
+        width: 360px;
+        height: 480px;
         z-index: 1;
-        overflow: hidden;
+        pointer-events: none;
+        opacity: 0.5;
+        background-image:
+            repeating-linear-gradient(45deg,
+                rgba(255,255,255,0.55) 0 4px,
+                transparent 4px 14px),
+            repeating-linear-gradient(-45deg,
+                rgba(147, 197, 253, 0.45) 0 3px,
+                transparent 3px 14px),
+            repeating-linear-gradient(90deg,
+                rgba(96, 165, 250, 0.20) 0 2px,
+                transparent 2px 22px);
+        -webkit-mask-image: linear-gradient(135deg, #000 0%, #000 40%, transparent 90%);
+                mask-image: linear-gradient(135deg, #000 0%, #000 40%, transparent 90%);
+        transform: rotate(-6deg);
     }
-    .particle {
+    .login-hero-circuit {
         position: absolute;
-        bottom: -40px;
-        display: block;
-        border-radius: 50%;
+        top: 12%;
+        left: 0;
+        width: 70%;
+        height: 60%;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .login-hero-officials {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 55%;
+        height: 80%;
+        z-index: 3;
+        background-image: url('{{ asset('img/login/officials.png') }}');
+        background-size: contain;
+        background-position: left bottom;
+        background-repeat: no-repeat;
+        pointer-events: none;
+    }
+    .login-hero-logo-daerah {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.75rem;
+        z-index: 4;
+        width: 72px;
+        height: 72px;
+    }
+    .login-hero-logo-daerah img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18));
+    }
+    .login-hero-wave {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 22%;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .login-hero-content {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 58%;
+        z-index: 5;
+        padding: 3.5rem 2.5rem 3.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @media (max-width: 1399.98px) {
+        .login-hero-officials { width: 48%; height: 72%; }
+        .login-hero-content { width: 60%; padding: 2.5rem 2rem 2.5rem 1rem; }
+    }
+    @media (max-width: 1199.98px) {
+        .login-hero-officials { opacity: 0.6; }
+        .login-hero-content { width: 70%; padding: 2rem 1.5rem; }
+    }
+
+    .login-hero-pill {
         background: rgba(255, 255, 255, 0.6);
-        box-shadow: 0 0 12px rgba(255, 255, 255, 0.55);
-        animation: particle-float linear infinite;
-        will-change: transform, opacity;
-        opacity: 0;
+        color: #1d4ed8;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
-    @keyframes particle-float {
-        0%   { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
-        10%  { opacity: 0.85; }
-        50%  { transform: translate3d(20px, -52vh, 0) scale(1); opacity: 0.9; }
-        90%  { opacity: 0.6; }
-        100% { transform: translate3d(-10px, -110vh, 0) scale(0.4); opacity: 0; }
+    .login-hero-pill i { color: #1d4ed8; }
+    .login-hero-title {
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 2.4rem;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        text-shadow: 0 2px 12px rgba(15, 23, 42, 0.25);
     }
-    .particle-1  { left:  4%; width:  6px; height:  6px; animation-duration: 14s; animation-delay:  0s; }
-    .particle-2  { left:  9%; width: 10px; height: 10px; animation-duration: 18s; animation-delay:  2s; background: rgba(167, 139, 250, 0.7); box-shadow: 0 0 14px rgba(167, 139, 250, 0.55); }
-    .particle-3  { left: 14%; width:  4px; height:  4px; animation-duration: 11s; animation-delay:  4s; }
-    .particle-4  { left: 19%; width:  8px; height:  8px; animation-duration: 16s; animation-delay:  1s; background: rgba(125, 211, 252, 0.75); box-shadow: 0 0 14px rgba(125, 211, 252, 0.55); }
-    .particle-5  { left: 24%; width: 12px; height: 12px; animation-duration: 22s; animation-delay:  6s; }
-    .particle-6  { left: 30%; width:  5px; height:  5px; animation-duration: 13s; animation-delay:  3s; }
-    .particle-7  { left: 36%; width:  9px; height:  9px; animation-duration: 19s; animation-delay:  5s; background: rgba(34, 211, 238, 0.7); box-shadow: 0 0 14px rgba(34, 211, 238, 0.55); }
-    .particle-8  { left: 42%; width:  6px; height:  6px; animation-duration: 15s; animation-delay:  7s; }
-    .particle-9  { left: 48%; width: 11px; height: 11px; animation-duration: 24s; animation-delay:  0s; background: rgba(255, 255, 255, 0.55); }
-    .particle-10 { left: 54%; width:  4px; height:  4px; animation-duration: 12s; animation-delay:  9s; }
-    .particle-11 { left: 60%; width:  8px; height:  8px; animation-duration: 17s; animation-delay:  2s; background: rgba(196, 181, 253, 0.7); box-shadow: 0 0 14px rgba(196, 181, 253, 0.55); }
-    .particle-12 { left: 66%; width:  6px; height:  6px; animation-duration: 14s; animation-delay:  6s; }
-    .particle-13 { left: 72%; width: 10px; height: 10px; animation-duration: 21s; animation-delay:  4s; background: rgba(147, 197, 253, 0.75); box-shadow: 0 0 14px rgba(147, 197, 253, 0.55); }
-    .particle-14 { left: 78%; width:  5px; height:  5px; animation-duration: 13s; animation-delay:  8s; }
-    .particle-15 { left: 83%; width:  9px; height:  9px; animation-duration: 18s; animation-delay:  1s; }
-    .particle-16 { left: 88%; width:  6px; height:  6px; animation-duration: 16s; animation-delay:  5s; background: rgba(255, 255, 255, 0.55); }
-    .particle-17 { left: 92%; width:  4px; height:  4px; animation-duration: 12s; animation-delay: 10s; }
-    .particle-18 { left: 96%; width: 11px; height: 11px; animation-duration: 23s; animation-delay:  3s; background: rgba(165, 180, 252, 0.7); box-shadow: 0 0 14px rgba(165, 180, 252, 0.55); }
-
-    /* === Twinkling Stars === */
-    .star {
-        position: absolute;
-        width: 3px;
-        height: 3px;
-        background: #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 0 6px rgba(255, 255, 255, 0.95);
-        animation: star-twinkle ease-in-out infinite;
-        opacity: 0.7;
-        will-change: opacity, transform;
+    .login-hero-subtitle {
+        color: #ffffff;
+        font-size: 0.95rem;
+        max-width: 480px;
+        opacity: 0.92;
+        line-height: 1.55;
     }
-    @keyframes star-twinkle {
-        0%, 100% { opacity: 0.15; transform: scale(0.7); }
-        50%      { opacity: 1;    transform: scale(1.3); }
-    }
-    .star-1  { top:  8%; left: 12%; animation-duration: 3.2s; animation-delay: 0.0s; }
-    .star-2  { top: 14%; left: 78%; animation-duration: 4.1s; animation-delay: 0.8s; width: 4px; height: 4px; }
-    .star-3  { top: 22%; left: 35%; animation-duration: 2.8s; animation-delay: 1.4s; }
-    .star-4  { top: 30%; left: 65%; animation-duration: 3.6s; animation-delay: 2.0s; width: 2px; height: 2px; }
-    .star-5  { top: 38%; left: 20%; animation-duration: 4.4s; animation-delay: 0.4s; }
-    .star-6  { top: 45%; left: 88%; animation-duration: 3.0s; animation-delay: 1.1s; width: 4px; height: 4px; }
-    .star-7  { top: 52%; left:  6%; animation-duration: 3.8s; animation-delay: 2.6s; }
-    .star-8  { top: 58%; left: 48%; animation-duration: 2.6s; animation-delay: 0.2s; width: 2px; height: 2px; }
-    .star-9  { top: 64%; left: 72%; animation-duration: 4.0s; animation-delay: 1.8s; }
-    .star-10 { top: 70%; left: 28%; animation-duration: 3.4s; animation-delay: 0.6s; width: 4px; height: 4px; }
-    .star-11 { top: 76%; left: 92%; animation-duration: 4.6s; animation-delay: 2.2s; }
-    .star-12 { top: 82%; left: 58%; animation-duration: 2.9s; animation-delay: 1.5s; }
-    .star-13 { top: 88%; left: 16%; animation-duration: 3.5s; animation-delay: 0.9s; width: 2px; height: 2px; }
-    .star-14 { top: 94%; left: 80%; animation-duration: 4.2s; animation-delay: 2.4s; }
-
-    @media (prefers-reduced-motion: reduce) {
-        .particle, .star { animation: none; opacity: 0.4; }
+    .login-hero-section-label {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #ffffff;
+        opacity: 0.9;
     }
 
     .login-stat-card {
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.20);
+        background: rgba(29, 78, 216, 0.42);
+        border: 1px solid rgba(255, 255, 255, 0.28);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
-        border-radius: 14px;
-        padding: 1rem 1.1rem;
+        border-radius: 16px;
+        padding: 0.95rem 1.1rem;
         height: 100%;
         transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     }
     .login-stat-card:hover {
         transform: translateY(-3px);
-        background: rgba(255,255,255,0.18);
-        border-color: rgba(255,255,255,0.35);
+        background: rgba(37, 99, 235, 0.55);
+        border-color: rgba(255, 255, 255, 0.45);
     }
     .login-stat-label {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: rgba(255,255,255,0.85);
+        letter-spacing: 0.06em;
+        color: rgba(255, 255, 255, 0.92);
         font-weight: 700;
         line-height: 1.25;
     }
@@ -492,115 +516,72 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 36px; height: 36px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.18);
+        width: 32px; height: 32px;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.22);
         color: #ffffff;
         flex-shrink: 0;
     }
     .login-stat-icon i { color: #ffffff; }
     .login-stat-value {
         color: #ffffff;
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: 800;
-        line-height: 1.15;
+        line-height: 1.1;
         letter-spacing: -0.01em;
+        margin-top: 0.25rem;
     }
 
-    /* === Right Panel === */
+    /* === Right Panel (minimalist, no card) === */
     .login-right-panel {
-        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        background: #f1f5f9;
         position: relative;
     }
-    .login-right-panel::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image:
-            radial-gradient(circle at 90% 10%, rgba(59,130,246,0.06) 0, transparent 35%),
-            radial-gradient(circle at 10% 90%, rgba(139,92,246,0.05) 0, transparent 40%);
-        pointer-events: none;
-    }
-    .register-card-wrapper {
+    .login-form-wrapper {
         width: 100%;
-        max-width: 460px;
-        padding: 0 1rem;
+        max-width: 480px;
+        padding: 0 2rem;
         position: relative;
         z-index: 1;
     }
-    .register-card {
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 0;
-        box-shadow:
-            0 20px 50px rgba(15, 23, 42, 0.10),
-            0 4px 12px rgba(15, 23, 42, 0.04);
-        border: 1px solid #eef2f7;
-        position: relative;
-        overflow: hidden;
-    }
-    .register-card-accent {
-        height: 4px;
-        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 35%, #8b5cf6 70%, #06b6d4 100%);
-        background-size: 200% 100%;
-        animation: register-accent-shift 6s ease-in-out infinite;
-    }
-    @keyframes register-accent-shift {
-        0%, 100% { background-position: 0% 50%; }
-        50%      { background-position: 100% 50%; }
-    }
-    .register-card-header {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.6rem;
-        padding: 1.2rem 1.4rem 0.4rem;
-    }
-    .register-logo-wrap { display: inline-flex; }
-    .login-logo { max-height: 34px; width: auto; }
-
-    .register-card-body {
-        padding: 0 1.4rem 1.4rem;
-    }
-    .register-section {
-        background: #f8fafc;
-        border: 1px solid #eef2f7;
-        border-radius: 14px;
-        padding: 1.15rem 1.15rem 1.15rem;
-        margin-bottom: 1rem;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .register-section:hover {
-        border-color: #c7d2fe;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
-    }
-    .register-section-title {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        font-weight: 700;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #1e293b;
-        margin-bottom: 1rem;
-        padding-bottom: 0.7rem;
-        border-bottom: 1px dashed #cbd5e1;
-    }
-    .register-section-num {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: #ffffff;
-        font-size: 0.78rem;
+    .login-form-title {
+        font-size: 1.85rem;
         font-weight: 800;
-        flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        color: #0f172a;
+        letter-spacing: -0.01em;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+    .login-form-subtitle {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+    .login-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin: 1.5rem 0 1rem;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+    .login-register-prompt {
+        font-size: 0.95rem;
+        color: #475569;
+    }
+    .login-register-prompt a { color: #1d4ed8; text-decoration: none; }
+    .login-register-prompt a:hover { text-decoration: underline; }
+    .login-footer-meta {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        border-top: 1px dashed #e2e8f0;
     }
 
     /* === Wizard Stepper === */
@@ -780,10 +761,10 @@
     /* === Wizard Buttons === */
     .wizard-btn-prev,
     .wizard-btn-next {
-        border-radius: 10px;
-        padding: 0.55rem 1rem;
+        border-radius: 12px;
+        padding: 0.7rem 1.1rem;
         font-weight: 600;
-        font-size: 0.86rem;
+        font-size: 0.9rem;
         transition: all 0.2s ease;
     }
     .wizard-btn-prev {
@@ -824,16 +805,16 @@
     }
     .login-field-label {
         display: block;
-        font-size: 0.7rem;
+        font-size: 0.92rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #475569;
-        margin-bottom: 0.25rem;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0;
+        text-transform: none;
     }
     .login-field-icon {
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
@@ -843,35 +824,41 @@
         z-index: 2;
     }
     .login-input {
-        padding: 0.55rem 0.85rem 0.55rem 2.4rem;
-        border-radius: 10px;
-        border: 1.5px solid #e2e8f0;
-        background: #f8fafc;
-        font-size: 0.88rem;
-        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-    }
-    .login-input:focus {
+        width: 100%;
+        padding: 0.85rem 1rem 0.85rem 2.8rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
         background: #ffffff;
+        font-size: 0.95rem;
+        color: #0f172a;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .login-input::placeholder { color: #94a3b8; }
+    .login-input:focus {
+        outline: none;
         border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14), 0 1px 2px rgba(15, 23, 42, 0.04);
     }
     .login-input.is-invalid {
         border-color: #ef4444;
         background: #fef2f2;
     }
-    .login-input.password-input { padding-right: 3rem; }
+    .login-input.password-input { padding-right: 3.2rem; }
     select.login-input { padding-right: 2.5rem; }
-    .password-addon { z-index: 3; }
+    .password-addon { z-index: 3; border-radius: 0 12px 12px 0 !important; }
+    .password-addon i { color: #94a3b8 !important; }
+
     .login-submit {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
         border: none;
         color: #ffffff;
         font-weight: 700;
-        letter-spacing: 0.02em;
-        padding: 0.65rem 1rem;
-        border-radius: 10px;
-        font-size: 0.92rem;
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+        letter-spacing: 0.01em;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.32);
         transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
     }
     .login-submit:hover,
@@ -882,10 +869,6 @@
         filter: brightness(1.04);
     }
     .login-submit:active { transform: translateY(0); }
-
-    @media (max-width: 991.98px) {
-        .login-card { padding: 1.75rem 1.4rem; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); }
-    }
 </style>
 @endpush
 
