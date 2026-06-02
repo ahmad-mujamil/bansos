@@ -32,7 +32,7 @@ class LaporanPengajuanController extends Controller
             $query->where('opd_id', $user->opd_id);
         }
 
-        return $query->latest();
+        return $query->latest('pengajuan.created_at');
     }
 
     private function data()
@@ -86,10 +86,10 @@ class LaporanPengajuanController extends Controller
             })
             ->addColumn('kode_pengajuan', fn (Pengajuan $row) => e($row->kode_pengajuan))
             ->addColumn('judul', fn (Pengajuan $row) => e($row->judul ?? '-'))
-            ->addColumn('kode_judul', function (Pengajuan $row) {
+            ->addColumn('kode_tanggal', function (Pengajuan $row) {
                 $kode = '<span class="fw-semibold">'.e($row->kode_pengajuan).'</span>';
                 $judul = $row->judul
-                    ? '<div class="text-muted text-small">'.e(Str::limit($row->judul, 60)).'</div>'
+                    ? '<div class="text-muted text-small">'.$row->created_at?->translatedFormat('d M Y').'</div>'
                     : '';
 
                 return $kode.$judul;
@@ -145,7 +145,7 @@ class LaporanPengajuanController extends Controller
             })
             ->rawColumns([
                 'kelompok',
-                'kode_judul',
+                'kode_tanggal',
                 'status',
                 'keputusan',
                 'nilai_rekomendasi',
@@ -180,15 +180,18 @@ class LaporanPengajuanController extends Controller
 
     public function show(Pengajuan $pengajuan)
     {
-        $pengajuan->loadMissing('jenisBantuan');
         $this->authorizeLaporan($pengajuan);
 
-        /** @var \Illuminate\Contracts\View\View $view */
-        $view = app(VerifikasiPengajuanController::class)->show($pengajuan);
+        $pengajuan->load([
+            'organisasi.desa.kecamatan',
+            'jenisBantuan',
+            'opd',
+            'verifikasiPengajuan.user',
+            'verifiedBy',
+        ]);
 
-        return $view->with([
-            'laporanBackUrl' => route('laporan-pengajuan.index'),
-            'laporanReadOnly' => true,
+        return view('pages.laporan-pengajuan.show', [
+            'pengajuan' => $pengajuan,
         ]);
     }
 

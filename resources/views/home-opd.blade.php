@@ -19,60 +19,52 @@
         <!-- Stats Start -->
         <div class="mb-5">
             <h2 class="small-title">Summary</h2>
-            <div class="row g-2">
+            <div class="row g-3">
                 <div class="col-12 col-lg-3 col-xxl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Organisasi/Kelompok</b></span>
-                                <i data-acorn-icon="category" class="text-primary"></i>
+                    <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Organisasi/Kelompok</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="building" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalOrganisasi) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalOrganisasi) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="building"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-3 col-xxl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Pengajuan</b></span>
-                                <i data-acorn-icon="category" class="text-primary"></i>
+                    <div class="card stat-card stat-card-violet border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Pengajuan</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="file-text" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalPengajuan) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalPengajuan) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="file-text"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-3 col-xxl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Realisasi</b></span>
-                                <i data-acorn-icon="category" class="text-primary"></i>
+                    <div class="card stat-card stat-card-emerald border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Realisasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="dollar" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">Rp. {{ number_format($totalBansos) }}</div>
+                            <div class="stat-card-value">Rp {{ number_format($totalBansos) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="dollar"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-3 col-xxl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Blacklist</b></span>
-                                <i data-acorn-icon="user" class="text-primary"></i>
+                    <div class="card stat-card stat-card-rose border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Blacklist</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="close-square" data-acorn-size="22"></i></div>
                             </div>
-                            <div class="cta-1 text-primary">{{ number_format($totalBlacklist) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalBlacklist) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="close-square"></i></div>
                         </div>
                     </div>
                 </div>

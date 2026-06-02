@@ -78,7 +78,13 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
 
         $kategori = $this->kategori ?? JenisPengajuan::BANSOS->value;
         if ($kategori !== 'all' && JenisPengajuan::tryFrom($kategori) !== null) {
-            $query->where('kategori_pengajuan', $kategori);
+            $query->where(function ($q) use ($kategori) {
+                $q->where('kategori_pengajuan', $kategori)
+                    ->orWhere(function ($q2) use ($kategori) {
+                        $q2->whereNull('kategori_pengajuan')
+                            ->whereHas('jenisBantuan', fn ($jb) => $jb->where('kategori', $kategori));
+                    });
+            });
         }
 
         if ($this->status && $this->status !== 'all' && PengajuanStatus::tryFrom($this->status) !== null) {
