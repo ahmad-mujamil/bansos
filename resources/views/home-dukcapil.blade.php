@@ -19,49 +19,40 @@
         <!-- Stats Start -->
         <div class="mb-5">
             <h2 class="small-title">Summary</h2>
-            <div class="row g-2">
+            <div class="row g-3">
                 <div class="col-12 col-lg-4 col-xxl-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Penduduk</b></span>
-                                <i data-acorn-icon="user" class="text-primary"></i>
+                    <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Penduduk</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="user" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalPenduduk) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalPenduduk) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="user"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-4 col-xxl-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Total <b>Terverifikasi</b></span>
-                                <i data-acorn-icon="check-square" class="text-primary"></i>
+                    <div class="card stat-card stat-card-emerald border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Total Terverifikasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="check-square" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalPendudukTerverifikasi) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalPendudukTerverifikasi) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="check-square"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-4 col-xxl-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="heading mb-0 d-flex justify-content-between lh-1-25 mb-3">
-                                <span>Belum <b>Terverifikasi</b></span>
-                                <i data-acorn-icon="close-circle" class="text-primary"></i>
+                    <div class="card stat-card stat-card-amber border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Belum Terverifikasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="close-circle" data-acorn-size="22"></i></div>
                             </div>
-                            {{--                            <div class="text-small text-success mb-1">--}}
-                            {{--                                <i data-acorn-icon="arrow-top" class="me-1" data-acorn-size="13"></i>--}}
-                            {{--                                <span class="text-medium">+55.2%</span>--}}
-                            {{--                            </div>--}}
-                            <div class="cta-1 text-primary">{{ number_format($totalPenduduk-$totalPendudukTerverifikasi) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalPenduduk-$totalPendudukTerverifikasi) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="close-circle"></i></div>
                         </div>
                     </div>
                 </div>

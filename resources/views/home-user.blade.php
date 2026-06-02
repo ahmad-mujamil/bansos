@@ -176,46 +176,50 @@
             <h2 class="small-title mb-3">Dashboard</h2>
             <div class="row g-3">
                 <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted text-small text-uppercase">Jumlah Pengajuan</span>
-                                <i data-acorn-icon="file-text" class="text-primary"></i>
+                    <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Jumlah Pengajuan</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="file-text" data-acorn-size="22"></i></div>
                             </div>
-                            <div class="cta-1 text-primary">{{ number_format($totalPengajuan ?? 0) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalPengajuan ?? 0) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="file-text"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted text-small text-uppercase">Verifikasi</span>
-                                <i data-acorn-icon="check-circle" class="text-success"></i>
+                    <div class="card stat-card stat-card-emerald border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Verifikasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="check-circle" data-acorn-size="22"></i></div>
                             </div>
-                            <div class="cta-1 text-success">{{ number_format($totalVerifikasi ?? 0) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalVerifikasi ?? 0) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="check-circle"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted text-small text-uppercase">Belum Verifikasi</span>
-                                <i data-acorn-icon="clock" class="text-warning"></i>
+                    <div class="card stat-card stat-card-amber border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Belum Verifikasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="clock" data-acorn-size="22"></i></div>
                             </div>
-                            <div class="cta-1 text-warning">{{ number_format($totalBelumVerifikasi ?? 0) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalBelumVerifikasi ?? 0) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="clock"></i></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted text-small text-uppercase">Realisasi</span>
-                                <i data-acorn-icon="notebook-1" class="text-info"></i>
+                    <div class="card stat-card stat-card-cyan border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card-body p-4 position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="stat-card-label">Realisasi</div>
+                                <div class="stat-card-icon"><i data-acorn-icon="notebook-1" data-acorn-size="22"></i></div>
                             </div>
-                            <div class="cta-1 text-info">{{ number_format($totalRealisasi ?? 0) }}</div>
+                            <div class="stat-card-value">{{ number_format($totalRealisasi ?? 0) }}</div>
+                            <div class="stat-card-deco"><i data-acorn-icon="notebook-1"></i></div>
                         </div>
                     </div>
                 </div>
