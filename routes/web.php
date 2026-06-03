@@ -76,6 +76,13 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::resource('pengguna', App\Http\Controllers\PenggunaController::class);
     });
 
+    // Impersonate (Login As) — hanya super
+    Route::middleware(['role:super'])->group(function () {
+        Route::post('pengguna/{pengguna}/login-as', [App\Http\Controllers\PenggunaController::class, 'loginAs'])->name('pengguna.login-as');
+    });
+    // Stop impersonate — boleh diakses user manapun yang sedang impersonate
+    Route::post('stop-impersonating', [App\Http\Controllers\PenggunaController::class, 'stopImpersonating'])->name('pengguna.stop-impersonating');
+
     // USERS KELOMPOK
     Route::middleware(['role:super,opd'])->group(function () {
         Route::resource('user-kelompok', App\Http\Controllers\UserKelompokController::class)

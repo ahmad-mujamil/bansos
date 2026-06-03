@@ -26,6 +26,7 @@
     </div>
     <main>
         <div class="container">
+            @include('components.impersonation_banner')
             <div class="row">
                 @include('components.nav_secondary')
                 <!-- Page Content Start -->
