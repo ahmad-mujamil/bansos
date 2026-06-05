@@ -22,7 +22,7 @@ class VerifikasiPengajuanRequest extends FormRequest
             'lulus_administrasi' => ['required', 'boolean'],
             'lulus_kesesuaian' => ['required', 'boolean'],
             'sesuai_program_pemda' => ['required', 'boolean'],
-            'nilai_rekomendasi' => ['nullable', 'numeric', 'min:0'],
+            'nilai_rekomendasi' => ['required', 'numeric', 'min:0'],
             'rupa_bantuan' => ['nullable', Rule::in(array_map(fn (RupaBantuan $e) => $e->value, RupaBantuan::cases()))],
 
             'detail' => ['nullable', 'array'],
@@ -62,6 +62,8 @@ class VerifikasiPengajuanRequest extends FormRequest
     {
         return [
             'rupa_bantuan.in' => 'Rupa bantuan tidak valid.',
+            'nilai_rekomendasi.required' => 'Nilai rekomendasi wajib diisi.',
+            'nilai_rekomendasi.numeric' => 'Nilai rekomendasi harus berupa angka.',
             'detail.*.penduduk_id.required_with' => 'Nilai harus diisi jika penduduk tersebut dipilih.',
             'detail.*.nilai.required_with' => 'Penduduk harus dipilih jika nilai diisi.',
             'items.*.nama_barang.required_with' => 'Satuan, spesifikasi, harga satuan, dan qty harus diisi jika barang tersebut dipilih.',
