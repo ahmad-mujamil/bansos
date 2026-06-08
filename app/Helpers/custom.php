@@ -48,6 +48,10 @@ if (! function_exists('terbilang')) {
                 return '';
             }
 
+            if ($n < 10) {
+                return $digits[$n];
+            }
+
             if ($n < 20) {
                 if ($n === 10) {
                     return 'sepuluh';
@@ -56,7 +60,7 @@ if (! function_exists('terbilang')) {
                     return 'sebelas';
                 }
 
-                return $digits[$n];
+                return $digits[$n - 10].' belas';
             }
 
             if ($n < 100) {
