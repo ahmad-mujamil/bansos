@@ -3,6 +3,7 @@
     <div class="laporan-tabs d-flex flex-wrap gap-3 mb-4" role="tablist">
         @php
             $tabMeta = [
+                'all'                                               => ['class' => 'laporan-tab-all',      'icon' => 'layout-3',  'title' => 'Semua',           'sub' => 'Semua Jenis Pengajuan'],
                 \App\Enums\JenisPengajuan::BANSOS->value             => ['class' => 'laporan-tab-bansos',   'icon' => 'user',     'title' => 'Bansos',           'sub' => 'Bantuan Sosial'],
                 \App\Enums\JenisPengajuan::HIBAH->value              => ['class' => 'laporan-tab-hibah',    'icon' => 'gift',     'title' => 'Hibah',            'sub' => 'Bantuan Hibah'],
                 \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value   => ['class' => 'laporan-tab-kelompok', 'icon' => 'building', 'title' => 'Bantuan Kelompok', 'sub' => 'Barang Diserahkan ke Masyarakat'],

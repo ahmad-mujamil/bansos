@@ -39,13 +39,13 @@ class LaporanPengajuanList extends DataList
             'detailRoute' => 'laporan-pengajuan.show',
         ]);
 
-        $this->kategori = JenisPengajuan::BANSOS->value;
+        $this->kategori = 'all';
     }
 
     public function updatedKategori(): void
     {
         if (JenisPengajuan::tryFrom($this->kategori) === null && $this->kategori !== 'all') {
-            $this->kategori = JenisPengajuan::BANSOS->value;
+            $this->kategori = 'all';
         }
         $this->resetPage();
     }
