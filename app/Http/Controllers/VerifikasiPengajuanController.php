@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PengajuanStatus;
+use App\Enums\RoleUser;
 use App\Enums\RupaBantuan;
 use App\Http\Requests\VerifikasiPengajuanRequest;
 use App\Models\BantuanBarangJasa;
@@ -70,14 +71,23 @@ class VerifikasiPengajuanController extends Controller
                     $downloadBaUrl = route('verifikasi-pengajuan.download-ba-verifikasi', $row->id);
                     $actionUpload = " <button type='button' class='btn btn-sm btn-outline-warning ms-1 btn-upload-ba' data-id='{$row->id}' title='Upload BA Verifikasi (hasil tanda tangan)'>Upload BA</button>";
 
+                    $batalUrl = route('verifikasi-pengajuan.batal-verifikasi', $row->id);
+                    $batalButton = " <button type='button' class='btn btn-sm btn-outline-danger ms-1 btn-batal-verifikasi' data-id='{$row->id}' data-url='{$batalUrl}' title='Batal Verifikasi'>Batal</button>";
+
+                    $isAdmin = in_array(Auth::user()?->role, [RoleUser::SUPER, RoleUser::ADMIN], true);
+
                     if ($baMedia) {
                         $baUrl = $baMedia->getUrl();
                         $action .= " <a href='{$baUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Lihat File BA'>Lihat BA</a>";
+
+                        // Admin/super admin tetap bisa membatalkan walau BA sudah diunggah.
+                        if ($isAdmin) {
+                            $action .= $batalButton;
+                        }
                     } else {
                         $action .= " <a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Download BA Verifikasi (template)'>Download BA</a>";
                         $action .= $actionUpload;
-                        $batalUrl = route('verifikasi-pengajuan.batal-verifikasi', $row->id);
-                        $action .= " <button type='button' class='btn btn-sm btn-outline-danger ms-1 btn-batal-verifikasi' data-id='{$row->id}' data-url='{$batalUrl}' title='Batal Verifikasi'>Batal</button>";
+                        $action .= $batalButton;
                     }
                 }
 
@@ -259,14 +269,16 @@ class VerifikasiPengajuanController extends Controller
 
         if (! $processed) {
             toast()->error('Gagal', 'Pengajuan belum diverifikasi.');
-            return redirect()->route('verifikasi-pengajuan.index');
+            return redirect()->back();
         }
 
         $verifikasi = $pengajuan->verifikasiPengajuan;
 
-        if ($verifikasi && $verifikasi->getFirstMedia('ba-verifikasi')) {
+        $isAdmin = in_array(Auth::user()?->role, [RoleUser::SUPER, RoleUser::ADMIN], true);
+
+        if (! $isAdmin && $verifikasi && $verifikasi->getFirstMedia('ba-verifikasi')) {
             toast()->error('Gagal', 'BA Verifikasi sudah diunggah. Pembatalan tidak dapat dilakukan.');
-            return redirect()->route('verifikasi-pengajuan.index');
+            return redirect()->back();
         }
 
         $oldStatus = $pengajuan->status;
@@ -304,7 +316,7 @@ class VerifikasiPengajuanController extends Controller
             toast()->error('Gagal', $e->getMessage());
         }
 
-        return redirect()->route('verifikasi-pengajuan.index');
+        return redirect()->back();
     }
 
     public function uploadBa(Request $request, Pengajuan $pengajuan): RedirectResponse

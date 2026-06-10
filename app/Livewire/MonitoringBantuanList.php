@@ -110,19 +110,15 @@ class MonitoringBantuanList extends Component
             ->get();
     }
 
-    private function baseQuery(): Builder
+    private function scopedQuery(): Builder
     {
-        $query = Pengajuan::query()
-            ->with(['user', 'jenisBantuan', 'media', 'verifikasiPengajuan.media', 'bast.media'])
-            ->select('pengajuan.*');
+        $query = Pengajuan::query();
 
         $user = Auth::user();
 
         if ($user?->is_opd()) {
             if ($user->opd_id === null) {
-                $query->whereRaw('1 = 0');
-
-                return $query;
+                return $query->whereRaw('1 = 0');
             }
 
             $query->where('pengajuan.opd_id', $user->opd_id);
@@ -137,7 +133,15 @@ class MonitoringBantuanList extends Component
             $query->whereYear('pengajuan.created_at', $selectedYear);
         }
 
-        return $query->latest('pengajuan.created_at');
+        return $query;
+    }
+
+    private function baseQuery(): Builder
+    {
+        return $this->scopedQuery()
+            ->with(['user', 'opd', 'jenisBantuan', 'media', 'verifikasiPengajuan.media', 'bast.media'])
+            ->select('pengajuan.*')
+            ->latest('pengajuan.created_at');
     }
 
     private function applyBelumBastSiapInputCriteria(Builder $query): void
@@ -159,7 +163,7 @@ class MonitoringBantuanList extends Component
         }
 
         if ($this->tahap === 'semua') {
-            if (!Auth::user()->is_super()) {
+            if (! (Auth::user()?->is_super() ?? false)) {
                 $query->where(function (Builder $builder): void {
                     $builder->where(function (Builder $subQuery): void {
                         $this->applyBelumBastSiapInputCriteria($subQuery);
@@ -197,14 +201,12 @@ class MonitoringBantuanList extends Component
 
     private function stats(): array
     {
-        $base = $this->baseQuery();
-
-        $belumBast = (clone $base);
+        $belumBast = $this->scopedQuery();
         $this->applyBelumBastSiapInputCriteria($belumBast);
 
         return [
             'belum_bast' => $belumBast->count(),
-            'sudah_bast' => (clone $base)->whereHas('bast')->count(),
+            'sudah_bast' => $this->scopedQuery()->whereHas('bast')->count(),
         ];
     }
 
@@ -226,34 +228,51 @@ class MonitoringBantuanList extends Component
             ? now()->setYear($selectedYear)->startOfYear()
             : now()->startOfMonth()->subMonths(5);
         $monthsToShow = $selectedYear !== null ? 12 : 6;
+
+        $rangeStart = (clone $startMonth)->startOfMonth();
+        $rangeEnd = (clone $startMonth)->addMonths($monthsToShow - 1)->endOfMonth();
+
         $labels = [];
         $belumBastSeries = [];
         $sudahBastSeries = [];
 
         for ($index = 0; $index < $monthsToShow; $index++) {
             $monthStart = (clone $startMonth)->addMonths($index)->startOfMonth();
-            $monthEnd = (clone $monthStart)->endOfMonth();
+            $key = $monthStart->format('Y-m');
 
             $labels[] = $selectedYear !== null
                 ? $monthStart->translatedFormat('M')
                 : $monthStart->translatedFormat('M Y');
+            $belumBastSeries[$key] = 0;
+            $sudahBastSeries[$key] = 0;
+        }
 
-            $belumBastQuery = $this->baseQuery()
-                ->whereBetween('pengajuan.created_at', [$monthStart, $monthEnd]);
-            $this->applyBelumBastSiapInputCriteria($belumBastQuery);
-            $belumBastSeries[] = $belumBastQuery->count();
+        // Dua query agregat saja, lalu di-bucket per bulan di PHP (portabel SQLite/MySQL).
+        $belumBastQuery = $this->scopedQuery()
+            ->whereBetween('pengajuan.created_at', [$rangeStart, $rangeEnd]);
+        $this->applyBelumBastSiapInputCriteria($belumBastQuery);
+        foreach ($belumBastQuery->get(['pengajuan.id', 'pengajuan.created_at']) as $row) {
+            $key = $row->created_at->format('Y-m');
+            if (array_key_exists($key, $belumBastSeries)) {
+                $belumBastSeries[$key]++;
+            }
+        }
 
-            $sudahBastSeries[] = $this->baseQuery()
-                ->whereBetween('pengajuan.created_at', [$monthStart, $monthEnd])
-                ->whereHas('bast')
-                ->count();
+        $sudahBastQuery = $this->scopedQuery()
+            ->whereBetween('pengajuan.created_at', [$rangeStart, $rangeEnd])
+            ->whereHas('bast');
+        foreach ($sudahBastQuery->get(['pengajuan.id', 'pengajuan.created_at']) as $row) {
+            $key = $row->created_at->format('Y-m');
+            if (array_key_exists($key, $sudahBastSeries)) {
+                $sudahBastSeries[$key]++;
+            }
         }
 
         return [
             'labels' => $labels,
             'series' => [
-                'belum_bast' => $belumBastSeries,
-                'sudah_bast' => $sudahBastSeries,
+                'belum_bast' => array_values($belumBastSeries),
+                'sudah_bast' => array_values($sudahBastSeries),
             ],
         ];
     }
@@ -266,7 +285,7 @@ class MonitoringBantuanList extends Component
         $stats = $this->stats();
 
         return view('livewire.monitoring-bantuan-list', [
-            'pengajuanList' => $query->paginate(4),
+            'pengajuanList' => $query->paginate(10),
             'stats' => $stats,
             'showOpdFilter' => $this->shouldShowOpdFilter(),
             'opdOptions' => $this->opdOptions(),

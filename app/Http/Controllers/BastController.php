@@ -52,14 +52,23 @@ class BastController extends Controller
     {
         $opdId = Auth::user()->opd_id;
 
-        $pengajuan = Pengajuan::query()
-            ->whereHas('verifikasiPengajuan')
-            ->where('status', PengajuanStatus::DISETUJUI->value)
-            ->when($opdId !== null, fn ($q) => $q->where('opd_id', $opdId))
-            ->latest()
-            ->get();
+        $pengajuan = $this->pengajuanSiapBast($opdId)->get();
 
         return view('pages.bast.create', compact('pengajuan'));
+    }
+
+    /**
+     * Kriteria pengajuan yang siap dibuatkan BAST — selaras dengan halaman monitoring:
+     * status DISETUJUI, BA verifikasi sudah diunggah, dan belum punya BAST.
+     */
+    private function pengajuanSiapBast(?string $opdId)
+    {
+        return Pengajuan::query()
+            ->where('status', PengajuanStatus::DISETUJUI->value)
+            ->whereHas('verifikasiPengajuan.media', fn ($q) => $q->where('collection_name', 'ba-verifikasi'))
+            ->whereDoesntHave('bast')
+            ->when($opdId !== null, fn ($q) => $q->where('opd_id', $opdId))
+            ->latest();
     }
 
     public function store(BastRequest $request)
@@ -67,6 +76,13 @@ class BastController extends Controller
         try {
             $validated = $request->validated();
             DB::beginTransaction();
+
+            if (Bast::query()->where('pengajuan_id', $validated['pengajuan_id'])->exists()) {
+                DB::rollBack();
+                toast()->error('Oppss !!', 'Pengajuan ini sudah memiliki BAST.');
+
+                return back()->withInput();
+            }
 
             $bast = Bast::query()->create([
                 'pengajuan_id' => $validated['pengajuan_id'],
@@ -107,9 +123,12 @@ class BastController extends Controller
 
     public function edit(Bast $bast)
     {
-        $pengajuan = Pengajuan::query()
-            ->whereRelation('verifikasiPengajuan', ['status' => 'disetujui'])
-            ->latest()
+        $opdId = Auth::user()->opd_id;
+
+        // Daftar sama dengan create, tapi tetap sertakan pengajuan milik BAST ini
+        // (yang sudah punya BAST) agar tetap terpilih di form.
+        $pengajuan = $this->pengajuanSiapBast($opdId)
+            ->orWhere('pengajuan.id', $bast->pengajuan_id)
             ->get();
 
         return view('pages.bast.create', compact('bast', 'pengajuan'));
@@ -163,6 +182,7 @@ class BastController extends Controller
 
             return redirect()->route('bast.index');
         } catch (\Throwable $th) {
+            DB::rollBack();
             toast()->error('Oppss !!', $th->getMessage());
 
             return redirect()->route('bast.index');
