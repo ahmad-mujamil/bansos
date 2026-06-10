@@ -61,10 +61,10 @@
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="stat-card-label">Total Blacklist</div>
-                                <div class="stat-card-icon"><i data-acorn-icon="close-square" data-acorn-size="22"></i></div>
+                                <div class="stat-card-icon"><i data-acorn-icon="close" data-acorn-size="22"></i></div>
                             </div>
                             <div class="stat-card-value">{{ number_format($totalBlacklist) }}</div>
-                            <div class="stat-card-deco"><i data-acorn-icon="close-square"></i></div>
+                            <div class="stat-card-deco"><i data-acorn-icon="close"></i></div>
                         </div>
                     </div>
                 </div>
