@@ -1,54 +1,14 @@
 <div>
-    <div class="card mb-4">
+    <style>
+        .monitoring-row { cursor: pointer; }
+        .monitoring-row .chevron { transition: transform .2s ease; }
+        .monitoring-row[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+        .monitoring-row:hover { background-color: rgba(0, 0, 0, .02); }
+    </style>
+
+    {{-- Filter selalu tampil di atas (berlaku untuk kedua tab) --}}
+    <div class="card mb-3">
         <div class="card-body">
-            <p class="text-muted mb-3">
-                <strong>Semua (default):</strong> gabungan pengajuan siap input BAST dan yang sudah punya BAST.
-                <br>
-                <strong>Belum BAST:</strong> disetujui, BA verifikasi bertanda tangan sudah diunggah, belum ada data BAST.
-                <br>
-                <strong>Sudah BAST:</strong> pengajuan yang sudah memiliki Berita Acara Serah Terima.
-            </p>
-
-            <div class="row g-2 mb-3">
-                <div class="col-12 col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-small text-uppercase text-muted mb-1">Siap input BAST</div>
-                        <h3 class="mb-0">{{ number_format($stats['belum_bast']) }}</h3>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-small text-uppercase text-muted mb-1">Sudah BAST</div>
-                        <h3 class="mb-0">{{ number_format($stats['sudah_bast']) }}</h3>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-small text-uppercase text-muted mb-1">Total ditampilkan</div>
-                        <h3 class="mb-0">{{ number_format($pengajuanList->total()) }}</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-2 mb-3">
-                <div class="col-12 col-xl-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-small text-uppercase text-muted mb-2">Komposisi Tahap BAST</div>
-                        <div class="position-relative" style="height: 220px;">
-                            <canvas id="monitoring-summary-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-xl-8">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-small text-uppercase text-muted mb-2">Tren Monitoring 6 Bulan Terakhir</div>
-                        <div class="position-relative" style="height: 220px;">
-                            <canvas id="monitoring-trend-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="row g-2">
                 <div class="col-12 col-lg-3">
                     <label for="tahap-monitoring" class="form-label text-small text-uppercase text-muted">Tahap</label>
@@ -114,155 +74,254 @@
         </div>
     </div>
 
-    @if ($pengajuanList->isEmpty())
-        <div class="alert alert-light border" role="alert">
-            Tidak ada data monitoring bantuan untuk filter yang dipilih.
+    {{-- Tab navigasi --}}
+    <ul class="nav nav-tabs mb-3" id="monitoring-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane"
+                type="button" role="tab" aria-controls="data-pane" aria-selected="true">
+                Data Bantuan
+                <span class="badge bg-secondary ms-1">{{ number_format($pengajuanList->total()) }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ringkasan-tab" data-bs-toggle="tab" data-bs-target="#ringkasan-pane"
+                type="button" role="tab" aria-controls="ringkasan-pane" aria-selected="false">
+                Ringkasan &amp; Grafik
+            </button>
+        </li>
+    </ul>
+
+    {{-- Pembawa data chart, ikut ter-update tiap morph Livewire --}}
+    <div id="monitoring-chart-data"
+        data-summary='@json($chartSummary)'
+        data-trend='@json($chartTrend)'
+        hidden></div>
+
+    <div class="tab-content">
+        {{-- ============ TAB DATA BANTUAN ============ --}}
+        <div class="tab-pane fade show active" id="data-pane" role="tabpanel" aria-labelledby="data-tab">
+            @if ($pengajuanList->isEmpty())
+                <div class="alert alert-light border" role="alert">
+                    Tidak ada data monitoring bantuan untuk filter yang dipilih.
+                </div>
+            @else
+                <div class="list-group shadow-sm">
+                    @foreach ($pengajuanList as $pengajuan)
+                        @php
+                            $nilaiPengajuan = $pengajuan->nilai !== null ? 'Rp '.number_format((float) $pengajuan->nilai, 0, ',', '.') : '-';
+                            $nilaiRekomendasiRaw = $pengajuan->verifikasiPengajuan?->nilai_rekomendasi;
+                            $nilaiRekomendasi = $nilaiRekomendasiRaw !== null ? 'Rp '.number_format((float) $nilaiRekomendasiRaw, 0, ',', '.') : '-';
+                            $dokumenPengajuanUrl = $pengajuan->getFirstMediaUrl('pengajuan');
+                            $dokumenBaVerifikasiUrl = $pengajuan->verifikasiPengajuan?->getFirstMediaUrl('ba-verifikasi');
+                            $dokumenBastUrl = $pengajuan->bast?->getFirstMediaUrl('dokumen');
+                            $isAdmin = (bool) (auth()->user()?->is_admin() || auth()->user()?->is_super());
+                            $sudahDiverifikasi = in_array($pengajuan->status, [
+                                \App\Enums\PengajuanStatus::DISETUJUI,
+                                \App\Enums\PengajuanStatus::DITOLAK,
+                            ], true);
+                            $bisaBatalVerifikasi = $sudahDiverifikasi && ($isAdmin || ! $dokumenBaVerifikasiUrl);
+                            $detailId = 'monitoring-detail-'.$pengajuan->id;
+                        @endphp
+                        <div class="list-group-item p-0" wire:key="monitoring-{{ $pengajuan->id }}">
+                            {{-- Baris ringkasan --}}
+                            <div class="d-flex align-items-center gap-3 p-3">
+                                {{-- Area klik untuk expand --}}
+                                <div class="monitoring-row d-flex align-items-center gap-3 flex-grow-1" style="min-width: 0;"
+                                    role="button" data-bs-toggle="collapse" data-bs-target="#{{ $detailId }}"
+                                    aria-expanded="false" aria-controls="{{ $detailId }}">
+                                    <span class="chevron d-inline-flex flex-shrink-0 text-muted">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6 4l4 4-4 4V4z"/></svg>
+                                    </span>
+                                    <div style="min-width: 0;">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <span class="text-small text-muted text-uppercase">{{ $pengajuan->kode_pengajuan }}</span>
+                                            <span class="badge bg-{{ $pengajuan->status?->badgeColor() ?? 'secondary' }}">
+                                                {{ $pengajuan->status?->getDescription() ?? '-' }}
+                                            </span>
+                                            @if ($pengajuan->bast)
+                                                <span class="badge bg-success">Sudah BAST</span>
+                                            @else
+                                                <span class="badge bg-info text-white">Siap BAST</span>
+                                            @endif
+                                        </div>
+                                        <div class="fw-semibold text-truncate" title="{{ $pengajuan->judul }}">{{ $pengajuan->judul ?? '-' }}</div>
+                                        <div class="text-small text-muted text-truncate">
+                                            {{ $pengajuan->jenisBantuan?->nama ?? '-' }} ·
+                                            {{ $pengajuan->user?->nama ?? $pengajuan->user?->email ?? '-' }} ·
+                                            @if ($pengajuan->opd)
+                                                <span title="{{ $pengajuan->opd->nama }}">{{ $pengajuan->opd->singkatan }}</span> ·
+                                            @endif
+                                            {{ $pengajuan->created_at?->translatedFormat('d M Y') ?? '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Tombol aksi di kanan --}}
+                                <div class="monitoring-actions d-flex flex-wrap gap-1 justify-content-end flex-shrink-0">
+                                    @if (auth()->user()?->is_opd())
+                                        <a href="{{ route('verifikasi-pengajuan.show', $pengajuan) }}" class="btn btn-sm btn-outline-primary">Detail Verifikasi</a>
+                                    @endif
+                                    @if ($pengajuan->bast)
+                                        <a href="{{ route('bast.show', $pengajuan->bast) }}" class="btn btn-sm btn-outline-success">Lihat BAST</a>
+                                    @endif
+                                    @if ($bisaBatalVerifikasi)
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-batal-verifikasi" data-url="{{ route('verifikasi-pengajuan.batal-verifikasi', $pengajuan) }}">
+                                            Batal Verifikasi
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Detail (expand) --}}
+                            <div class="collapse" id="{{ $detailId }}">
+                                <div class="border-top bg-light p-3">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Pemohon</div>
+                                            <div class="fw-semibold">{{ $pengajuan->user?->nama ?? $pengajuan->user?->email ?? '-' }}</div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Dinas / OPD</div>
+                                            <div class="fw-semibold">{{ $pengajuan->opd?->nama ?? '-' }}</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Nilai Pengajuan</div>
+                                            <div class="fw-semibold">{{ $nilaiPengajuan }}</div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Nilai Rekomendasi</div>
+                                            <div class="fw-semibold">{{ $nilaiRekomendasi }}</div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Status BAST</div>
+                                            @if ($pengajuan->bast)
+                                                <div class="fw-semibold">No. {{ $pengajuan->bast->nomor }}</div>
+                                                <div class="text-small text-muted">{{ $pengajuan->bast->tanggal?->translatedFormat('d M Y') ?? '-' }}</div>
+                                            @else
+                                                <span class="badge bg-info text-white">Belum ada BAST</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <div class="text-small text-uppercase text-muted mb-2">Dokumen Terkait</div>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @if ($dokumenPengajuanUrl)
+                                                <a href="{{ $dokumenPengajuanUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">Dokumen Pengajuan</a>
+                                            @endif
+                                            @if ($dokumenBaVerifikasiUrl)
+                                                <a href="{{ $dokumenBaVerifikasiUrl }}" target="_blank" class="btn btn-sm btn-outline-info">BA Verifikasi</a>
+                                            @elseif (auth()->user()?->is_opd())
+                                                <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan) }}" target="_blank" class="btn btn-sm btn-outline-info">Download BA Verifikasi</a>
+                                            @endif
+                                            @if ($dokumenBastUrl)
+                                                <a href="{{ $dokumenBastUrl }}" target="_blank" class="btn btn-sm btn-outline-success">Dokumen BAST</a>
+                                            @endif
+                                            @if (! $dokumenPengajuanUrl && ! $dokumenBaVerifikasiUrl && ! $dokumenBastUrl && ! auth()->user()?->is_opd())
+                                                <span class="text-small text-muted">Belum ada dokumen.</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+                    <div class="text-small text-muted">
+                        Menampilkan {{ $pengajuanList->firstItem() }}-{{ $pengajuanList->lastItem() }}
+                        dari {{ $pengajuanList->total() }} data.
+                    </div>
+                    <div>
+                        {{ $pengajuanList->links() }}
+                    </div>
+                </div>
+            @endif
         </div>
-    @else
-        <div class="row g-3">
-            @foreach ($pengajuanList as $pengajuan)
-                @php
-                    $nilaiPengajuan = $pengajuan->nilai !== null ? 'Rp '.number_format((float) $pengajuan->nilai, 0, ',', '.') : '-';
-                    $nilaiRekomendasiRaw = $pengajuan->verifikasiPengajuan?->nilai_rekomendasi;
-                    $nilaiRekomendasi = $nilaiRekomendasiRaw !== null ? 'Rp '.number_format((float) $nilaiRekomendasiRaw, 0, ',', '.') : '-';
-                    $dokumenPengajuanUrl = $pengajuan->getFirstMediaUrl('pengajuan');
-                    $dokumenBaVerifikasiUrl = $pengajuan->verifikasiPengajuan?->getFirstMediaUrl('ba-verifikasi');
-                    $dokumenBastUrl = $pengajuan->bast?->getFirstMediaUrl('dokumen');
-                    $isAdmin = (bool) (auth()->user()?->is_admin() || auth()->user()?->is_super());
-                    $sudahDiverifikasi = in_array($pengajuan->status, [
-                        \App\Enums\PengajuanStatus::DISETUJUI,
-                        \App\Enums\PengajuanStatus::DITOLAK,
-                    ], true);
-                    $bisaBatalVerifikasi = $sudahDiverifikasi && ($isAdmin || ! $dokumenBaVerifikasiUrl);
-                @endphp
-                <div class="col-12 col-xl-6" wire:key="monitoring-{{ $pengajuan->id }}">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column gap-3">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
-                                <div>
-                                    <div class="text-small text-muted text-uppercase mb-1">{{ $pengajuan->kode_pengajuan }}</div>
-                                    <h3 class="h5 mb-1">{{ $pengajuan->judul ?? '-' }}</h3>
-                                    <div class="text-small text-muted">
-                                        {{ $pengajuan->jenisBantuan?->nama ?? '-' }} ·
-                                        {{ $pengajuan->created_at?->translatedFormat('d M Y') ?? '-' }}
-                                    </div>
-                                </div>
-                                <span class="badge bg-{{ $pengajuan->status?->badgeColor() ?? 'secondary' }}">
-                                    {{ $pengajuan->status?->getDescription() ?? '-' }}
-                                </span>
+
+        {{-- ============ TAB RINGKASAN & GRAFIK ============ --}}
+        <div class="tab-pane fade" id="ringkasan-pane" role="tabpanel" aria-labelledby="ringkasan-tab">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <strong>Semua (default):</strong> gabungan pengajuan siap input BAST dan yang sudah punya BAST.
+                        <br>
+                        <strong>Belum BAST:</strong> disetujui, BA verifikasi bertanda tangan sudah diunggah, belum ada data BAST.
+                        <br>
+                        <strong>Sudah BAST:</strong> pengajuan yang sudah memiliki Berita Acara Serah Terima.
+                    </p>
+
+                    <div class="row g-2">
+                        <div class="col-12 col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-small text-uppercase text-muted mb-1">Siap input BAST</div>
+                                <h3 class="mb-0">{{ number_format($stats['belum_bast']) }}</h3>
                             </div>
-
-                            <div class="row g-2">
-                                <div class="col-12 col-md-6">
-                                    <div class="border rounded p-2 h-100">
-                                        <div class="text-small text-uppercase text-muted mb-1">Pemohon</div>
-                                        <div class="fw-semibold">{{ $pengajuan->user?->nama ?? $pengajuan->user?->email ?? '-' }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <div class="border rounded p-2 h-100">
-                                        <div class="text-small text-uppercase text-muted mb-1">Status BAST</div>
-                                        @if ($pengajuan->bast)
-                                            <div class="fw-semibold">No. {{ $pengajuan->bast->nomor }}</div>
-                                            <div class="text-small text-muted">
-                                                Tanggal: {{ $pengajuan->bast->tanggal?->translatedFormat('d M Y') ?? '-' }}
-                                            </div>
-                                        @else
-                                            <span class="badge bg-info text-white">Siap BAST</span>
-                                        @endif
-                                    </div>
-                                </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-small text-uppercase text-muted mb-1">Sudah BAST</div>
+                                <h3 class="mb-0">{{ number_format($stats['sudah_bast']) }}</h3>
                             </div>
-
-                            <div class="row g-2">
-                                <div class="col-12 col-md-6">
-                                    <div class="border rounded p-2 h-100">
-                                        <div class="text-small text-uppercase text-muted mb-1">Nilai Pengajuan</div>
-                                        <div class="fw-semibold">{{ $nilaiPengajuan }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <div class="border rounded p-2 h-100">
-                                        <div class="text-small text-uppercase text-muted mb-1">Nilai Rekomendasi</div>
-                                        <div class="fw-semibold">{{ $nilaiRekomendasi }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="border rounded p-2">
-                                <div class="text-small text-uppercase text-muted mb-2">Dokumen Terkait</div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @if ($dokumenPengajuanUrl)
-                                        <a href="{{ $dokumenPengajuanUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            Dokumen Pengajuan
-                                        </a>
-                                    @endif
-
-                                    @if ($dokumenBaVerifikasiUrl)
-                                        <a href="{{ $dokumenBaVerifikasiUrl }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                            BA Verifikasi
-                                        </a>
-                                    @elseif (auth()->user()?->is_opd())
-                                        <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan) }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                            Download BA Verifikasi
-                                        </a>
-                                    @endif
-
-                                    @if ($dokumenBastUrl)
-                                        <a href="{{ $dokumenBastUrl }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                            Dokumen BAST
-                                        </a>
-                                    @endif
-
-                                    @if (! $dokumenPengajuanUrl && ! $dokumenBaVerifikasiUrl && ! $dokumenBastUrl && ! auth()->user()?->is_opd())
-                                        <span class="text-small text-muted">Belum ada dokumen.</span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="d-flex flex-wrap gap-2 mt-auto">
-                                @if (auth()->user()?->is_opd())
-                                    <a href="{{ route('verifikasi-pengajuan.show', $pengajuan) }}" class="btn btn-sm btn-outline-primary">
-                                        Detail Verifikasi
-                                    </a>
-                                @endif
-                                @if ($pengajuan->bast)
-                                    <a href="{{ route('bast.show', $pengajuan->bast) }}" class="btn btn-sm btn-outline-success">
-                                        Lihat BAST
-                                    </a>
-                                {{-- @else
-                                    <a href="{{ route('bast.create', ['pengajuan_id' => $pengajuan->id]) }}" class="btn btn-sm btn-outline-secondary">
-                                        Input BAST
-                                    </a> --}}
-                                @endif
-                                @if ($bisaBatalVerifikasi)
-                                    <button type="button" class="btn btn-sm btn-outline-danger btn-batal-verifikasi" data-url="{{ route('verifikasi-pengajuan.batal-verifikasi', $pengajuan) }}">
-                                        Batal Verifikasi
-                                    </button>
-                                @endif
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-small text-uppercase text-muted mb-1">Total ditampilkan</div>
+                                <h3 class="mb-0">{{ number_format($pengajuanList->total()) }}</h3>
                             </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </div>
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
-            <div class="text-small text-muted">
-                Menampilkan {{ $pengajuanList->firstItem() }}-{{ $pengajuanList->lastItem() }}
-                dari {{ $pengajuanList->total() }} data.
-            </div>
-            <div>
-                {{ $pengajuanList->links() }}
+            <div class="row g-2">
+                <div class="col-12 col-xl-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-small text-uppercase text-muted mb-2">Komposisi Tahap BAST</div>
+                            <div class="position-relative" style="height: 260px;">
+                                <canvas id="monitoring-summary-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-8">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-small text-uppercase text-muted mb-2">Tren Monitoring</div>
+                            <div class="position-relative" style="height: 260px;">
+                                <canvas id="monitoring-trend-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    @endif
+    </div>
 </div>
 
 @script
 <script>
     let monitoringSummaryChart = null;
     let monitoringTrendChart = null;
+    let activeMonitoringTab = '#data-pane';
+
+    const readMonitoringChartData = () => {
+        const el = document.getElementById('monitoring-chart-data');
+        if (! el) {
+            return null;
+        }
+
+        try {
+            return {
+                summary: JSON.parse(el.dataset.summary),
+                trend: JSON.parse(el.dataset.trend),
+            };
+        } catch (e) {
+            return null;
+        }
+    };
 
     const initMonitoringCharts = () => {
         if (typeof Chart === 'undefined') {
@@ -271,8 +330,13 @@
             return;
         }
 
-        const summaryData = @js($chartSummary);
-        const trendData = @js($chartTrend);
+        const data = readMonitoringChartData();
+        if (! data) {
+            return;
+        }
+
+        const summaryData = data.summary;
+        const trendData = data.trend;
 
         const summaryCanvas = document.getElementById('monitoring-summary-chart');
         if (summaryCanvas) {
@@ -346,6 +410,33 @@
                     },
                 },
             });
+        }
+    };
+
+    const initMonitoringTabs = () => {
+        document.querySelectorAll('#monitoring-tab button[data-bs-toggle="tab"]').forEach((btn) => {
+            if (btn.dataset.tabBound) {
+                return;
+            }
+            btn.dataset.tabBound = '1';
+
+            btn.addEventListener('shown.bs.tab', (event) => {
+                activeMonitoringTab = event.target.getAttribute('data-bs-target');
+                if (activeMonitoringTab === '#ringkasan-pane') {
+                    initMonitoringCharts();
+                }
+            });
+        });
+    };
+
+    const restoreMonitoringTab = () => {
+        if (activeMonitoringTab === '#data-pane' || typeof bootstrap === 'undefined') {
+            return;
+        }
+
+        const trigger = document.querySelector(`#monitoring-tab button[data-bs-target="${activeMonitoringTab}"]`);
+        if (trigger) {
+            bootstrap.Tab.getOrCreateInstance(trigger).show();
         }
     };
 
@@ -425,14 +516,20 @@
         });
     };
 
-    initMonitoringCharts();
+    initMonitoringTabs();
     initMonitoringFilterSelect2();
     initBatalVerifikasi();
 
     Livewire.hook('morph.updated', () => {
-        setTimeout(initMonitoringCharts, 10);
-        setTimeout(initMonitoringFilterSelect2, 10);
-        setTimeout(initBatalVerifikasi, 10);
+        setTimeout(() => {
+            initMonitoringTabs();
+            restoreMonitoringTab();
+            initMonitoringFilterSelect2();
+            initBatalVerifikasi();
+            if (activeMonitoringTab === '#ringkasan-pane') {
+                initMonitoringCharts();
+            }
+        }, 10);
     });
 </script>
 @endscript
