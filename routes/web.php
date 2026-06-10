@@ -149,6 +149,9 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::post('verifikasi-pengajuan/{pengajuan}/verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'verifikasi'])->name('verifikasi-pengajuan.verifikasi');
         Route::post('verifikasi-pengajuan/{pengajuan}/upload-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'uploadBa'])->name('verifikasi-pengajuan.upload-ba');
         Route::get('verifikasi-pengajuan/{pengajuan}/download-ba', [App\Http\Controllers\VerifikasiPengajuanController::class, 'downloadBaVerifikasi'])->name('verifikasi-pengajuan.download-ba-verifikasi');
+    });
+
+    Route::middleware(['role:opd,admin,super'])->group(function () {
         Route::post('verifikasi-pengajuan/{pengajuan}/batal-verifikasi', [App\Http\Controllers\VerifikasiPengajuanController::class, 'batalVerifikasi'])->name('verifikasi-pengajuan.batal-verifikasi');
     });
 

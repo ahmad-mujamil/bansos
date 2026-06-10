@@ -128,6 +128,12 @@
                     $dokumenPengajuanUrl = $pengajuan->getFirstMediaUrl('pengajuan');
                     $dokumenBaVerifikasiUrl = $pengajuan->verifikasiPengajuan?->getFirstMediaUrl('ba-verifikasi');
                     $dokumenBastUrl = $pengajuan->bast?->getFirstMediaUrl('dokumen');
+                    $isAdmin = (bool) (auth()->user()?->is_admin() || auth()->user()?->is_super());
+                    $sudahDiverifikasi = in_array($pengajuan->status, [
+                        \App\Enums\PengajuanStatus::DISETUJUI,
+                        \App\Enums\PengajuanStatus::DITOLAK,
+                    ], true);
+                    $bisaBatalVerifikasi = $sudahDiverifikasi && ($isAdmin || ! $dokumenBaVerifikasiUrl);
                 @endphp
                 <div class="col-12 col-xl-6" wire:key="monitoring-{{ $pengajuan->id }}">
                     <div class="card h-100">
@@ -228,6 +234,11 @@
                                     <a href="{{ route('bast.create', ['pengajuan_id' => $pengajuan->id]) }}" class="btn btn-sm btn-outline-secondary">
                                         Input BAST
                                     </a> --}}
+                                @endif
+                                @if ($bisaBatalVerifikasi)
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-batal-verifikasi" data-url="{{ route('verifikasi-pengajuan.batal-verifikasi', $pengajuan) }}">
+                                        Batal Verifikasi
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -385,12 +396,43 @@
         }
     };
 
+    const initBatalVerifikasi = () => {
+        $($el).off('click.batalVerifikasi', '.btn-batal-verifikasi').on('click.batalVerifikasi', '.btn-batal-verifikasi', function () {
+            const url = $(this).data('url');
+
+            Swal.fire({
+                title: 'Batal Verifikasi?',
+                text: 'Pengajuan akan kembali ke status Diajukan dan data verifikasi akan dihapus.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Batalkan',
+                cancelButtonText: 'Tidak',
+                confirmButtonColor: '#dc3545',
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+    };
+
     initMonitoringCharts();
     initMonitoringFilterSelect2();
+    initBatalVerifikasi();
 
     Livewire.hook('morph.updated', () => {
         setTimeout(initMonitoringCharts, 10);
         setTimeout(initMonitoringFilterSelect2, 10);
+        setTimeout(initBatalVerifikasi, 10);
     });
 </script>
 @endscript

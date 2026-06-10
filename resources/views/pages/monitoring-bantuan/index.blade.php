@@ -29,4 +29,5 @@
 @push('js_vendor')
     <script src="{{ asset('js/vendor/Chart.bundle.min.js') }}"></script>
     <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+    <script src="{{ $cdn ?? asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
 @endpush
