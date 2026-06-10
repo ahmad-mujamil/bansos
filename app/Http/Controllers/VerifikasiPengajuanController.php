@@ -269,7 +269,7 @@ class VerifikasiPengajuanController extends Controller
 
         if (! $processed) {
             toast()->error('Gagal', 'Pengajuan belum diverifikasi.');
-            return redirect()->route('verifikasi-pengajuan.index');
+            return redirect()->back();
         }
 
         $verifikasi = $pengajuan->verifikasiPengajuan;
@@ -278,7 +278,7 @@ class VerifikasiPengajuanController extends Controller
 
         if (! $isAdmin && $verifikasi && $verifikasi->getFirstMedia('ba-verifikasi')) {
             toast()->error('Gagal', 'BA Verifikasi sudah diunggah. Pembatalan tidak dapat dilakukan.');
-            return redirect()->route('verifikasi-pengajuan.index');
+            return redirect()->back();
         }
 
         $oldStatus = $pengajuan->status;
@@ -316,7 +316,7 @@ class VerifikasiPengajuanController extends Controller
             toast()->error('Gagal', $e->getMessage());
         }
 
-        return redirect()->route('verifikasi-pengajuan.index');
+        return redirect()->back();
     }
 
     public function uploadBa(Request $request, Pengajuan $pengajuan): RedirectResponse
