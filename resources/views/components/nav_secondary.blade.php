@@ -1,6 +1,6 @@
 <!-- Menu Start -->
-<div class="col-auto d-none d-lg-flex" style="max-height: 100vh; overflow-y: auto;">
-    <ul class="sw-25 side-menu mb-0 primary" id="menuSide">
+<div class="col-auto d-none d-lg-flex">
+    <ul class="sw-25 side-menu mb-0 primary" id="menuSide" style="position: sticky; top: 1rem; align-self: flex-start; max-height: calc(100vh - 2rem); overflow-y: auto;">
         <li>
             <ul>
                 <li>
