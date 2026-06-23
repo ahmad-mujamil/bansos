@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
-use App\Enums\JenisUser;
 use App\Models\Organisasi;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
-use App\Models\UserDetail;
 use Illuminate\Support\Facades\URL;
 
 class HomeController extends Controller
@@ -146,28 +145,26 @@ class HomeController extends Controller
             ];
         }, $definisiKartu);
 
-        // Organisasi per jenis pengajuan (1 query, dipetakan dari jenis organisasi)
-        $organisasiPerJenis = Organisasi::query()
-            ->selectRaw('jenis, COUNT(*) as total')
-            ->groupBy('jenis')
-            ->pluck('total', 'jenis');
+        // Penerima perorangan = jenis_penerima_bantuan individu/keluarga
+        $jenisPerorangan = [JenisPenerimaBantuan::INDIVIDU->value, JenisPenerimaBantuan::KELUARGA->value];
 
-        $orgHibah = 0;
-        $orgKelompok = 0;
-        $orgBansos = 0;
-        foreach ($organisasiPerJenis as $jenis => $count) {
-            $kategori = JenisPengajuan::fromJenisOrganisasi((string) $jenis);
-            if ($kategori === JenisPengajuan::HIBAH) {
-                $orgHibah += (int) $count;
-            } elseif ($kategori === JenisPengajuan::BANTUAN_KELOMPOK) {
-                $orgKelompok += (int) $count;
-            } elseif ($kategori === JenisPengajuan::BANSOS) {
-                $orgBansos += (int) $count;
-            }
-        }
+        // Organisasi per jenis pengajuan = pengajuan dengan penerima selain individu/keluarga (1 query)
+        $organisasiPerKategori = Pengajuan::query()
+            ->whereNotIn('jenis_penerima_bantuan', $jenisPerorangan)
+            ->selectRaw('kategori_pengajuan, COUNT(*) as total')
+            ->groupBy('kategori_pengajuan')
+            ->pluck('total', 'kategori_pengajuan');
 
-        $totalPerorangan = UserDetail::query()->where('type', JenisUser::INDIVIDUAL)->count();
-        $totalOrganisasi = (int) $organisasiPerJenis->sum();
+        $orgCount = fn (JenisPengajuan $k): int => (int) $organisasiPerKategori->get($k->value, 0);
+        $orgHibah = $orgCount(JenisPengajuan::HIBAH);
+        $orgKelompok = $orgCount(JenisPengajuan::BANTUAN_KELOMPOK);
+        $orgBansos = $orgCount(JenisPengajuan::BANSOS);
+
+        // Perorangan = pengajuan dengan penerima individu/keluarga, selain itu organisasi
+        $totalPerorangan = Pengajuan::query()
+            ->whereIn('jenis_penerima_bantuan', $jenisPerorangan)
+            ->count();
+        $totalOrganisasi = (int) $organisasiPerKategori->sum();
         $totalPengajuan = (int) $pengajuanPerKategori->sum();
 
         $pengBansos = $pengCount(JenisPengajuan::BANSOS);
