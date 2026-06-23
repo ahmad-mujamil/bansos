@@ -82,7 +82,8 @@
                             <th class="text-muted text-small text-uppercase">Desa</th>
                             <th class="text-muted text-small text-uppercase">Kecamatan</th>
                             <th class="text-muted text-small text-uppercase">Status Validasi</th>
-                            <th class="text-muted text-small text-uppercase">Tanggal Validasi</th>
+                            <th class="text-muted text-small text-uppercase">Tgl Validasi</th>
+                            <th class="text-muted text-small text-uppercase">Tgl Input</th>
                             <th class="text-muted text-small text-uppercase w-10">Aksi</th>
                         </tr>
                     </thead>
@@ -124,6 +125,7 @@
             serverSide: true,
             responsive: true,
             lengthChange: true,
+            order: [[6, 'desc']],
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
             ajax: {
@@ -139,6 +141,7 @@
                 { data: 'kecamatan.nama', name: 'kecamatan.nama', defaultContent: '-' },
                 { data: 'is_valid_badge', name: 'is_valid', orderable: true, searchable: false },
                 { data: 'validated_at_fmt', name: 'validated_at', searchable: false },
+                { data: 'created_at_fmt', name: 'created_at', searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ],
         });
