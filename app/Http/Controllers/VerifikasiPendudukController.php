@@ -18,8 +18,7 @@ class VerifikasiPendudukController extends Controller
 
         $query = Penduduk::query()
             ->with(['kecamatan', 'desa', 'validatedBy'])
-            ->withCount(['historyVerifikasi as perbaikan_count' => fn ($q) => $q->where('action', 'perbaikan')])
-            ->latest();
+            ->withCount(['historyVerifikasi as perbaikan_count' => fn ($q) => $q->where('action', 'perbaikan')]);
 
         if ($statusRequest === '1') {
             $query->where('is_valid', true);
@@ -52,9 +51,14 @@ class VerifikasiPendudukController extends Controller
             ->addColumn('validated_at_fmt', fn ($row) => $row->validated_at
                 ? \Carbon\Carbon::parse($row->validated_at)->translatedFormat('d M Y H:i')
                 : '-')
+            ->addColumn('created_at_fmt', fn ($row) => $row->created_at
+                ? \Carbon\Carbon::parse($row->created_at)->translatedFormat('d M Y H:i')
+                : '-')
             ->addColumn('action', fn ($row) =>
                 "<a href='" . route('verifikasi-penduduk.show', $row->id) . "' class='btn btn-sm btn-outline-primary'>Lihat</a>"
             )
+            ->orderColumn('created_at_fmt', 'created_at $1')
+            ->orderColumn('validated_at_fmt', 'validated_at $1')
             ->rawColumns(['is_valid_badge', 'action'])
             ->toJson();
     }
