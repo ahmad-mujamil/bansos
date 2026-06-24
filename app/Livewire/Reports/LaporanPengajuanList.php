@@ -15,6 +15,7 @@ class LaporanPengajuanList extends DataList
 {
     public string $kategori = '';
     public string $status = 'all';
+    public ?string $expandedId = null;
 
     public function mount(): void
     {
@@ -24,6 +25,7 @@ class LaporanPengajuanList extends DataList
             'detailFields' => $this->defaultDetailFields(),
             'with' => [
                 'organisasi.desa.kecamatan',
+                'organisasi.organisasiDetail.penduduk',
                 'jenisBantuan',
                 'opd',
                 'verifikasiPengajuan.user',
@@ -47,6 +49,7 @@ class LaporanPengajuanList extends DataList
         if (JenisPengajuan::tryFrom($this->kategori) === null && $this->kategori !== 'all') {
             $this->kategori = 'all';
         }
+        $this->expandedId = null;
         $this->resetPage();
     }
 
@@ -56,7 +59,13 @@ class LaporanPengajuanList extends DataList
         if ($this->status !== 'all' && ! in_array($this->status, $allowed, true)) {
             $this->status = 'all';
         }
+        $this->expandedId = null;
         $this->resetPage();
+    }
+
+    public function toggleAnggota(string $id): void
+    {
+        $this->expandedId = $this->expandedId === $id ? null : $id;
     }
 
     public function setKategori(string $kategori): void

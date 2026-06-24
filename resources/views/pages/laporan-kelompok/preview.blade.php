@@ -73,6 +73,31 @@
         .badge-aktif    { color: #155724; font-weight: bold; }
         .badge-nonaktif { color: #721c24; font-weight: bold; }
 
+        tr.anggota-row > td { background: #fcfcff; padding: 4px 6px 6px; }
+
+        .anggota-title { font-weight: bold; font-size: 9.5px; margin-bottom: 3px; }
+
+        table.anggota {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.anggota th {
+            background: #dde6f3;
+            border: 1px solid #b8c4d6;
+            padding: 3px 5px;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        table.anggota td {
+            border: 1px solid #cdd6e3;
+            padding: 3px 5px;
+            font-size: 9px;
+        }
+
+        .anggota-empty { font-size: 9px; color: #888; font-style: italic; }
+
         .footer {
             margin-top: 20px;
             display: flex;
@@ -158,6 +183,48 @@
                             <span class="badge-aktif">Aktif</span>
                         @else
                             <span class="badge-nonaktif">Nonaktif</span>
+                        @endif
+                    </td>
+                </tr>
+                @php
+                    $anggota = $row->organisasiDetail
+                        ->sortBy(fn ($d) => array_search(
+                            $d->jabatan?->value,
+                            ['Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Admin', 'Anggota'],
+                            true
+                        ))
+                        ->values();
+                @endphp
+                <tr class="anggota-row">
+                    <td></td>
+                    <td colspan="8">
+                        <div class="anggota-title">Anggota Kelompok ({{ $anggota->count() }})</div>
+                        @if ($anggota->isEmpty())
+                            <div class="anggota-empty">Belum ada anggota.</div>
+                        @else
+                            <table class="anggota">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 26px;">No</th>
+                                        <th style="width: 140px;">NIK</th>
+                                        <th>Nama</th>
+                                        <th style="width: 90px;">Jabatan</th>
+                                        <th style="width: 130px;">Desil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($anggota as $i => $d)
+                                        @php $desil = $d->penduduk?->level_desil; @endphp
+                                        <tr>
+                                            <td style="text-align: center;">{{ $i + 1 }}</td>
+                                            <td>{{ $d->penduduk?->nik ?? '-' }}</td>
+                                            <td>{{ $d->penduduk?->nama ?? '-' }}</td>
+                                            <td>{{ $d->jabatan?->value ?? '-' }}</td>
+                                            <td>{{ $desil ? $desil->value . ' - ' . $desil->getDescription() : '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         @endif
                     </td>
                 </tr>

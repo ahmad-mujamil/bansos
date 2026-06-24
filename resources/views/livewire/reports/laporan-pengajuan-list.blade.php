@@ -52,7 +52,12 @@
     </div>
 
     {{-- Table + pagination --}}
-    @include('livewire.partials.data-list-table', ['items' => $items])
+    @include('livewire.partials.data-list-table', [
+        'items' => $items,
+        'inlineExpand' => true,
+        'expandedId' => $expandedId,
+        'inlineExpandView' => 'livewire.reports.partials.pengajuan-anggota',
+    ])
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
         <small class="text-muted">

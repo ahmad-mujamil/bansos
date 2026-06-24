@@ -78,7 +78,9 @@ class LaporanKelompokController extends Controller
 
     public function preview()
     {
-        $kelompoks = $this->baseQuery()->get();
+        $kelompoks = $this->baseQuery()
+            ->with(['organisasiDetail.penduduk'])
+            ->get();
 
         $selectedOpd = null;
         $opdId = request('opd_id');
