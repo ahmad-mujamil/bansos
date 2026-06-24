@@ -2,10 +2,13 @@
 
 namespace App\Exports;
 
+use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
+use App\Models\Organisasi;
 use App\Models\Pengajuan;
+use App\Models\Penduduk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -64,6 +67,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         $query = Pengajuan::query()
             ->with([
                 'organisasi.desa.kecamatan',
+                'organisasi.organisasiDetail.penduduk',
                 'jenisBantuan',
                 'details.penduduk',
                 'verifikasiPengajuan.user',
@@ -92,18 +96,37 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             $query->where('status', $this->status);
         }
 
-        $yaTidak = fn(?bool $v) => $v === null ? '-' : ($v ? 'Ya' : 'Tidak');
+        $rows = collect();
+        $no = 0;
 
-        return $query->get()->values()->map(function (Pengajuan $row, int $i) use ($yaTidak) {
+        foreach ($query->get() as $row) {
             $org = $row->organisasi;
+            $isKelompok = $org && $org->jenis === JenisOrganisasi::KELOMPOK->value;
+
+            // Kelompok masyarakat: satu baris per anggota kelompok.
+            if ($isKelompok && $org->organisasiDetail->isNotEmpty()) {
+                $wilayah = $this->wilayahLabel($org);
+
+                foreach ($org->organisasiDetail as $detail) {
+                    $anggota = $detail->penduduk;
+
+                    $rows->push($this->buildRow(
+                        $row,
+                        ++$no,
+                        $org->nama . ($anggota?->nama ? ' - ' . $anggota->nama : ''),
+                        $anggota?->nik ?? ($wilayah !== '' ? $wilayah : '-'),
+                        $this->desilLabel($anggota),
+                    ));
+                }
+
+                continue;
+            }
+
             $penduduk = $row->details->first()?->penduduk;
 
             if ($org) {
                 $pemohon = $org->nama;
-                $nikWilayah = trim(
-                    ($org->desa?->nama ?? '')
-                    . ($org->desa?->kecamatan?->nama ? ', ' . $org->desa->kecamatan->nama : '')
-                );
+                $nikWilayah = $this->wilayahLabel($org);
             } elseif ($penduduk) {
                 $pemohon = $penduduk->nama;
                 $nikWilayah = $penduduk->nik ?? '-';
@@ -112,46 +135,74 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $nikWilayah = '-';
             }
 
-            $keputusan = match ($row->status) {
-                PengajuanStatus::DISETUJUI => 'Disetujui',
-                PengajuanStatus::DITOLAK => 'Ditolak',
-                default => '-',
-            };
-
-            $desil = $penduduk?->level_desil;
-            $desilLabel = $desil
-                ? $desil->value . ' - ' . $desil->getDescription()
-                : '-';
-
-            $verifikasi = $row->verifikasiPengajuan;
-            $tglVerifikasi = $row->verified_at ?? $verifikasi?->created_at;
-
-            return [
-                $i + 1,
-                $row->kode_pengajuan,
-                $row->judul ?? '-',
-                $row->kategori_pengajuan?->getDescription()
-                    ?? JenisPengajuan::fromJenisOrganisasi($org?->jenis)?->getDescription()
-                    ?? '-',
-                $row->jenisBantuan?->nama ?? '-',
+            $rows->push($this->buildRow(
+                $row,
+                ++$no,
                 $pemohon,
                 $nikWilayah !== '' ? $nikWilayah : '-',
-                $desilLabel,
-                $row->opd?->nama ?? '-',
-                (float) $row->nilai,
-                $row->status?->getDescription() ?? '-',
-                $row->created_at?->translatedFormat('d M Y') ?? '-',
-                $keputusan,
-                $verifikasi?->nilai_rekomendasi !== null ? (float) $verifikasi->nilai_rekomendasi : '-',
-                $yaTidak($verifikasi?->lulus_kriteria),
-                $yaTidak($verifikasi?->lulus_administrasi),
-                $yaTidak($verifikasi?->lulus_kesesuaian),
-                $yaTidak($verifikasi?->sesuai_program_pemda),
-                $verifikasi?->catatan ?? '-',
-                $verifikasi?->user?->nama ?? $row->verifiedBy?->nama ?? '-',
-                $tglVerifikasi?->translatedFormat('d M Y H:i') ?? '-',
-            ];
-        });
+                $this->desilLabel($penduduk),
+            ));
+        }
+
+        return $rows;
+    }
+
+    private function buildRow(Pengajuan $row, int $no, string $pemohon, string $nikWilayah, string $desilLabel): array
+    {
+        $yaTidak = fn(?bool $v) => $v === null ? '-' : ($v ? 'Ya' : 'Tidak');
+        $org = $row->organisasi;
+
+        $keputusan = match ($row->status) {
+            PengajuanStatus::DISETUJUI => 'Disetujui',
+            PengajuanStatus::DITOLAK => 'Ditolak',
+            default => '-',
+        };
+
+        $verifikasi = $row->verifikasiPengajuan;
+        $tglVerifikasi = $row->verified_at ?? $verifikasi?->created_at;
+
+        return [
+            $no,
+            $row->kode_pengajuan,
+            $row->judul ?? '-',
+            $row->kategori_pengajuan?->getDescription()
+                ?? JenisPengajuan::fromJenisOrganisasi($org?->jenis)?->getDescription()
+                ?? '-',
+            $row->jenisBantuan?->nama ?? '-',
+            $pemohon,
+            $nikWilayah !== '' ? $nikWilayah : '-',
+            $desilLabel,
+            $row->opd?->nama ?? '-',
+            (float) $row->nilai,
+            $row->status?->getDescription() ?? '-',
+            $row->created_at?->translatedFormat('d M Y') ?? '-',
+            $keputusan,
+            $verifikasi?->nilai_rekomendasi !== null ? (float) $verifikasi->nilai_rekomendasi : '-',
+            $yaTidak($verifikasi?->lulus_kriteria),
+            $yaTidak($verifikasi?->lulus_administrasi),
+            $yaTidak($verifikasi?->lulus_kesesuaian),
+            $yaTidak($verifikasi?->sesuai_program_pemda),
+            $verifikasi?->catatan ?? '-',
+            $verifikasi?->user?->nama ?? $row->verifiedBy?->nama ?? '-',
+            $tglVerifikasi?->translatedFormat('d M Y H:i') ?? '-',
+        ];
+    }
+
+    private function wilayahLabel(Organisasi $org): string
+    {
+        return trim(
+            ($org->desa?->nama ?? '')
+            . ($org->desa?->kecamatan?->nama ? ', ' . $org->desa->kecamatan->nama : '')
+        );
+    }
+
+    private function desilLabel(?Penduduk $penduduk): string
+    {
+        $desil = $penduduk?->level_desil;
+
+        return $desil
+            ? $desil->value . ' - ' . $desil->getDescription()
+            : '-';
     }
 
     public function styles(Worksheet $sheet): array
