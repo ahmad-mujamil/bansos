@@ -228,14 +228,30 @@
                     ))
                     ->values()
                 : collect();
+
+            if ($anggota->isNotEmpty()) {
+                $penerimaJudul = 'Anggota Kelompok';
+                $showJabatan = true;
+                $penerima = $anggota->map(fn ($d) => [
+                    'penduduk' => $d->penduduk,
+                    'jabatan'  => $d->jabatan?->value ?? '-',
+                ]);
+            } else {
+                $penerimaJudul = 'Penerima Bantuan';
+                $showJabatan = false;
+                $penerima = $pengajuan->details
+                    ->filter(fn ($d) => $d->penduduk)
+                    ->map(fn ($d) => ['penduduk' => $d->penduduk, 'jabatan' => '-'])
+                    ->values();
+            }
         @endphp
 
-        @if($anggota->isNotEmpty())
+        @if($penerima->isNotEmpty())
             <div class="card border-0 shadow-sm mt-3 detail-card">
                 <div class="card-body p-4">
                     <div class="detail-card-header">
                         <span class="detail-card-badge" style="background: #0ea5e9;"></span>
-                        <span class="detail-card-title">Anggota Kelompok ({{ $anggota->count() }})</span>
+                        <span class="detail-card-title">{{ $penerimaJudul }} ({{ $penerima->count() }})</span>
                     </div>
                     <div class="table-responsive mt-3">
                         <table class="table table-sm table-hover align-middle mb-0">
@@ -244,18 +260,22 @@
                                     <th class="text-muted text-small text-uppercase" style="width: 2.5rem;">No</th>
                                     <th class="text-muted text-small text-uppercase" style="width: 11rem;">NIK</th>
                                     <th class="text-muted text-small text-uppercase">Nama</th>
-                                    <th class="text-muted text-small text-uppercase">Jabatan</th>
+                                    @if($showJabatan)
+                                        <th class="text-muted text-small text-uppercase">Jabatan</th>
+                                    @endif
                                     <th class="text-muted text-small text-uppercase">Desil</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($anggota as $i => $d)
-                                    @php $desil = $d->penduduk?->level_desil; @endphp
+                                @foreach($penerima as $i => $p)
+                                    @php $desil = $p['penduduk']?->level_desil; @endphp
                                     <tr>
                                         <td class="text-muted">{{ $i + 1 }}</td>
-                                        <td>{{ $d->penduduk?->nik ?? '-' }}</td>
-                                        <td class="fw-semibold">{{ $d->penduduk?->nama ?? '-' }}</td>
-                                        <td><span class="badge bg-secondary">{{ $d->jabatan?->value ?? '-' }}</span></td>
+                                        <td>{{ $p['penduduk']?->nik ?? '-' }}</td>
+                                        <td class="fw-semibold">{{ $p['penduduk']?->nama ?? '-' }}</td>
+                                        @if($showJabatan)
+                                            <td><span class="badge bg-secondary">{{ $p['jabatan'] }}</span></td>
+                                        @endif
                                         <td>
                                             @if($desil)
                                                 <span class="badge bg-info text-dark">{{ $desil->value }}</span>

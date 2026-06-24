@@ -108,6 +108,19 @@
                 if (e.target.closest('a, button, input, label, .btn')) return;
                 window.location.href = row.dataset.href;
             });
+
+            // Re-render acorn icons after every Livewire update (filter, search,
+            // pagination, expand) — Livewire morphs replace <i data-acorn-icon>
+            // with fresh tags that would otherwise stay unprocessed.
+            document.addEventListener('livewire:init', function () {
+                Livewire.hook('commit', function ({ succeed }) {
+                    succeed(function () {
+                        if (typeof AcornIcons !== 'undefined') {
+                            new AcornIcons().replace();
+                        }
+                    });
+                });
+            });
         </script>
     @endpush
 @endonce

@@ -26,6 +26,7 @@ class LaporanPengajuanList extends DataList
             'with' => [
                 'organisasi.desa.kecamatan',
                 'organisasi.organisasiDetail.penduduk',
+                'details.penduduk',
                 'jenisBantuan',
                 'opd',
                 'verifikasiPengajuan.user',
