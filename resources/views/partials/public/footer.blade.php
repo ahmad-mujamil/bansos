@@ -12,7 +12,7 @@
             <div class="space-y-4 text-center md:text-left">
                 <div class="text-lg font-bold text-blue-800 dark:text-blue-400 font-public-sans">Bantu-In</div>
                 <p class="text-sm font-public-sans leading-relaxed text-slate-500 max-w-xs">
-                    Platform resmi Kementerian Sosial Republik Indonesia untuk layanan bantuan satu pintu.
+                    Platform resmi pemerintah daerah kabupaten lombok barat.
                 </p>
             </div>
             <div class="flex flex-wrap justify-center gap-8">
@@ -22,7 +22,7 @@
                 <a class="text-sm font-public-sans leading-relaxed text-slate-500 hover:text-blue-600 dark:hover:text-blue-300 underline-offset-4 hover:underline transition-opacity opacity-90 hover:opacity-100" href="#">Help Center</a>
             </div>
             <div class="text-sm font-public-sans text-slate-500 text-center">
-                © {{ date('Y') }} Bantu-In Social Assistance. All rights reserved.
+                © {{ date('Y') }} Bantu-In. All rights reserved.
             </div>
         </div>
     </footer>

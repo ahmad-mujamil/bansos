@@ -218,6 +218,11 @@
             width: 10px;
         }
 
+        /* Penutup rekomendasi + tanda tangan: jaga tetap satu kesatuan saat ganti halaman */
+        .rekomendasi-penutup {
+            page-break-inside: avoid;
+        }
+
         /* Tanda tangan: blok mepet ke kanan */
         .ttd-wrap {
             margin-top: 20px;
@@ -474,25 +479,27 @@
             {{ $nilaiBesar }}
             ({{ $nilaiBesarTerbilang }}).
         </div>
-        <div class="row lvl-1" style="margin-top: 10px;">
-            Demikian bagian rekomendasi hasil evaluasi ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
-        </div>
-        <div class="ttd-wrap">
-            <div class="ttd-inner">
-                <div class="bold">Mengesahkan</div>
-                <div class="ttd-date-line" style="margin-top: 4px; margin-bottom: 8px;">
-                    {{ $verifikasi->lokasi_pengesahan ?: 'Gerung' }},
-                    @if ($verifikasi->tgl_disahkan)
-                        {{ $verifikasi->tgl_disahkan->translatedFormat('d F Y') }}
-                    @else
-                        .................. {{ now()->translatedFormat('Y') }}
-                    @endif
+        <div class="rekomendasi-penutup">
+            <div class="row lvl-1" style="margin-top: 10px;">
+                Demikian bagian rekomendasi hasil evaluasi ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
+            </div>
+            <div class="ttd-wrap">
+                <div class="ttd-inner">
+                    <div class="bold">Mengesahkan</div>
+                    <div class="ttd-date-line" style="margin-top: 4px; margin-bottom: 8px;">
+                        {{ $verifikasi->lokasi_pengesahan ?: 'Gerung' }},
+                        @if ($verifikasi->tgl_disahkan)
+                            {{ $verifikasi->tgl_disahkan->translatedFormat('d F Y') }}
+                        @else
+                            .................. {{ now()->translatedFormat('Y') }}
+                        @endif
+                    </div>
+                    <div class="bold ttd-kepala-jabatan">Kepala SKPD,</div>
+                    <div class="ttd-ruang-tanda-tangan" aria-hidden="true"></div>
+                    <div class="bold ttd-kepala-nama">{{ $verifikasi->disahkan_oleh ?: '-' }}</div>
+                    <div class="ttd-kepala-garis">...................................................</div>
+                    <div class="ttd-kepala-nip">NIP: {{ $verifikasi->disahkan_nip ?? '' }}</div>
                 </div>
-                <div class="bold ttd-kepala-jabatan">Kepala SKPD,</div>
-                <div class="ttd-ruang-tanda-tangan" aria-hidden="true"></div>
-                <div class="bold ttd-kepala-nama">{{ $verifikasi->disahkan_oleh ?: '-' }}</div>
-                <div class="ttd-kepala-garis">...................................................</div>
-                <div class="ttd-kepala-nip">NIP: {{ $verifikasi->disahkan_nip ?? '' }}</div>
             </div>
         </div>
     </div>

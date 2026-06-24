@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JenisUser;
+use App\Enums\JenisPenerimaBantuan;
+use App\Enums\JenisPengajuan;
 use App\Models\Organisasi;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
-use App\Models\PengajuanRealisasi;
-use App\Models\UserDetail;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
 class HomeController extends Controller
@@ -20,7 +18,6 @@ class HomeController extends Controller
         }
 
         $user = auth()->user();
-        $year = (int) now()->year;
 
         if ($user->is_user()) {
             $user->load('userDetail.desa');
@@ -95,140 +92,155 @@ class HomeController extends Controller
             ));
         }
 
-        $charts = $this->dashboardChartsForYear($year, null);
-
-        $totalPerorangan = UserDetail::query()->where('type', JenisUser::INDIVIDUAL)->count();
-        $totalOrganisasi = Organisasi::query()->count();
-        $totalPengajuan = Pengajuan::query()->count();
-
-        $totalBantuan = (float) Pengajuan::query()
-            ->whereHas('realisasi')
-            ->with('verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi')
-            ->get()
-            ->sum(fn (Pengajuan $pengajuan) => (float) ($pengajuan->verifikasiPengajuan?->nilai_rekomendasi ?? 0));
-
-        return view('home', array_merge(compact(
-            'totalPerorangan',
-            'totalOrganisasi',
-            'totalBantuan',
-            'totalPengajuan',
-        ), $charts));
+        // Dashboard admin / super
+        return view('home', $this->dashboardAdminData());
     }
 
     /**
-     * @return array{dataLabel: list<string>, dataChartPengajuan: array{labels: list<string>, data: array<string, list<int>>}, dataChartBansos: array{labels: list<string>, data: array<string, list<float>>}}
+     * Data ringkasan dashboard untuk role admin/super.
+     *
+     * @return array<string, mixed>
      */
-    private function dashboardChartsForYear(int $year, ?string $opdId): array
+    private function dashboardAdminData(): array
     {
-        $labels = $this->monthLabels($year);
+        // Mode demo: tampilkan data dummy untuk melihat model chart (akses ?demo=1)
+        if (request()->boolean('demo')) {
+            return $this->dummyDashboardData();
+        }
+
+        // Jumlah pengajuan per kategori (1 query)
+        $pengajuanPerKategori = Pengajuan::query()
+            ->selectRaw('kategori_pengajuan, COUNT(*) as total')
+            ->groupBy('kategori_pengajuan')
+            ->pluck('total', 'kategori_pengajuan');
+
+        // Pengajuan yang sudah memiliki dokumen BA verifikasi, per kategori (1 query)
+        $verifikasiPerKategori = Pengajuan::query()
+            ->whereHas('verifikasiPengajuan.media', fn ($q) => $q->where('collection_name', 'ba-verifikasi'))
+            ->selectRaw('kategori_pengajuan, COUNT(*) as total')
+            ->groupBy('kategori_pengajuan')
+            ->pluck('total', 'kategori_pengajuan');
+
+        $pengCount = fn (JenisPengajuan $k): int => (int) $pengajuanPerKategori->get($k->value, 0);
+        $verifCount = fn (JenisPengajuan $k): int => (int) $verifikasiPerKategori->get($k->value, 0);
+
+        // Tiga kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
+        $definisiKartu = [
+            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS],
+            ['title' => 'Total Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH],
+            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
+        ];
+
+        $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount): array {
+            $total = $pengCount($def['jenis']);
+            $verifikasi = $verifCount($def['jenis']);
+
+            return [
+                'title' => $def['title'],
+                'label' => $def['label'],
+                'total' => $total,
+                'usulan' => max(0, $total - $verifikasi),
+                'verifikasi' => $verifikasi,
+            ];
+        }, $definisiKartu);
+
+        // Penerima perorangan = jenis_penerima_bantuan individu/keluarga
+        $jenisPerorangan = [JenisPenerimaBantuan::INDIVIDU->value, JenisPenerimaBantuan::KELUARGA->value];
+
+        // Organisasi per jenis pengajuan = pengajuan dengan penerima selain individu/keluarga (1 query)
+        $organisasiPerKategori = Pengajuan::query()
+            ->whereNotIn('jenis_penerima_bantuan', $jenisPerorangan)
+            ->selectRaw('kategori_pengajuan, COUNT(*) as total')
+            ->groupBy('kategori_pengajuan')
+            ->pluck('total', 'kategori_pengajuan');
+
+        $orgCount = fn (JenisPengajuan $k): int => (int) $organisasiPerKategori->get($k->value, 0);
+        $orgHibah = $orgCount(JenisPengajuan::HIBAH);
+        $orgKelompok = $orgCount(JenisPengajuan::BANTUAN_KELOMPOK);
+        $orgBansos = $orgCount(JenisPengajuan::BANSOS);
+
+        // Perorangan = pengajuan dengan penerima individu/keluarga, selain itu organisasi
+        $totalPerorangan = Pengajuan::query()
+            ->whereIn('jenis_penerima_bantuan', $jenisPerorangan)
+            ->count();
+        $totalOrganisasi = (int) $organisasiPerKategori->sum();
+        $totalPengajuan = (int) $pengajuanPerKategori->sum();
+
+        $pengBansos = $pengCount(JenisPengajuan::BANSOS);
+        $pengHibah = $pengCount(JenisPengajuan::HIBAH);
+        $pengKelompok = $pengCount(JenisPengajuan::BANTUAN_KELOMPOK);
+
+        // Chart usulan calon penerima bantuan per jenis
+        $chartUsulan = [
+            'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
+            'values' => [$pengBansos, $pengHibah, $pengKelompok],
+        ];
+
+        // Chart pengajuan: stacked (Usulan vs Sudah Verifikasi) per jenis
+        $chartPengajuan = [
+            'labels' => ['Pengajuan Usulan', 'Sudah Verifikasi'],
+            'series' => array_map(function (array $kartu): array {
+                return [
+                    'label' => $kartu['label'],
+                    'data' => [$kartu['usulan'], $kartu['verifikasi']],
+                ];
+            }, $kartuKategori),
+        ];
 
         return [
-            'dataLabel' => $labels,
-            'dataChartPengajuan' => [
-                'labels' => $labels,
-                'data' => [
-                    'Jumlah' => $this->pengajuanCountsPerMonth($year, $opdId),
-                ],
-            ],
-            'dataChartBantuan' => [
-                'labels' => $labels,
-                'data' => [
-                    'Rupiah' => $this->realisasiNilaiPerMonth($year, $opdId),
-                ],
-            ],
+            'kartuKategori' => $kartuKategori,
+            'totalPerorangan' => $totalPerorangan,
+            'totalOrganisasi' => $totalOrganisasi,
+            'orgHibah' => $orgHibah,
+            'orgKelompok' => $orgKelompok,
+            'orgBansos' => $orgBansos,
+            'totalPengajuan' => $totalPengajuan,
+            'pengBansos' => $pengBansos,
+            'pengHibah' => $pengHibah,
+            'pengKelompok' => $pengKelompok,
+            'chartUsulan' => $chartUsulan,
+            'chartPengajuan' => $chartPengajuan,
+            'isDemo' => false,
         ];
     }
 
     /**
-     * @return list<string>
+     * Data dummy untuk preview tampilan dashboard (mode ?demo=1).
+     *
+     * @return array<string, mixed>
      */
-    private function monthLabels(int $year): array
+    private function dummyDashboardData(): array
     {
-        return collect(range(1, 12))
-            ->map(fn (int $month) => Carbon::create($year, $month, 1)->translatedFormat('F'))
-            ->all();
-    }
+        $kartuKategori = [
+            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Total Hibah', 'label' => 'Hibah', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+        ];
 
-    /**
-     * @return list<int>
-     */
-    private function pengajuanCountsPerMonth(int $year, ?string $opdId): array
-    {
-        $query = Pengajuan::query()
-            ->whereYear('created_at', $year)
-            ->when($opdId !== null, fn ($q) => $q->where('opd_id', $opdId));
-
-        $byMonth = [];
-        foreach ($query->get(['created_at']) as $pengajuan) {
-            $month = (int) $pengajuan->created_at->format('n');
-            $byMonth[$month] = ($byMonth[$month] ?? 0) + 1;
-        }
-
-        return $this->twelveMonthSeriesInt($byMonth);
-    }
-
-    /**
-     * @return list<float>
-     */
-    private function realisasiNilaiPerMonth(int $year, ?string $opdId): array
-    {
-        $query = PengajuanRealisasi::query()
-            ->whereYear('tanggal_laporan', $year)
-            ->with([
-                'pengajuan' => fn ($pengajuanQuery) => $pengajuanQuery
-                    ->select(['id', 'opd_id'])
-                    ->with([
-                        'verifikasiPengajuan:id,pengajuan_id,nilai_rekomendasi',
-                    ]),
-            ]);
-
-        $byMonth = [];
-        foreach ($query->get() as $realisasi) {
-            $pengajuan = $realisasi->pengajuan;
-            if ($pengajuan === null) {
-                continue;
-            }
-            if ($opdId !== null && (string) $pengajuan->opd_id !== (string) $opdId) {
-                continue;
-            }
-
-            $nilaiRekomendasi = $pengajuan->verifikasiPengajuan?->nilai_rekomendasi;
-            if ($nilaiRekomendasi === null) {
-                continue;
-            }
-
-            $month = (int) $realisasi->tanggal_laporan->format('n');
-            $byMonth[$month] = ($byMonth[$month] ?? 0.0) + (float) $nilaiRekomendasi;
-        }
-
-        return $this->twelveMonthSeriesFloat($byMonth);
-    }
-
-    /**
-     * @param  array<int, int>  $byMonth
-     * @return list<int>
-     */
-    private function twelveMonthSeriesInt(array $byMonth): array
-    {
-        $out = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $out[] = (int) ($byMonth[$m] ?? 0);
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param  array<int, float>  $byMonth
-     * @return list<float>
-     */
-    private function twelveMonthSeriesFloat(array $byMonth): array
-    {
-        $out = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $out[] = (float) ($byMonth[$m] ?? 0.0);
-        }
-
-        return $out;
+        return [
+            'kartuKategori' => $kartuKategori,
+            'totalPerorangan' => 26,
+            'totalOrganisasi' => 214,
+            'orgHibah' => 74,
+            'orgKelompok' => 140,
+            'orgBansos' => 0,
+            'totalPengajuan' => 214,
+            'pengBansos' => 89,
+            'pengHibah' => 7,
+            'pengKelompok' => 45,
+            'chartUsulan' => [
+                'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
+                'values' => [78, 60, 45],
+            ],
+            'chartPengajuan' => [
+                'labels' => ['Pengajuan Usulan', 'Sudah Verifikasi'],
+                'series' => [
+                    ['label' => 'Bantuan Sosial', 'data' => [8, 38]],
+                    ['label' => 'Hibah', 'data' => [5, 19]],
+                    ['label' => 'Bantuan ke Masyarakat', 'data' => [33, 26]],
+                ],
+            ],
+            'isDemo' => true,
+        ];
     }
 }
