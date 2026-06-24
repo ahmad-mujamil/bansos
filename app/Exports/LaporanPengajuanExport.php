@@ -42,6 +42,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             'Jenis Bantuan',
             'Pemohon',
             'NIK/Wilayah',
+            'Desil Penduduk',
             'OPD',
             'Nilai Usulan',
             'Status',
@@ -117,6 +118,11 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 default => '-',
             };
 
+            $desil = $penduduk?->level_desil;
+            $desilLabel = $desil
+                ? $desil->value . ' - ' . $desil->getDescription()
+                : '-';
+
             $verifikasi = $row->verifikasiPengajuan;
             $tglVerifikasi = $row->verified_at ?? $verifikasi?->created_at;
 
@@ -130,6 +136,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $row->jenisBantuan?->nama ?? '-',
                 $pemohon,
                 $nikWilayah !== '' ? $nikWilayah : '-',
+                $desilLabel,
                 $row->opd?->nama ?? '-',
                 (float) $row->nilai,
                 $row->status?->getDescription() ?? '-',
