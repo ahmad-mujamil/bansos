@@ -184,6 +184,7 @@ class LaporanPengajuanController extends Controller
 
         $pengajuan->load([
             'organisasi.desa.kecamatan',
+            'organisasi.organisasiDetail.penduduk',
             'jenisBantuan',
             'opd',
             'verifikasiPengajuan.user',

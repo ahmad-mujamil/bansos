@@ -218,6 +218,61 @@
             </div>
         </div>
 
+        @php
+            $anggota = $organisasi
+                ? $organisasi->organisasiDetail
+                    ->sortBy(fn ($d) => array_search(
+                        $d->jabatan?->value,
+                        ['Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Admin', 'Anggota'],
+                        true
+                    ))
+                    ->values()
+                : collect();
+        @endphp
+
+        @if($anggota->isNotEmpty())
+            <div class="card border-0 shadow-sm mt-3 detail-card">
+                <div class="card-body p-4">
+                    <div class="detail-card-header">
+                        <span class="detail-card-badge" style="background: #0ea5e9;"></span>
+                        <span class="detail-card-title">Anggota Kelompok ({{ $anggota->count() }})</span>
+                    </div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-muted text-small text-uppercase" style="width: 2.5rem;">No</th>
+                                    <th class="text-muted text-small text-uppercase" style="width: 11rem;">NIK</th>
+                                    <th class="text-muted text-small text-uppercase">Nama</th>
+                                    <th class="text-muted text-small text-uppercase">Jabatan</th>
+                                    <th class="text-muted text-small text-uppercase">Desil</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($anggota as $i => $d)
+                                    @php $desil = $d->penduduk?->level_desil; @endphp
+                                    <tr>
+                                        <td class="text-muted">{{ $i + 1 }}</td>
+                                        <td>{{ $d->penduduk?->nik ?? '-' }}</td>
+                                        <td class="fw-semibold">{{ $d->penduduk?->nama ?? '-' }}</td>
+                                        <td><span class="badge bg-secondary">{{ $d->jabatan?->value ?? '-' }}</span></td>
+                                        <td>
+                                            @if($desil)
+                                                <span class="badge bg-info text-dark">{{ $desil->value }}</span>
+                                                {{ $desil->getDescription() }}
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="mt-4">
             <a href="{{ route('laporan-pengajuan.index') }}" class="btn btn-outline-primary">
                 <i data-acorn-icon="arrow-left" class="me-1"></i> Kembali ke Daftar

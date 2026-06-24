@@ -1,3 +1,8 @@
+@php
+    $inlineExpand = $inlineExpand ?? false;
+    $expandedId = $expandedId ?? null;
+    $inlineExpandView = $inlineExpandView ?? null;
+@endphp
 <div class="table-responsive">
     <table class="table table-hover align-middle data-list-table mb-0">
         <thead>
@@ -22,9 +27,12 @@
                 @php
                     $rowKey = $row->getKey();
                     $detailHref = ($enableDetail && $detailRoute !== '') ? route($detailRoute, $rowKey) : null;
+                    $isExpanded = $inlineExpand && (string) $expandedId === (string) $rowKey;
                 @endphp
-                <tr class="data-list-row"
-                    @if($detailHref)
+                <tr class="data-list-row {{ $inlineExpand ? 'data-list-expandable' : '' }} {{ $isExpanded ? 'shown' : '' }}"
+                    @if($inlineExpand)
+                        wire:click="toggleAnggota('{{ $rowKey }}')"
+                    @elseif($detailHref)
                         data-href="{{ $detailHref }}"
                     @elseif($enableDetail)
                         wire:click="showDetail('{{ $rowKey }}')"
@@ -35,7 +43,9 @@
                     @if($enableDetail)
                         <td class="text-end">
                             @if($detailHref)
-                                <a href="{{ $detailHref }}" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ $detailHref }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   onclick="event.stopPropagation()">
                                     Detail
                                 </a>
                             @else
@@ -48,6 +58,13 @@
                         </td>
                     @endif
                 </tr>
+                @if($isExpanded && $inlineExpandView)
+                    <tr class="data-list-detail-row">
+                        <td colspan="{{ count($columns) + ($enableDetail ? 1 : 0) }}" class="p-0 border-0">
+                            @include($inlineExpandView, ['row' => $row])
+                        </td>
+                    </tr>
+                @endif
             @empty
                 <tr>
                     <td colspan="{{ count($columns) + ($enableDetail ? 1 : 0) }}"
@@ -68,6 +85,19 @@
             .data-list-table .data-list-row { transition: background 0.15s ease; }
             .data-list-table .data-list-row[wire\:click],
             .data-list-table .data-list-row[data-href] { cursor: pointer; }
+            .data-list-table .data-list-expandable > td:first-child::before {
+                content: "\25B8"; /* ▸ */
+                display: inline-block;
+                margin-right: 0.45rem;
+                color: #94a3b8;
+                transition: transform 0.15s ease, color 0.15s ease;
+            }
+            .data-list-table .data-list-expandable.shown > td:first-child::before {
+                content: "\25B8";
+                transform: rotate(90deg);
+                color: var(--bs-primary, #0d6efd);
+            }
+            .data-list-table .data-list-detail-row > td { background: #f8f9fa; }
         </style>
     @endpush
     @push('js_page')
