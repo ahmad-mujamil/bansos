@@ -212,7 +212,16 @@
                                             @if ($dokumenBaVerifikasiUrl)
                                                 <a href="{{ $dokumenBaVerifikasiUrl }}" target="_blank" class="btn btn-sm btn-outline-info">BA Verifikasi</a>
                                             @elseif (auth()->user()?->is_opd())
-                                                <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan) }}" target="_blank" class="btn btn-sm btn-outline-info">Download BA Verifikasi</a>
+                                                <div class="btn-group">
+                                                    <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan) }}" target="_blank" class="btn btn-sm btn-outline-info">Download BA Verifikasi (PDF)</a>
+                                                    <button type="button" class="btn btn-sm btn-outline-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <span class="visually-hidden">Pilih format</span>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item" href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan) }}" target="_blank">Download sebagai PDF</a></li>
+                                                        <li><a class="dropdown-item" href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', ['pengajuan' => $pengajuan, 'format' => 'word']) }}" target="_blank">Download sebagai Word</a></li>
+                                                    </ul>
+                                                </div>
                                             @endif
                                             @if ($dokumenBastUrl)
                                                 <a href="{{ $dokumenBastUrl }}" target="_blank" class="btn btn-sm btn-outline-success">Dokumen BAST</a>

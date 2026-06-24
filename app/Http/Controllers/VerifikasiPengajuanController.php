@@ -69,6 +69,7 @@ class VerifikasiPengajuanController extends Controller
                 if ($processed) {
                     $baMedia = $row->verifikasiPengajuan?->getFirstMedia('ba-verifikasi');
                     $downloadBaUrl = route('verifikasi-pengajuan.download-ba-verifikasi', $row->id);
+                    $downloadBaWordUrl = route('verifikasi-pengajuan.download-ba-verifikasi', ['pengajuan' => $row->id, 'format' => 'word']);
                     $actionUpload = " <button type='button' class='btn btn-sm btn-outline-warning ms-1 btn-upload-ba' data-id='{$row->id}' title='Upload BA Verifikasi (hasil tanda tangan)'>Upload BA</button>";
 
                     $batalUrl = route('verifikasi-pengajuan.batal-verifikasi', $row->id);
@@ -85,7 +86,13 @@ class VerifikasiPengajuanController extends Controller
                             $action .= $batalButton;
                         }
                     } else {
-                        $action .= " <a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success ms-1' title='Download BA Verifikasi (template)'>Download BA</a>";
+                        $action .= " <div class='btn-group ms-1'>"
+                            . "<a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success' title='Download BA Verifikasi (template)'>Download BA (PDF)</a>"
+                            . "<button type='button' class='btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split' data-bs-toggle='dropdown' aria-expanded='false'><span class='visually-hidden'>Pilih format</span></button>"
+                            . "<ul class='dropdown-menu'>"
+                            . "<li><a class='dropdown-item' href='{$downloadBaUrl}' target='_blank'>Download sebagai PDF</a></li>"
+                            . "<li><a class='dropdown-item' href='{$downloadBaWordUrl}' target='_blank'>Download sebagai Word</a></li>"
+                            . "</ul></div>";
                         $action .= $actionUpload;
                         $action .= $batalButton;
                     }
@@ -352,8 +359,10 @@ class VerifikasiPengajuanController extends Controller
         return redirect()->route('verifikasi-pengajuan.index');
     }
 
-    public function downloadBaVerifikasi(Pengajuan $pengajuan): \Symfony\Component\HttpFoundation\Response
+    public function downloadBaVerifikasi(Request $request, Pengajuan $pengajuan): \Symfony\Component\HttpFoundation\Response
     {
+        $format = $request->query('format') === 'word' ? 'word' : 'pdf';
+
         $pengajuan->loadMissing([
             'user.userDetail',
             'verifiedBy',
@@ -377,7 +386,7 @@ class VerifikasiPengajuanController extends Controller
         ], true), 404);
 
         $baMedia = $verifikasi->getFirstMedia('ba-verifikasi');
-        if ($baMedia) {
+        if ($baMedia && $format === 'pdf') {
             return response()->download(
                 $baMedia->getPath(),
                 $baMedia->file_name ?: 'BA-Verifikasi.pdf',
@@ -472,6 +481,34 @@ class VerifikasiPengajuanController extends Controller
             'nilaiBesarTerbilang' => $nilaiBesarTerbilang,
         ])->render();
 
+        $baseName = 'BA-Verifikasi-' . ($pengajuan->kode_pengajuan ?: $pengajuan->id);
+
+        // Word: serve the same HTML as an editable .doc. Word's HTML engine ignores @page size,
+        // position:fixed and inline-block, so inject an MSO print-view header + overrides to match the PDF.
+        // ponytail: avoids a PHPWord dependency; not pixel-perfect, upgrade to a .docx template if exact parity is needed.
+        if ($format === 'word') {
+            $msoHead = <<<'HTML'
+<!--[if gte mso 9]>
+<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+<![endif]-->
+<style>
+@page { size: 21cm 29.7cm; margin: 32pt 40pt 48pt 40pt; }
+.ba-doc-footer { position: static; left: auto; right: auto; bottom: auto; margin-top: 24px; }
+</style>
+HTML;
+
+            $wordHtml = str_replace(
+                '<html lang="id">',
+                '<html lang="id" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">',
+                $html,
+            );
+            $wordHtml = str_replace('</head>', $msoHead . "\n</head>", $wordHtml);
+
+            return response($wordHtml)
+                ->header('Content-Type', 'application/msword')
+                ->header('Content-Disposition', 'attachment; filename="' . $baseName . '.doc"');
+        }
+
         $dompdf = new Dompdf([
             'isHtml5ParserEnabled' => true,
             'isRemoteEnabled' => true,
@@ -483,7 +520,7 @@ class VerifikasiPengajuanController extends Controller
 
         $pdfContent = $dompdf->output();
 
-        $fileName = 'BA-Verifikasi-' . ($pengajuan->kode_pengajuan ?: $pengajuan->id) . '.pdf';
+        $fileName = $baseName . '.pdf';
 
         // $verifikasi->addMediaFromString($pdfContent)
         //     ->usingFileName($fileName)

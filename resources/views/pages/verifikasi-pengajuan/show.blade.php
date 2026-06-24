@@ -225,11 +225,20 @@
                     @elseif(!($laporanReadOnly ?? false))
                     <div class="col-12">
                         <p class="text-small text-uppercase text-muted mb-1">Dokumen BA Verifikasi</p>
-                        <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan->id) }}" target="_blank"
-                            class="btn btn-sm btn-outline-success btn-icon btn-icon-start">
-                            <i data-acorn-icon="file-text"></i>
-                            <span>Download BA</span>
-                        </a>
+                        <div class="btn-group">
+                            <a href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan->id) }}" target="_blank"
+                                class="btn btn-sm btn-outline-success btn-icon btn-icon-start">
+                                <i data-acorn-icon="file-text"></i>
+                                <span>Download BA (PDF)</span>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Pilih format</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', $pengajuan->id) }}" target="_blank">Download sebagai PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ route('verifikasi-pengajuan.download-ba-verifikasi', ['pengajuan' => $pengajuan->id, 'format' => 'word']) }}" target="_blank">Download sebagai Word</a></li>
+                            </ul>
+                        </div>
                     </div>
                     @else
                     <div class="col-12">
