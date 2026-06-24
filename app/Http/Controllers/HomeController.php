@@ -89,7 +89,6 @@ class HomeController extends Controller
             $totalPendudukTerverifikasi = Penduduk::query()
                 ->whereNotNull('validated_at')
                 ->count();
-
             return view('home-dukcapil', compact(
                 'totalPenduduk',
                 'totalPendudukTerverifikasi'
