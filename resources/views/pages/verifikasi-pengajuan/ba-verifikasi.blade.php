@@ -291,7 +291,7 @@
         <tr>
             <td class="kop-logo-cell">
                 @if (!empty($logoSrc))
-                    <img class="kop-logo" src="{{ $logoSrc }}" alt="Logo" />
+                    <img class="kop-logo" src="{{ $logoSrc }}" width="64" height="82" alt="Logo" />
                 @endif
             </td>
             <td class="kop-text-cell">
@@ -483,24 +483,27 @@
             <div class="row lvl-1" style="margin-top: 10px;">
                 Demikian bagian rekomendasi hasil evaluasi ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
             </div>
-            <div class="ttd-wrap">
-                <div class="ttd-inner">
-                    <div class="bold">Mengesahkan</div>
-                    <div class="ttd-date-line" style="margin-top: 4px; margin-bottom: 8px;">
-                        {{ $verifikasi->lokasi_pengesahan ?: 'Gerung' }},
-                        @if ($verifikasi->tgl_disahkan)
-                            {{ $verifikasi->tgl_disahkan->translatedFormat('d F Y') }}
-                        @else
-                            .................. {{ now()->translatedFormat('Y') }}
-                        @endif
-                    </div>
-                    <div class="bold ttd-kepala-jabatan">Kepala SKPD,</div>
-                    <div class="ttd-ruang-tanda-tangan" aria-hidden="true"></div>
-                    <div class="bold ttd-kepala-nama">{{ $verifikasi->disahkan_oleh ?: '-' }}</div>
-                    <div class="ttd-kepala-garis">...................................................</div>
-                    <div class="ttd-kepala-nip">NIP: {{ $verifikasi->disahkan_nip ?? '' }}</div>
-                </div>
-            </div>
+            <table class="ttd-wrap" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="border: none; padding: 0;">&nbsp;</td>
+                    <td style="border: none; padding: 0; width: 260px; text-align: center; vertical-align: top;">
+                        <div class="bold">Mengesahkan</div>
+                        <div class="ttd-date-line" style="margin-top: 4px; margin-bottom: 8px;">
+                            {{ $verifikasi->lokasi_pengesahan ?: 'Gerung' }},
+                            @if ($verifikasi->tgl_disahkan)
+                                {{ $verifikasi->tgl_disahkan->translatedFormat('d F Y') }}
+                            @else
+                                .................. {{ now()->translatedFormat('Y') }}
+                            @endif
+                        </div>
+                        <div class="bold ttd-kepala-jabatan">Kepala SKPD,</div>
+                        <div class="ttd-ruang-tanda-tangan" aria-hidden="true"></div>
+                        <div class="bold ttd-kepala-nama">{{ $verifikasi->disahkan_oleh ?: '-' }}</div>
+                        <div class="ttd-kepala-garis">...................................................</div>
+                        <div class="ttd-kepala-nip">NIP: {{ $verifikasi->disahkan_nip ?? '' }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 
