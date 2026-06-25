@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JabatanOrganisasi;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Enums\RupaBantuan;
@@ -414,7 +415,12 @@ class VerifikasiPengajuanController extends Controller
             $pengajuan->desa?->kecamatan?->nama,
         ])));
 
-        $pemohon = $pengajuan->user?->userDetail?->nama_user
+        $pemohon = $pengajuan->organisasi
+            ?->organisasiDetail()
+                ->where('jabatan', JabatanOrganisasi::KETUA)
+                ->first()
+                ?->penduduk?->nama
+            ?? $pengajuan->user?->userDetail?->nama_user
             ?? $pengajuan->user?->nama
             ?? $pengajuan->user?->email
             ?? '-';
