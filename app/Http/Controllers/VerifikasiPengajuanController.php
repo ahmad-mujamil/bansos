@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JabatanOrganisasi;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Enums\RupaBantuan;
@@ -418,6 +419,31 @@ class VerifikasiPengajuanController extends Controller
             ?? $pengajuan->user?->nama
             ?? $pengajuan->user?->email
             ?? '-';
+
+        // Untuk pengajuan kelompok, pemohon diisi nama anggota dengan jabatan
+        // tertinggi: Ketua, atau jabatan di bawahnya bila Ketua tidak ada.
+        if ($pengajuan->organisasi) {
+            $prioritasJabatan = [
+                JabatanOrganisasi::KETUA->value,
+                JabatanOrganisasi::WAKIL->value,
+                JabatanOrganisasi::SEKRETARIS->value,
+                JabatanOrganisasi::BENDAHARA->value,
+                JabatanOrganisasi::ADMIN->value,
+                JabatanOrganisasi::ANGGOTA->value,
+            ];
+
+            $ketua = $pengajuan->organisasi->organisasiDetail
+                ->sortBy(function ($detail) use ($prioritasJabatan) {
+                    $idx = array_search($detail->jabatan?->value, $prioritasJabatan, true);
+
+                    return $idx === false ? count($prioritasJabatan) : $idx;
+                })
+                ->first(fn ($detail) => $detail->penduduk?->nama);
+
+            if ($ketua?->penduduk?->nama) {
+                $pemohon = $ketua->penduduk->nama;
+            }
+        }
 
         $namaKelompok = $pengajuan->organisasi?->nama
             ?? $pengajuan->details()->first()?->penduduk?->nama
