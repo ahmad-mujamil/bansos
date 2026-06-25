@@ -97,6 +97,54 @@ class HomeController extends Controller
     }
 
     /**
+     * Daftar pengajuan detail di balik angka dashboard admin/super.
+     *
+     * Filter via query string:
+     *  - jenis: bansos|hibah|bantuan_kelompok
+     *  - penerima: perorangan|organisasi
+     *  - verif: usulan|verifikasi
+     */
+    public function detail()
+    {
+        $jenis = JenisPengajuan::tryFrom((string) request()->query('jenis'));
+        $penerimaParam = (string) request()->query('penerima');
+        $verifParam = (string) request()->query('verif');
+
+        $kategori = $jenis?->value ?? 'all';
+        $penerima = in_array($penerimaParam, ['perorangan', 'organisasi'], true) ? $penerimaParam : 'all';
+        $verif = in_array($verifParam, ['usulan', 'verifikasi'], true) ? $verifParam : 'all';
+
+        $titleParts = [];
+
+        if ($jenis) {
+            $titleParts[] = match ($jenis) {
+                JenisPengajuan::BANSOS => 'Bantuan Sosial',
+                JenisPengajuan::HIBAH => 'Hibah',
+                JenisPengajuan::BANTUAN_KELOMPOK => 'Bantuan ke Masyarakat',
+            };
+        }
+        if ($penerima === 'perorangan') {
+            $titleParts[] = 'Perorangan';
+        } elseif ($penerima === 'organisasi') {
+            $titleParts[] = 'Organisasi';
+        }
+        if ($verif === 'verifikasi') {
+            $titleParts[] = 'Sudah Verifikasi BA';
+        } elseif ($verif === 'usulan') {
+            $titleParts[] = 'Usulan';
+        }
+
+        $judul = 'Detail ' . (empty($titleParts) ? 'Semua Pengajuan' : implode(' · ', $titleParts));
+
+        return view('pages.dashboard.detail', [
+            'judul' => $judul,
+            'kategori' => $kategori,
+            'penerima' => $penerima,
+            'verif' => $verif,
+        ]);
+    }
+
+    /**
      * Data ringkasan dashboard untuk role admin/super.
      *
      * @return array<string, mixed>
@@ -138,6 +186,7 @@ class HomeController extends Controller
             return [
                 'title' => $def['title'],
                 'label' => $def['label'],
+                'jenis' => $def['jenis']->value,
                 'total' => $total,
                 'usulan' => max(0, $total - $verifikasi),
                 'verifikasi' => $verifikasi,
@@ -212,9 +261,9 @@ class HomeController extends Controller
     private function dummyDashboardData(): array
     {
         $kartuKategori = [
-            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'Total Hibah', 'label' => 'Hibah', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Total Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
         ];
 
         return [
