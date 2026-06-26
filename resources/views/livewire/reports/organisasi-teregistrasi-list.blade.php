@@ -1,7 +1,7 @@
 <div class="laporan-pengajuan-list">
     {{-- Filter row --}}
     <div class="row g-2 align-items-center mb-3">
-        <div class="col-12 col-md-4" wire:ignore>
+        <div class="col-12 col-md-3" wire:ignore>
             <select id="organisasi-filter-kecamatan" class="form-select form-select-sm" data-placeholder="Semua kecamatan">
                 <option value="all" @selected($kecamatanId === 'all')>Semua kecamatan</option>
                 @foreach($kecamatanOptions as $kec)
@@ -9,7 +9,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-2">
             <select class="form-select form-select-sm" wire:model.live="status">
                 <option value="all">Semua status</option>
                 <option value="aktif">Aktif</option>
@@ -17,7 +17,14 @@
                 <option value="blacklist">Blacklist</option>
             </select>
         </div>
-        <div class="col-6 col-md-5">
+        <div class="col-6 col-md-3">
+            <select class="form-select form-select-sm" wire:model.live="pengajuan">
+                <option value="all">Semua pengajuan</option>
+                <option value="belum">Belum mengajukan</option>
+                <option value="sudah">Sudah mengajukan</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
                        class="form-control form-control-sm"
