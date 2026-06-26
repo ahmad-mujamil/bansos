@@ -314,13 +314,13 @@ class HomeController extends Controller
             'values' => array_map(fn (array $kartu): int => $kartu['teregistrasi'], $kartuKategori),
         ];
 
-        // Chart pengajuan: stacked (Usulan vs Verifikasi BA) per jenis
+        // Chart pengajuan: stacked per jenis — samakan dengan metrik kartu di atas
         $chartPengajuan = [
             'labels' => ['Proses Pengajuan SKPD', 'Verifikasi BA'],
             'series' => array_map(function (array $kartu): array {
                 return [
                     'label' => $kartu['label'],
-                    'data' => [$kartu['usulan'], $kartu['verifikasi']],
+                    'data' => [$kartu['diajukan'], $kartu['disetujui']],
                 ];
             }, $kartuKategori),
         ];
@@ -373,9 +373,9 @@ class HomeController extends Controller
             'chartPengajuan' => [
                 'labels' => ['Proses Pengajuan SKPD', 'Verifikasi BA'],
                 'series' => [
-                    ['label' => 'Bantuan Sosial', 'data' => [8, 38]],
-                    ['label' => 'Hibah', 'data' => [5, 19]],
-                    ['label' => 'Bantuan ke Masyarakat', 'data' => [33, 26]],
+                    ['label' => 'Bantuan Sosial', 'data' => [12, 8]],
+                    ['label' => 'Hibah', 'data' => [12, 8]],
+                    ['label' => 'Bantuan ke Masyarakat', 'data' => [12, 8]],
                 ],
             ],
             'isDemo' => true,
