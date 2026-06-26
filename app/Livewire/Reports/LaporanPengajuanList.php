@@ -6,6 +6,7 @@ use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Livewire\DataList;
+use App\Models\Opd;
 use App\Models\Pengajuan;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,7 @@ class LaporanPengajuanList extends DataList
 {
     public string $kategori = '';
     public string $status = 'all';
+    public string $opd = 'all';
     public ?string $expandedId = null;
 
     public function mount(): void
@@ -64,6 +66,21 @@ class LaporanPengajuanList extends DataList
         $this->resetPage();
     }
 
+    public function updatedOpd(): void
+    {
+        $this->expandedId = null;
+        $this->resetPage();
+    }
+
+    /**
+     * Filter OPD hanya untuk role yang melihat semua OPD (super/admin).
+     * Role OPD sudah otomatis dibatasi ke OPD-nya sendiri.
+     */
+    public function showOpdFilter(): bool
+    {
+        return Auth::user()?->role !== RoleUser::OPD;
+    }
+
     public function toggleAnggota(string $id): void
     {
         $this->expandedId = $this->expandedId === $id ? null : $id;
@@ -95,6 +112,10 @@ class LaporanPengajuanList extends DataList
 
         if ($this->status !== 'all' && PengajuanStatus::tryFrom($this->status) !== null) {
             $query->where('status', $this->status);
+        }
+
+        if ($this->showOpdFilter() && $this->opd !== 'all') {
+            $query->where('opd_id', $this->opd);
         }
     }
 
@@ -177,6 +198,9 @@ class LaporanPengajuanList extends DataList
                 JenisPengajuan::BANTUAN_KELOMPOK,
             ],
             'statusOptions' => PengajuanStatus::cases(),
+            'opdOptions' => $this->showOpdFilter()
+                ? Opd::query()->orderBy('nama')->get(['id', 'nama'])
+                : collect(),
         ]);
     }
 }

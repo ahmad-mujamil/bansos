@@ -21,7 +21,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
 {
     public string $penerima = 'all';
     public string $verif = 'all';
-    public string $opd = 'all';
 
     public function mount(string $kategori = 'all', string $status = 'all', string $penerima = 'all', string $verif = 'all', string $opd = 'all'): void
     {
@@ -32,12 +31,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
         $this->penerima = in_array($penerima, ['perorangan', 'organisasi'], true) ? $penerima : 'all';
         $this->verif = in_array($verif, ['usulan', 'verifikasi'], true) ? $verif : 'all';
         $this->opd = $opd !== '' ? $opd : 'all';
-    }
-
-    public function updatedOpd(): void
-    {
-        $this->expandedId = null;
-        $this->resetPage();
     }
 
     public function updatedPenerima(): void
@@ -74,10 +67,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
             $query->whereHas('verifikasiPengajuan.media', fn (Builder $q) => $q->where('collection_name', 'ba-verifikasi'));
         } elseif ($this->verif === 'usulan') {
             $query->whereDoesntHave('verifikasiPengajuan.media', fn (Builder $q) => $q->where('collection_name', 'ba-verifikasi'));
-        }
-
-        if ($this->opd !== 'all') {
-            $query->where('opd_id', $this->opd);
         }
     }
 

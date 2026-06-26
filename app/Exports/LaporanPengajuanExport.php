@@ -28,6 +28,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
     public function __construct(
         private ?string $kategori = null,
         private ?string $status = null,
+        private ?string $opd = null,
     ) {}
 
     public function title(): string
@@ -79,6 +80,8 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         $user = Auth::user();
         if ($user?->role === RoleUser::OPD) {
             $query->where('opd_id', $user->opd_id);
+        } elseif ($this->opd && $this->opd !== 'all') {
+            $query->where('opd_id', $this->opd);
         }
 
         $kategori = $this->kategori ?? JenisPengajuan::BANSOS->value;

@@ -26,7 +26,17 @@
 
     {{-- Filter row --}}
     <div class="row g-2 align-items-center mb-3">
-        <div class="col-12 col-md-3">
+        @if($this->showOpdFilter())
+            <div class="col-12 col-md-3" wire:ignore>
+                <select id="laporan-filter-opd" class="form-select form-select-sm" data-placeholder="Semua OPD">
+                    <option value="all" @selected($opd === 'all')>Semua OPD</option>
+                    @foreach($opdOptions as $op)
+                        <option value="{{ $op->id }}" @selected($opd === $op->id)>{{ $op->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+        <div class="col-12 col-md-{{ $this->showOpdFilter() ? '2' : '3' }}">
             <select class="form-select form-select-sm" wire:model.live="status">
                 <option value="all">Semua status</option>
                 @foreach($statusOptions as $st)
@@ -34,7 +44,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-4">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
                        class="form-control form-control-sm"
@@ -43,8 +53,8 @@
                 <span class="search-magnifier-icon"><i data-acorn-icon="search"></i></span>
             </div>
         </div>
-        <div class="col-12 col-md-4 text-md-end">
-            <a href="{{ route('laporan-pengajuan.export', ['kategori' => $kategori, 'status' => $status]) }}"
+        <div class="col-12 col-md-3 text-md-end">
+            <a href="{{ route('laporan-pengajuan.export', ['kategori' => $kategori, 'status' => $status, 'opd' => $opd]) }}"
                class="btn btn-sm btn-success">
                 <i data-acorn-icon="download" class="me-1"></i> Export Excel
             </a>
@@ -70,3 +80,38 @@
         <div>{{ $items->onEachSide(1)->links() }}</div>
     </div>
 </div>
+
+@script
+<script>
+    const initLaporanOpdSelect2 = () => {
+        if (typeof $ === 'undefined' || !$.fn.select2) {
+            setTimeout(initLaporanOpdSelect2, 50);
+
+            return;
+        }
+
+        const $sel = $('#laporan-filter-opd');
+        if (! $sel.length) {
+            return;
+        }
+
+        if (! $sel.hasClass('select2-hidden-accessible')) {
+            $sel.select2({
+                theme: 'bootstrap4',
+                width: '100%',
+            });
+        }
+
+        $sel.val($wire.get('opd')).trigger('change.select2');
+        $sel.off('change.laporanOpd').on('change.laporanOpd', function () {
+            $wire.set('opd', $(this).val());
+        });
+    };
+
+    initLaporanOpdSelect2();
+
+    Livewire.hook('morph.updated', () => {
+        setTimeout(initLaporanOpdSelect2, 0);
+    });
+</script>
+@endscript
