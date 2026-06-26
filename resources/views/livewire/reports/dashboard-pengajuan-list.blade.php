@@ -51,9 +51,9 @@
         </div>
         <div class="col-6 col-md-2" wire:ignore>
             <select id="dashboard-filter-verif" class="form-select form-select-sm">
-                <option value="all" @selected($verif === 'all')>Semua verifikasi</option>
-                <option value="usulan" @selected($verif === 'usulan')>Usulan</option>
-                <option value="verifikasi" @selected($verif === 'verifikasi')>Sudah Verifikasi BA</option>
+                <option value="all" @selected($verif === 'all')>Semua tahap</option>
+                <option value="usulan" @selected($verif === 'usulan')>Proses Pengajuan</option>
+                <option value="verifikasi" @selected($verif === 'verifikasi')>Verifikasi BA</option>
             </select>
         </div>
         <div class="col-6 col-md-3">

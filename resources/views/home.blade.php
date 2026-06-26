@@ -44,6 +44,8 @@
             @endif
         </div>
 
+        <h5 class="fw-bold mb-3" style="color: #1f2937;">Jumlah Usulan Calon Penerima Bantuan</h5>
+
         {{-- ===== Baris 1: Total per jenis pengajuan ===== --}}
         @php $warnaKartu = ['dash-blue', 'dash-cyan', 'dash-amber']; @endphp
         <div class="row g-3 mb-3">
@@ -56,8 +58,12 @@
                                 <div class="dash-value">{{ number_format($kartu['total']) }}</div>
                             </a>
                             <div class="dash-rows">
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
+                                    <span class="dash-row__label">Teregistrasi</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['total']) }}</span>
+                                </a>
                                 <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'verif' => 'usulan']) }}">
-                                    <span class="dash-row__label">Usulan</span>
+                                    <span class="dash-row__label">Proses Pengajuan</span>
                                     <span class="dash-row__value">{{ number_format($kartu['usulan']) }}</span>
                                 </a>
                                 <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'verif' => 'verifikasi']) }}">

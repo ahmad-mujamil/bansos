@@ -92,6 +92,7 @@ class HomeController extends Controller
             ));
         }
 
+        // dd($this->dashboardAdminData());
         // Dashboard admin / super
         return view('home', $this->dashboardAdminData());
     }
@@ -129,9 +130,9 @@ class HomeController extends Controller
             $titleParts[] = 'Organisasi';
         }
         if ($verif === 'verifikasi') {
-            $titleParts[] = 'Sudah Verifikasi BA';
+            $titleParts[] = 'Verifikasi BA';
         } elseif ($verif === 'usulan') {
-            $titleParts[] = 'Usulan';
+            $titleParts[] = 'Proses Pengajuan';
         }
 
         $judul = 'Detail ' . (empty($titleParts) ? 'Semua Pengajuan' : implode(' · ', $titleParts));
@@ -174,9 +175,9 @@ class HomeController extends Controller
 
         // Tiga kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
         $definisiKartu = [
-            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS],
-            ['title' => 'Total Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH],
-            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
         ];
 
         $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount): array {
@@ -202,6 +203,7 @@ class HomeController extends Controller
             ->selectRaw('kategori_pengajuan, COUNT(*) as total')
             ->groupBy('kategori_pengajuan')
             ->pluck('total', 'kategori_pengajuan');
+
 
         $orgCount = fn (JenisPengajuan $k): int => (int) $organisasiPerKategori->get($k->value, 0);
         $orgHibah = $orgCount(JenisPengajuan::HIBAH);
@@ -261,9 +263,9 @@ class HomeController extends Controller
     private function dummyDashboardData(): array
     {
         $kartuKategori = [
-            ['title' => 'Total Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'Total Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'Total BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
         ];
 
         return [
