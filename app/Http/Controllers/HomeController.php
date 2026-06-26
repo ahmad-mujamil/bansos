@@ -308,10 +308,10 @@ class HomeController extends Controller
         $pengHibah = $pengCount(JenisPengajuan::HIBAH);
         $pengKelompok = $pengCount(JenisPengajuan::BANTUAN_KELOMPOK);
 
-        // Chart usulan calon penerima bantuan per jenis
+        // Chart usulan calon penerima bantuan per jenis — samakan dengan angka utama (Teregistrasi) tiap kartu
         $chartUsulan = [
             'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
-            'values' => [$pengBansos, $pengHibah, $pengKelompok],
+            'values' => array_map(fn (array $kartu): int => $kartu['teregistrasi'], $kartuKategori),
         ];
 
         // Chart pengajuan: stacked (Usulan vs Sudah Verifikasi) per jenis
@@ -368,7 +368,7 @@ class HomeController extends Controller
             'pengKelompok' => 45,
             'chartUsulan' => [
                 'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
-                'values' => [78, 60, 45],
+                'values' => [30, 40, 52],
             ],
             'chartPengajuan' => [
                 'labels' => ['Pengajuan Usulan', 'Sudah Verifikasi'],
