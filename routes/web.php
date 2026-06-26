@@ -34,6 +34,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
     // Detail data dashboard (admin/super) — daftar pengajuan sesuai metrik yang diklik
     Route::middleware(['role:super,admin'])->group(function () {
         Route::get('/dashboard/detail', [App\Http\Controllers\HomeController::class, 'detail'])->name('dashboard.detail');
+        Route::get('/dashboard/organisasi', [App\Http\Controllers\HomeController::class, 'organisasi'])->name('dashboard.organisasi');
     });
 
     // User detail (lengkapi data diri untuk user yang belum verifikasi)

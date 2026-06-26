@@ -53,18 +53,23 @@
                 <div class="col-12 col-md-4">
                     <div class="card dash-card {{ $warnaKartu[$loop->index % count($warnaKartu)] }} dash-card--center h-100">
                         <div class="card-body">
-                            <a class="dash-head-link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
+                            @php
+                                $teregistrasiUrl = ($kartu['teregistrasiOrganisasi'] ?? false)
+                                    ? route('dashboard.organisasi', ['jenis' => $kartu['jenis']])
+                                    : route('dashboard.detail', ['jenis' => $kartu['jenis']]);
+                            @endphp
+                            <a class="dash-head-link" href="{{ $teregistrasiUrl }}">
                                 <div class="dash-title">{{ $kartu['title'] }}</div>
-                                <div class="dash-value">{{ number_format($kartu['total']) }}</div>
+                                <div class="dash-value">{{ number_format($kartu['teregistrasi']) }}</div>
                             </a>
                             <div class="dash-rows">
-                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
+                                <a class="dash-row dash-row--link" href="{{ $teregistrasiUrl }}">
                                     <span class="dash-row__label">Teregistrasi</span>
-                                    <span class="dash-row__value">{{ number_format($kartu['total']) }}</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['teregistrasi']) }}</span>
                                 </a>
-                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'verif' => 'usulan']) }}">
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
                                     <span class="dash-row__label">Proses Pengajuan</span>
-                                    <span class="dash-row__value">{{ number_format($kartu['usulan']) }}</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['total']) }}</span>
                                 </a>
                                 <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'verif' => 'verifikasi']) }}">
                                     <span class="dash-row__label">Verifikasi BA</span>
