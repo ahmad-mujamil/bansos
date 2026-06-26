@@ -88,4 +88,26 @@ class Organisasi extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Label wilayah "Kecamatan / Desa" untuk tampilan tabel.
+     */
+    public function getWilayahLabelAttribute(): string
+    {
+        return ($this->kecamatan?->nama ?? '-') . ' / ' . ($this->desa?->nama ?? '-');
+    }
+
+    /**
+     * Badge status (Aktif / Nonaktif / Blacklist) sebagai HTML untuk tampilan tabel.
+     */
+    public function getStatusBadgeAttribute(): string
+    {
+        if ($this->is_blacklist) {
+            return '<span class="badge bg-danger">Blacklist</span>';
+        }
+
+        return $this->is_active
+            ? '<span class="badge bg-success">Aktif</span>'
+            : '<span class="badge bg-secondary">Nonaktif</span>';
+    }
 }
