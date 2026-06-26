@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
 use App\Models\Organisasi;
@@ -146,6 +147,35 @@ class HomeController extends Controller
     }
 
     /**
+     * Daftar organisasi teregistrasi sesuai jenis pengajuan (dipakai oleh metrik
+     * "Teregistrasi" pada dashboard).
+     */
+    public function organisasi()
+    {
+        $jenis = JenisPengajuan::tryFrom((string) request()->query('jenis'));
+        abort_if($jenis === null, 404);
+
+        $jenisOrganisasi = array_map(fn ($j) => $j->value, $jenis->getJenisOrganisasi());
+
+        $organisasi = Organisasi::query()
+            ->whereIn('jenis', $jenisOrganisasi)
+            ->with(['desa.kecamatan', 'opd'])
+            ->orderBy('nama')
+            ->get();
+
+        $judulJenis = match ($jenis) {
+            JenisPengajuan::BANSOS => 'Bantuan Sosial',
+            JenisPengajuan::HIBAH => 'Hibah',
+            JenisPengajuan::BANTUAN_KELOMPOK => 'Bantuan ke Masyarakat',
+        };
+
+        return view('pages.dashboard.organisasi', [
+            'organisasi' => $organisasi,
+            'judul' => 'Organisasi Teregistrasi · ' . $judulJenis,
+        ]);
+    }
+
+    /**
      * Data ringkasan dashboard untuk role admin/super.
      *
      * @return array<string, mixed>
@@ -180,15 +210,33 @@ class HomeController extends Controller
             ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
         ];
 
-        $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount): array {
+        // Teregistrasi = jumlah organisasi/kelompok yang jenisnya termasuk kategori pengajuan tsb.
+        $organisasiTeregistrasiCount = function (JenisPengajuan $k): int {
+            $jenisOrganisasi = array_map(fn ($j) => $j->value, $k->getJenisOrganisasi());
+
+            return Organisasi::query()->whereIn('jenis', $jenisOrganisasi)->count();
+        };
+
+        // Jenis pengajuan yang teregistrasinya dihitung dari jumlah organisasi (bukan pengajuan).
+        $teregistrasiDariOrganisasi = [JenisPengajuan::HIBAH, JenisPengajuan::BANTUAN_KELOMPOK, JenisPengajuan::BANSOS];
+
+        $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount, $organisasiTeregistrasiCount, $teregistrasiDariOrganisasi): array {
             $total = $pengCount($def['jenis']);
             $verifikasi = $verifCount($def['jenis']);
+
+            // Hibah & BDSKM: teregistrasi dihitung dari jumlah organisasi/kelompok berjenis terkait.
+            $dariOrganisasi = in_array($def['jenis'], $teregistrasiDariOrganisasi, true);
+            $teregistrasi = $dariOrganisasi
+                ? $organisasiTeregistrasiCount($def['jenis'])
+                : $total;
 
             return [
                 'title' => $def['title'],
                 'label' => $def['label'],
                 'jenis' => $def['jenis']->value,
                 'total' => $total,
+                'teregistrasi' => $teregistrasi,
+                'teregistrasiOrganisasi' => $dariOrganisasi,
                 'usulan' => max(0, $total - $verifikasi),
                 'verifikasi' => $verifikasi,
             ];
@@ -263,9 +311,9 @@ class HomeController extends Controller
     private function dummyDashboardData(): array
     {
         $kartuKategori = [
-            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
-            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'teregistrasi' => 30, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'teregistrasi' => 40, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'teregistrasi' => 52, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6],
         ];
 
         return [
