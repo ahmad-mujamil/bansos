@@ -24,56 +24,29 @@
 
         <div class="card mb-5">
             <div class="card-body">
-                <div class="mb-3 text-muted text-small">
-                    Menampilkan <strong>{{ number_format($organisasi->count()) }}</strong> organisasi.
-                </div>
-
-                @if ($organisasi->isEmpty())
-                    <p class="text-muted mb-0">Tidak ada organisasi teregistrasi untuk jenis ini.</p>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th class="text-muted text-small text-uppercase">Nama</th>
-                                    <th class="text-muted text-small text-uppercase">Jenis</th>
-                                    <th class="text-muted text-small text-uppercase">Nomor</th>
-                                    <th class="text-muted text-small text-uppercase">Wilayah</th>
-                                    <th class="text-muted text-small text-uppercase">OPD</th>
-                                    <th class="text-muted text-small text-uppercase">Tgl Pembentukan</th>
-                                    <th class="text-muted text-small text-uppercase">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($organisasi as $org)
-                                    @php
-                                        $jenisOrg = \App\Enums\JenisOrganisasi::tryFrom($org->jenis);
-                                        $wilayah = collect([$org->desa?->nama, $org->desa?->kecamatan?->nama])
-                                            ->filter()->implode(', ');
-                                    @endphp
-                                    <tr>
-                                        <td class="fw-semibold">{{ $org->nama }}</td>
-                                        <td>{{ $jenisOrg?->getDescription() ?? $org->jenis }}</td>
-                                        <td>{{ $org->nomor ?? '-' }}</td>
-                                        <td>{{ $wilayah !== '' ? $wilayah : '-' }}</td>
-                                        <td>{{ $org->opd?->nama ?? '-' }}</td>
-                                        <td>{{ $org->tgl_pembentukan?->translatedFormat('d M Y') ?? '-' }}</td>
-                                        <td>
-                                            @if ($org->is_blacklist)
-                                                <span class="badge bg-danger">Blacklist</span>
-                                            @elseif ($org->is_active)
-                                                <span class="badge bg-success">Aktif</span>
-                                            @else
-                                                <span class="badge bg-secondary">Nonaktif</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                <livewire:reports.organisasi-teregistrasi-list :jenis="$jenis" />
             </div>
         </div>
     </div>
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}" />
+    <style>
+        /* Select2 selaras dengan form-select-sm */
+        .laporan-pengajuan-list .select2-container--bootstrap4 .select2-selection--single {
+            height: 31px;
+            font-size: 0.875rem;
+        }
+        .laporan-pengajuan-list .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            line-height: 29px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    </style>
+@endpush
+
+@push('js_vendor')
+    <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+@endpush

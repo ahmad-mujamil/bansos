@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
 use App\Models\Organisasi;
@@ -155,14 +154,6 @@ class HomeController extends Controller
         $jenis = JenisPengajuan::tryFrom((string) request()->query('jenis'));
         abort_if($jenis === null, 404);
 
-        $jenisOrganisasi = array_map(fn ($j) => $j->value, $jenis->getJenisOrganisasi());
-
-        $organisasi = Organisasi::query()
-            ->whereIn('jenis', $jenisOrganisasi)
-            ->with(['desa.kecamatan', 'opd'])
-            ->orderBy('nama')
-            ->get();
-
         $judulJenis = match ($jenis) {
             JenisPengajuan::BANSOS => 'Bantuan Sosial',
             JenisPengajuan::HIBAH => 'Hibah',
@@ -170,7 +161,7 @@ class HomeController extends Controller
         };
 
         return view('pages.dashboard.organisasi', [
-            'organisasi' => $organisasi,
+            'jenis' => $jenis->value,
             'judul' => 'Organisasi Teregistrasi · ' . $judulJenis,
         ]);
     }
