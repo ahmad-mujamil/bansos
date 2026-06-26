@@ -26,29 +26,37 @@
 
     {{-- Filter row --}}
     <div class="row g-2 align-items-center mb-3">
-        <div class="col-6 col-md-3">
-            <select class="form-select form-select-sm" wire:model.live="status">
-                <option value="all">Semua status</option>
-                @foreach($statusOptions as $st)
-                    <option value="{{ $st->value }}">{{ $st->getDescription() }}</option>
+        <div class="col-12 col-md-3" wire:ignore>
+            <select id="dashboard-filter-opd" class="form-select form-select-sm" data-placeholder="Semua OPD">
+                <option value="all" @selected($opd === 'all')>Semua OPD</option>
+                @foreach($opdOptions as $op)
+                    <option value="{{ $op->id }}" @selected($opd === $op->id)>{{ $op->nama }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-6 col-md-2">
-            <select class="form-select form-select-sm" wire:model.live="penerima">
-                <option value="all">Semua penerima</option>
-                <option value="perorangan">Perorangan</option>
-                <option value="organisasi">Organisasi</option>
+        <div class="col-6 col-md-2" wire:ignore>
+            <select id="dashboard-filter-status" class="form-select form-select-sm">
+                <option value="all" @selected($status === 'all')>Semua status</option>
+                @foreach($statusOptions as $st)
+                    <option value="{{ $st->value }}" @selected($status === $st->value)>{{ $st->getDescription() }}</option>
+                @endforeach
             </select>
         </div>
-        <div class="col-6 col-md-2">
-            <select class="form-select form-select-sm" wire:model.live="verif">
-                <option value="all">Semua verifikasi</option>
-                <option value="usulan">Usulan</option>
-                <option value="verifikasi">Sudah Verifikasi BA</option>
+        <div class="col-6 col-md-2" wire:ignore>
+            <select id="dashboard-filter-penerima" class="form-select form-select-sm">
+                <option value="all" @selected($penerima === 'all')>Semua penerima</option>
+                <option value="perorangan" @selected($penerima === 'perorangan')>Perorangan</option>
+                <option value="organisasi" @selected($penerima === 'organisasi')>Organisasi</option>
             </select>
         </div>
-        <div class="col-6 col-md-5">
+        <div class="col-6 col-md-2" wire:ignore>
+            <select id="dashboard-filter-verif" class="form-select form-select-sm">
+                <option value="all" @selected($verif === 'all')>Semua verifikasi</option>
+                <option value="usulan" @selected($verif === 'usulan')>Usulan</option>
+                <option value="verifikasi" @selected($verif === 'verifikasi')>Sudah Verifikasi BA</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
                        class="form-control form-control-sm"
@@ -78,3 +86,46 @@
         <div>{{ $items->onEachSide(1)->links() }}</div>
     </div>
 </div>
+
+@script
+<script>
+    const initDashboardFilterSelect2 = () => {
+        if (typeof $ === 'undefined' || !$.fn.select2) {
+            setTimeout(initDashboardFilterSelect2, 50);
+
+            return;
+        }
+
+        const bind = (id, prop, searchable) => {
+            const $sel = $('#' + id);
+            if (! $sel.length) {
+                return;
+            }
+
+            if (! $sel.hasClass('select2-hidden-accessible')) {
+                $sel.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    minimumResultsForSearch: searchable ? 0 : Infinity,
+                });
+            }
+
+            $sel.val($wire.get(prop)).trigger('change.select2');
+            $sel.off('change.dashFilter').on('change.dashFilter', function () {
+                $wire.set(prop, $(this).val());
+            });
+        };
+
+        bind('dashboard-filter-opd', 'opd', true);
+        bind('dashboard-filter-status', 'status', false);
+        bind('dashboard-filter-penerima', 'penerima', false);
+        bind('dashboard-filter-verif', 'verif', false);
+    };
+
+    initDashboardFilterSelect2();
+
+    Livewire.hook('morph.updated', () => {
+        setTimeout(initDashboardFilterSelect2, 0);
+    });
+</script>
+@endscript
