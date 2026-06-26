@@ -26,7 +26,7 @@
             <div class="card-body">
                 <livewire:reports.dashboard-pengajuan-list
                     :kategori="$kategori"
-                    :status="'all'"
+                    :status="$status"
                     :penerima="$penerima"
                     :verif="$verif" />
             </div>

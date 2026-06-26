@@ -64,16 +64,16 @@
                             </a>
                             <div class="dash-rows">
                                 <a class="dash-row dash-row--link" href="{{ $teregistrasiUrl }}">
-                                    <span class="dash-row__label">Teregistrasi</span>
-                                    <span class="dash-row__value">{{ number_format($kartu['teregistrasi']) }}</span>
+                                    <span class="dash-row__label">Verifikasi NIK</span>
+                                    <span class="dash-row__value">{{ number_format(max(0, $kartu['teregistrasi'] - $kartu['disetujui'] - $kartu['diajukan'])) }}</span>
                                 </a>
-                                <a class="dash-row dash-row--link" href="{{ ($kartu['teregistrasiOrganisasi'] ?? false) ? route('dashboard.organisasi', ['jenis' => $kartu['jenis'], 'pengajuan' => 'belum']) : route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
-                                    <span class="dash-row__label">Proses Pengajuan</span>
-                                    <span class="dash-row__value">{{ number_format(max(0, $kartu['teregistrasi'] - $kartu['total'])) }}</span>
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'status' => 'diajukan']) }}">
+                                    <span class="dash-row__label">Proses Pengajuan SKPD</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['diajukan']) }}</span>
                                 </a>
-                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis']]) }}">
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'status' => 'disetujui']) }}">
                                     <span class="dash-row__label">Verifikasi BA</span>
-                                    <span class="dash-row__value">{{ number_format($kartu['total']) }}</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['disetujui']) }}</span>
                                 </a>
                             </div>
                         </div>
