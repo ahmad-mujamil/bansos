@@ -173,9 +173,10 @@ class LaporanPengajuanController extends Controller
     {
         $kategori = (string) request('kategori', 'all');
         $status = (string) request('status', 'all');
+        $opd = (string) request('opd', 'all');
         $filename = 'laporan-pengajuan-'.date('YmdHis').'.xlsx';
 
-        return Excel::download(new LaporanPengajuanExport($kategori, $status), $filename);
+        return Excel::download(new LaporanPengajuanExport($kategori, $status, $opd), $filename);
     }
 
     public function show(Pengajuan $pengajuan)
