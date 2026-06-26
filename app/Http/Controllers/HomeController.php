@@ -86,9 +86,27 @@ class HomeController extends Controller
             $totalPendudukTerverifikasi = Penduduk::query()
                 ->whereNotNull('validated_at')
                 ->count();
+
+            $totalDiverifikasiSaya = Penduduk::query()
+                ->where('validated_by', $user->id)
+                ->whereNotNull('validated_at')
+                ->count();
+            $totalValid = Penduduk::query()
+                ->where('validated_by', $user->id)
+                ->where('is_valid', true)
+                ->count();
+            $totalTidakValid = Penduduk::query()
+                ->where('validated_by', $user->id)
+                ->where('is_valid', false)
+                ->whereNotNull('validated_at')
+                ->count();
+
             return view('home-dukcapil', compact(
                 'totalPenduduk',
-                'totalPendudukTerverifikasi'
+                'totalPendudukTerverifikasi',
+                'totalDiverifikasiSaya',
+                'totalValid',
+                'totalTidakValid',
             ));
         }
 

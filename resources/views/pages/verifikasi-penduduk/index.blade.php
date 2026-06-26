@@ -32,11 +32,11 @@
                         <div class="d-flex gap-2 w-100 align-items-center">
                             <div class="flex-grow-1">
                                 <select id="filter-status-validasi" class="form-select form-select-sm">
-                                    <option value="all" selected>Semua Status</option>
-                                    <option value="1">Terverifikasi</option>
-                                    <option value="0">Belum Diverifikasi</option>
-                                    <option value="2">Ditolak</option>
-                                    <option value="3">Sudah Perbaikan</option>
+                                    <option value="all" @selected(request('status', 'all') === 'all')>Semua Status</option>
+                                    <option value="1" @selected(request('status') === '1')>Terverifikasi</option>
+                                    <option value="0" @selected(request('status') === '0')>Belum Diverifikasi</option>
+                                    <option value="2" @selected(request('status') === '2')>Ditolak</option>
+                                    <option value="3" @selected(request('status') === '3')>Sudah Perbaikan</option>
                                 </select>
                             </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm">
@@ -132,6 +132,7 @@
                 url: "{!! route('verifikasi-penduduk.index') !!}",
                 data: function (d) {
                     d.status = $('#filter-status-validasi').val();
+                    d.verifikator = new URLSearchParams(window.location.search).get('verifikator') || '';
                 }
             },
             columns: [

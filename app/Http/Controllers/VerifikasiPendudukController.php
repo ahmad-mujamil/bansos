@@ -20,6 +20,10 @@ class VerifikasiPendudukController extends Controller
             ->with(['kecamatan', 'desa', 'validatedBy'])
             ->withCount(['historyVerifikasi as perbaikan_count' => fn ($q) => $q->where('action', 'perbaikan')]);
 
+        if (request('verifikator') === 'me') {
+            $query->where('validated_by', auth()->id());
+        }
+
         if ($statusRequest === '1') {
             $query->where('is_valid', true);
         } elseif ($statusRequest === '0') {
