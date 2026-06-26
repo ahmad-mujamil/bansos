@@ -24,7 +24,7 @@
 
         <div class="card mb-5">
             <div class="card-body">
-                <livewire:reports.organisasi-teregistrasi-list :jenis="$jenis" />
+                <livewire:reports.organisasi-teregistrasi-list :jenis="$jenis" :pengajuan="$pengajuan" />
             </div>
         </div>
     </div>

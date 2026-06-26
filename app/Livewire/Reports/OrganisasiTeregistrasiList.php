@@ -20,9 +20,10 @@ class OrganisasiTeregistrasiList extends DataList
     public string $jenis = '';
     public string $status = 'all';
     public string $kecamatanId = 'all';
+    public string $pengajuan = 'all';
     public ?string $expandedId = null;
 
-    public function mount(string $jenis = ''): void
+    public function mount(string $jenis = '', string $pengajuan = 'all'): void
     {
         $this->configure([
             'model' => Organisasi::class,
@@ -37,6 +38,7 @@ class OrganisasiTeregistrasiList extends DataList
         ]);
 
         $this->jenis = $jenis;
+        $this->pengajuan = in_array($pengajuan, ['belum', 'sudah'], true) ? $pengajuan : 'all';
     }
 
     public function updatedStatus(): void
@@ -50,6 +52,15 @@ class OrganisasiTeregistrasiList extends DataList
 
     public function updatedKecamatanId(): void
     {
+        $this->expandedId = null;
+        $this->resetPage();
+    }
+
+    public function updatedPengajuan(): void
+    {
+        if (! in_array($this->pengajuan, ['belum', 'sudah'], true)) {
+            $this->pengajuan = 'all';
+        }
         $this->expandedId = null;
         $this->resetPage();
     }
@@ -77,6 +88,12 @@ class OrganisasiTeregistrasiList extends DataList
 
         if ($this->kecamatanId !== 'all') {
             $query->where('kecamatan_id', $this->kecamatanId);
+        }
+
+        if ($this->pengajuan === 'belum') {
+            $query->whereDoesntHave('pengajuans');
+        } elseif ($this->pengajuan === 'sudah') {
+            $query->whereHas('pengajuans');
         }
 
         $query->withCount('organisasiDetail');

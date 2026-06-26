@@ -154,15 +154,25 @@ class HomeController extends Controller
         $jenis = JenisPengajuan::tryFrom((string) request()->query('jenis'));
         abort_if($jenis === null, 404);
 
+        $pengajuanParam = (string) request()->query('pengajuan');
+        $pengajuan = in_array($pengajuanParam, ['belum', 'sudah'], true) ? $pengajuanParam : 'all';
+
         $judulJenis = match ($jenis) {
             JenisPengajuan::BANSOS => 'Bantuan Sosial',
             JenisPengajuan::HIBAH => 'Hibah',
             JenisPengajuan::BANTUAN_KELOMPOK => 'Bantuan ke Masyarakat',
         };
 
+        $judulPengajuan = match ($pengajuan) {
+            'belum' => ' · Belum Mengajukan',
+            'sudah' => ' · Sudah Mengajukan',
+            default => '',
+        };
+
         return view('pages.dashboard.organisasi', [
             'jenis' => $jenis->value,
-            'judul' => 'Organisasi Teregistrasi · ' . $judulJenis,
+            'pengajuan' => $pengajuan,
+            'judul' => 'Organisasi Teregistrasi · ' . $judulJenis . $judulPengajuan,
         ]);
     }
 
