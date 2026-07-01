@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPengajuan;
 use App\Enums\JenisUser;
+use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
 use App\Models\Desa;
 use App\Models\JenisBantuan;
@@ -14,6 +15,7 @@ use App\Models\OrganisasiDetail;
 use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
+use App\Services\PengajuanSnapshotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -315,8 +317,20 @@ class PengajuanController extends Controller
         }
 
         $oldStatus = $pengajuan->status->value;
-        $pengajuan->update(['status' => PengajuanStatus::DIAJUKAN]);
-        $this->logPengajuan($pengajuan, 'status_changed', $oldStatus, PengajuanStatus::DIAJUKAN->value);
+
+        try {
+            DB::beginTransaction();
+            $pengajuan->update(['status' => PengajuanStatus::DIAJUKAN]);
+            $this->logPengajuan($pengajuan, 'status_changed', $oldStatus, PengajuanStatus::DIAJUKAN->value);
+            app(PengajuanSnapshotService::class)->capture($pengajuan, MomenSnapshot::DIAJUKAN);
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            toast()->error('Gagal', 'Pengajuan gagal diajukan.');
+
+            return redirect()->route('pengajuan.index');
+        }
+
         toast()->success('Berhasil', 'Pengajuan berhasil diajukan.');
 
         return redirect()->route('pengajuan.index');
