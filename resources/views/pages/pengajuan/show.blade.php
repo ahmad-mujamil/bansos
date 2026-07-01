@@ -171,6 +171,8 @@
                                 <div class="fw-semibold text-body">{{ $pengajuan->organisasi?->nama ?? '-' }}</div>
                             </div>
                         </div>
+
+                        @include('pages.pengajuan.partials.snapshot', ['pengajuan' => $pengajuan])
                         <div class="col-12">
                             <div class="pengajuan-field-tile border border-separator bg-foreground p-3 h-100">
                                 <div class="text-muted text-small text-uppercase mb-2">Lokasi & wilayah</div>

@@ -70,6 +70,8 @@
                     <div class="text-muted small">Kecamatan</div>
                     <div>{{ $pengajuan->desa?->kecamatan?->nama ?? '-' }}</div>
                 </div>
+
+                @include('pages.pengajuan.partials.snapshot', ['pengajuan' => $pengajuan])
             </div>
         </div>
     </div>
