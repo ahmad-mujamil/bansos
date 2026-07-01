@@ -31,6 +31,9 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+    // Ganti tahun anggaran aktif (semua role) — dinamis tanpa login ulang
+    Route::post('/tahun-anggaran/pilih', [App\Http\Controllers\TahunAnggaranController::class, 'pilih'])->name('tahun-anggaran.pilih');
+
     // Detail data dashboard (admin/super) — daftar pengajuan sesuai metrik yang diklik
     Route::middleware(['role:super,admin'])->group(function () {
         Route::get('/dashboard/detail', [App\Http\Controllers\HomeController::class, 'detail'])->name('dashboard.detail');
@@ -210,6 +213,10 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
         Route::get('cari-penduduk-by-nik', CariPendudukByNikController::class)->name('penduduk.cari-by-nik');
         Route::resource('opd', App\Http\Controllers\OpdController::class);
         Route::resource('jenis-bantuan', App\Http\Controllers\JenisBantuanController::class);
+        Route::middleware(['role:super,admin'])->group(function () {
+            Route::resource('tahun-anggaran', App\Http\Controllers\TahunAnggaranController::class)
+                ->except(['show']);
+        });
         Route::resource('jenis-kelompok-masyarakat', App\Http\Controllers\JenisKelompokMasyarakatController::class);
         Route::get('kelompok-masyarakat/penduduk-by-nik', [App\Http\Controllers\KelompokMasyarakatController::class, 'lookupPendudukByNik'])->name('kelompok-masyarakat.penduduk-by-nik');
         Route::resource('kelompok-masyarakat', App\Http\Controllers\KelompokMasyarakatController::class);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\JenisOrganisasi;
 use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
+use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
 use App\Models\Desa;
 use App\Models\JenisBantuan;
@@ -15,6 +16,7 @@ use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
 use App\Models\PengajuanLog;
+use App\Services\PengajuanSnapshotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -431,8 +433,20 @@ class PengajuanOpdController extends Controller
         }
 
         $oldStatus = $pengajuan->status->value;
-        $pengajuan->update(['status' => PengajuanStatus::DIAJUKAN]);
-        $this->logPengajuan($pengajuan, 'status_changed', $oldStatus, PengajuanStatus::DIAJUKAN->value);
+
+        try {
+            DB::beginTransaction();
+            $pengajuan->update(['status' => PengajuanStatus::DIAJUKAN]);
+            $this->logPengajuan($pengajuan, 'status_changed', $oldStatus, PengajuanStatus::DIAJUKAN->value);
+            app(PengajuanSnapshotService::class)->capture($pengajuan, MomenSnapshot::DIAJUKAN);
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            toast()->error('Gagal', 'Pengajuan OPD gagal diajukan.');
+
+            return redirect()->route('pengajuan-opd.index');
+        }
+
         toast()->success('Berhasil', 'Pengajuan OPD berhasil diajukan.');
 
         return redirect()->route('pengajuan-opd.index');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\JabatanOrganisasi;
+use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Enums\RupaBantuan;
@@ -13,6 +14,7 @@ use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
 use App\Models\PengajuanPemeriksa;
 use App\Models\VerifikasiPengajuan;
+use App\Services\PengajuanSnapshotService;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -198,6 +200,11 @@ class VerifikasiPengajuanController extends Controller
             ]);
 
             if ($newStatus === PengajuanStatus::DISETUJUI) {
+                $snapshotService = app(PengajuanSnapshotService::class);
+                $snapshotService->capture($pengajuan, MomenSnapshot::DISETUJUI);
+                // Cukup simpan satu snapshot aktif: buang snapshot "diajukan" yang kini redundan.
+                $snapshotService->forget($pengajuan, MomenSnapshot::DIAJUKAN);
+
                 $rupa = $request->validated('rupa_bantuan');
 
                 if (! $rupa) {
@@ -301,6 +308,12 @@ class VerifikasiPengajuanController extends Controller
             }
 
             PengajuanPemeriksa::where('pengajuan_id', $pengajuan->id)->delete();
+
+            // Keputusan dibatalkan: buang snapshot "disetujui", lalu pulihkan snapshot
+            // "diajukan" karena pengajuan kembali ke status Diajukan.
+            $snapshotService = app(PengajuanSnapshotService::class);
+            $snapshotService->forget($pengajuan, MomenSnapshot::DISETUJUI);
+            $snapshotService->capture($pengajuan, MomenSnapshot::DIAJUKAN);
 
             $pengajuan->status = PengajuanStatus::DIAJUKAN;
             $pengajuan->verified_at = null;
@@ -455,6 +468,41 @@ class VerifikasiPengajuanController extends Controller
             ?? '-';
 
         $isIndividu =  $pengajuan->organisasi_id === null;
+
+        // Utamakan data beku saat disetujui agar dokumen konsisten dengan kondisi
+        // saat di-ACC, walau nama kelompok/anggota berubah setelahnya.
+        $snapshotDisetujui = $pengajuan->snapshotMomen(MomenSnapshot::DISETUJUI);
+        if ($snapshotDisetujui) {
+            $namaKelompok = $snapshotDisetujui->nama_kelompok ?: $namaKelompok;
+
+            $prioritasJabatanSnapshot = [
+                JabatanOrganisasi::KETUA->value,
+                JabatanOrganisasi::WAKIL->value,
+                JabatanOrganisasi::SEKRETARIS->value,
+                JabatanOrganisasi::BENDAHARA->value,
+                JabatanOrganisasi::ADMIN->value,
+                JabatanOrganisasi::ANGGOTA->value,
+            ];
+
+            $ketuaSnapshot = $snapshotDisetujui->anggota
+                ->sortBy(function ($anggota) use ($prioritasJabatanSnapshot) {
+                    $idx = array_search($anggota->jabatan, $prioritasJabatanSnapshot, true);
+
+                    return $idx === false ? count($prioritasJabatanSnapshot) : $idx;
+                })
+                ->first(fn ($anggota) => $anggota->nama);
+
+            if ($ketuaSnapshot?->nama) {
+                $pemohon = $ketuaSnapshot->nama;
+            }
+        }
+
+        if ($isIndividu) {
+            $penerimaSnapshot = $pengajuan->penerimaMomen(MomenSnapshot::DISETUJUI);
+            if ($penerimaSnapshot->isNotEmpty()) {
+                $namaKelompok = $penerimaSnapshot->first()->nama;
+            }
+        }
         $kepalaSkpd = $verifikasi->disahkan_oleh ?? '-';
         $nipKepalaSkpd = $verifikasi->disahkan_nip ?? '-';
         $jumlahUsulan = 0;

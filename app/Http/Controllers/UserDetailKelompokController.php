@@ -53,7 +53,8 @@ class UserDetailKelompokController extends Controller
                 'required',
                 'exists:penduduk,id',
                 \Illuminate\Validation\Rule::unique('organisasi_detail', 'penduduk_id')
-                    ->where('organisasi_id', $organisasi->id),
+                    ->where('organisasi_id', $organisasi->id)
+                    ->where('tahun_anggaran', tahun_aktif()),
             ],
             'jabatan' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\JabatanOrganisasi::class)],
         ]);

@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
+use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
+use App\Models\Concerns\BelongsToTahunAnggaran;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +17,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Pengajuan extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia;
+    use BelongsToTahunAnggaran, HasUuids, InteractsWithMedia;
 
     /**
      * @var mixed|true
@@ -78,6 +80,40 @@ class Pengajuan extends Model implements HasMedia
     public function logs(): HasMany
     {
         return $this->hasMany(PengajuanLog::class);
+    }
+
+    public function kelompokSnapshots(): HasMany
+    {
+        return $this->hasMany(PengajuanKelompokSnapshot::class);
+    }
+
+    public function penerimaSnapshots(): HasMany
+    {
+        return $this->hasMany(PengajuanPenerimaSnapshot::class);
+    }
+
+    /**
+     * Snapshot kelompok pada momen tertentu (diajukan | disetujui).
+     */
+    public function snapshotMomen(MomenSnapshot $momen): ?PengajuanKelompokSnapshot
+    {
+        return $this->kelompokSnapshots()
+            ->with('anggota')
+            ->where('momen', $momen->value)
+            ->first();
+    }
+
+    /**
+     * Snapshot daftar penerima individu/keluarga pada momen tertentu.
+     *
+     * @return \Illuminate\Support\Collection<int, PengajuanPenerimaSnapshot>
+     */
+    public function penerimaMomen(MomenSnapshot $momen): \Illuminate\Support\Collection
+    {
+        return $this->penerimaSnapshots()
+            ->where('momen', $momen->value)
+            ->orderBy('created_at')
+            ->get();
     }
 
     public function registerMediaCollections(): void

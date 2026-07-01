@@ -1,5 +1,44 @@
 <?php
 
+if (! function_exists('tahun_aktif')) {
+    /**
+     * Tahun anggaran yang sedang dipilih (konteks aplikasi).
+     *
+     * Nilai yang di-bind middleware (per-request) → tahun kalender berjalan.
+     * Aman dipanggil sebelum migrasi/seed.
+     */
+    function tahun_aktif(): int
+    {
+        if (app()->bound('tahun_anggaran_terpilih')) {
+            return (int) app('tahun_anggaran_terpilih');
+        }
+
+        return (int) date('Y');
+    }
+}
+
+if (! function_exists('tahun_terkunci')) {
+    /**
+     * Apakah sebuah tahun anggaran terkunci (read-only). Default: tahun terpilih.
+     */
+    function tahun_terkunci(?int $tahun = null): bool
+    {
+        $tahun ??= tahun_aktif();
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('tahun_anggaran')) {
+                return (bool) \App\Models\TahunAnggaran::query()
+                    ->where('tahun', $tahun)
+                    ->value('is_terkunci');
+            }
+        } catch (\Throwable $e) {
+            // anggap tidak terkunci bila tabel belum ada
+        }
+
+        return false;
+    }
+}
+
 if (! function_exists('get_day_name')) {
     function get_day_name($day): string
     {
