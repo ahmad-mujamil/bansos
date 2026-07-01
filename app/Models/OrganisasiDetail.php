@@ -3,22 +3,24 @@
 namespace App\Models;
 
 use App\Enums\JabatanOrganisasi;
+use App\Models\Concerns\BelongsToTahunAnggaran;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrganisasiDetail extends Model
 {
-    use HasUuids;
+    use BelongsToTahunAnggaran, HasUuids;
     protected $table = 'organisasi_detail';
     protected $keyType = 'string';
 
-    protected $fillable = ['organisasi_id', 'penduduk_id', 'jabatan'];
+    protected $fillable = ['organisasi_id', 'penduduk_id', 'jabatan', 'tahun_anggaran'];
 
     protected function casts(): array
     {
         return [
             'jabatan' => JabatanOrganisasi::class,
+            'tahun_anggaran' => 'integer',
         ];
     }
 

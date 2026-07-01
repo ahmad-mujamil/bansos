@@ -13,7 +13,39 @@
     <!-- Logo End -->
 
     <!-- User Menu Start -->
-    <div class="user-container d-flex">
+    <div class="user-container d-flex align-items-center">
+        <!-- Tahun Anggaran Switcher (kanan atas) -->
+        @auth
+        <div class="dropdown d-inline-block me-3">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle d-flex align-items-center gap-1"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Tahun Anggaran">
+                <i data-acorn-icon="calendar" data-acorn-size="15"></i>
+                <span>TA {{ $tahunTerpilih ?? date('Y') }}</span>
+                @if(! empty($tahunTerpilihTerkunci))
+                    <i data-acorn-icon="lock-on" data-acorn-size="14" class="text-warning" title="Terkunci"></i>
+                @endif
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <h6 class="dropdown-header">Pilih Tahun Anggaran</h6>
+                @forelse(($tahunAnggaranList ?? collect()) as $ta)
+                    <form action="{{ route('tahun-anggaran.pilih') }}" method="POST" class="m-0">
+                        @csrf
+                        <input type="hidden" name="tahun" value="{{ $ta->tahun }}">
+                        <button type="submit"
+                                class="dropdown-item d-flex align-items-center justify-content-between {{ (int)($tahunTerpilih ?? 0) === (int)$ta->tahun ? 'active' : '' }}">
+                            <span>{{ $ta->label_tampil }}</span>
+                            <span>
+                                @if($ta->is_terkunci)<i data-acorn-icon="lock-on" data-acorn-size="13" class="text-warning" title="Terkunci"></i>@endif
+                            </span>
+                        </button>
+                    </form>
+                @empty
+                    <span class="dropdown-item-text text-muted small">Belum ada tahun anggaran.</span>
+                @endforelse
+            </div>
+        </div>
+        @endauth
+
         <a href="#" class="d-flex user position-relative" data-bs-toggle="dropdown" aria-haspopup="true"
            aria-expanded="false">
             <img class="profile" alt="profile" src="{{ asset(auth()->user()->pengguna->foto??'img/logo-only.png') }}"/>

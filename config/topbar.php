@@ -33,6 +33,11 @@ return [
                 'title' => 'Jenis Bantuan',
             ],
             [
+                'id' => 'TAHUN_ANGGARAN',
+                'url' => '/tahun-anggaran',
+                'title' => 'Tahun Anggaran',
+            ],
+            [
                 'id' => 'OPD',
                 'url' => '/opd',
                 'title' => 'OPD',

@@ -7,6 +7,8 @@ use App\Http\Requests\KelompokMasyarakatAnggotaRequest;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDetail;
 use App\Models\Penduduk;
+use App\Models\Scopes\TahunAnggaranScope;
+use App\Services\RosterKelompokService;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,8 +17,11 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function index(string $kelompok_masyarakat)
     {
         $organisasi = Organisasi::query()
-        
+
             ->findOrFail($kelompok_masyarakat);
+
+        // Copy-on-first-use: seed roster tahun terpilih dari tahun sebelumnya bila kosong.
+        app(RosterKelompokService::class)->ensureSeeded($organisasi, tahun_aktif());
 
         confirmDelete('Hapus Anggota', 'Apakah Anda yakin ingin menghapus anggota ini?');
         if (request()->ajax()) {
@@ -113,6 +118,7 @@ class KelompokMasyarakatAnggotaController extends Controller
             ->findOrFail($kelompok_masyarakat);
 
         $detail = OrganisasiDetail::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
             ->where('organisasi_id', $kelompok_masyarakat)
             ->findOrFail($anggota);
 
@@ -128,6 +134,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function update(KelompokMasyarakatAnggotaRequest $request, string $kelompok_masyarakat, string $anggota): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $detail = OrganisasiDetail::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
             ->where('organisasi_id', $kelompok_masyarakat)
             ->findOrFail($anggota);
 
@@ -156,6 +163,7 @@ class KelompokMasyarakatAnggotaController extends Controller
     public function destroy(string $kelompok_masyarakat, string $anggota): \Illuminate\Http\RedirectResponse
     {
         $detail = OrganisasiDetail::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
             ->where('organisasi_id', $kelompok_masyarakat)
             ->findOrFail($anggota);
 
