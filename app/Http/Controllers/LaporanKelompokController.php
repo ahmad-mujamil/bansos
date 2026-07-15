@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\LaporanKelompokExport;
 use App\Models\Opd;
 use App\Models\Organisasi;
+use App\Models\TahunAnggaran;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -44,7 +45,18 @@ class LaporanKelompokController extends Controller
             );
         }
 
-        return $q->orderBy('opd.nama')->orderBy('organisasi.nama');
+        $tahun = request('tahun_anggaran');
+        if (is_numeric($tahun)) {
+            $q->where('organisasi.tahun_anggaran', (int) $tahun);
+        }
+
+        // Grup utama OPD; di dalamnya dipisah per tahun anggaran (terbaru dulu).
+        $q->orderBy('opd.nama');
+        if (! is_numeric($tahun)) {
+            $q->orderByDesc('organisasi.tahun_anggaran');
+        }
+
+        return $q->orderBy('organisasi.nama');
     }
 
     private function data()
@@ -58,6 +70,7 @@ class LaporanKelompokController extends Controller
             ->addColumn('desa', fn ($row) => $row->desa?->nama ?? '-')
             ->addColumn('tgl_pembentukan', fn ($row) => $row->tgl_pembentukan?->format('d-m-Y') ?? '-')
             ->addColumn('jumlah_anggota', fn ($row) => $row->organisasi_detail_count)
+            ->addColumn('tahun_anggaran', fn ($row) => $row->tahun_anggaran ?? '-')
             ->addColumn('status', fn ($row) => $row->is_active
                 ? '<span class="badge bg-success">Aktif</span>'
                 : '<span class="badge bg-danger">Nonaktif</span>')
@@ -72,8 +85,9 @@ class LaporanKelompokController extends Controller
         }
 
         $opds = Opd::query()->orderBy('nama')->get(['id', 'nama']);
+        $tahunList = TahunAnggaran::query()->orderByDesc('tahun')->get(['tahun', 'label']);
 
-        return view('pages.laporan-kelompok.index', compact('opds'));
+        return view('pages.laporan-kelompok.index', compact('opds', 'tahunList'));
     }
 
     public function preview()

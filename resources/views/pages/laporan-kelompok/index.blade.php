@@ -44,6 +44,14 @@
                                     <option value="1">Ada Anggota Belum Terverifikasi</option>
                                 </select>
                             </div>
+                            <div class="flex-grow-1" style="min-width: 9rem;">
+                                <select id="filter-tahun" class="form-select form-select-sm">
+                                    <option value="">Semua Tahun</option>
+                                    @foreach ($tahunList as $ta)
+                                        <option value="{{ $ta->tahun }}">{{ $ta->label ?: 'TA '.$ta->tahun }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm" style="min-width: 10rem;">
                                 <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-laporan-kelompok" />
                                 <span class="search-magnifier-icon"><i data-acorn-icon="search"></i></span>
@@ -149,8 +157,9 @@
         const $filterOpd = $('#filter-opd');
         const $filterStatus = $('#filter-status');
         const $filterBelumVerifikasi = $('#filter-belum-verifikasi');
+        const $filterTahun = $('#filter-tahun');
 
-        [$filterOpd, $filterStatus, $filterBelumVerifikasi].forEach(function ($el) {
+        [$filterOpd, $filterStatus, $filterBelumVerifikasi, $filterTahun].forEach(function ($el) {
             if ($el.length) {
                 $el.select2({ theme: 'bootstrap4', width: '100%' });
             }
@@ -179,6 +188,7 @@
                     if ($filterOpd.length) d.opd_id = $filterOpd.val();
                     d.status = $filterStatus.val();
                     d.belum_verifikasi = $filterBelumVerifikasi.val();
+                    d.tahun_anggaran = $filterTahun.val();
                 },
             },
             columns: [
@@ -192,20 +202,37 @@
                 { data: 'status',         name: 'status',          searchable: false },
                 { data: 'opd',            name: 'opd',             visible: false, searchable: false },
                 { data: 'id',             name: 'id',              visible: false, searchable: false },
+                { data: 'tahun_anggaran', name: 'tahun_anggaran',  visible: false, searchable: false },
             ],
             drawCallback: function () {
-                var api   = this.api();
-                var rows  = api.rows({ page: 'current' }).nodes();
-                var last  = null;
+                var api = this.api();
+                // Pisah per tahun (di dalam OPD) hanya saat "Semua Tahun" dipilih.
+                var groupByTahun = !$filterTahun.val();
+                var lastOpd = null;
+                var lastTahun = null;
 
-                api.column(8, { page: 'current' }).data().each(function (group, i) {
-                    if (last !== group) {
-                        $(rows).eq(i).before(
+                api.rows({ page: 'current' }).every(function () {
+                    var d = this.data();
+                    var node = this.node();
+
+                    if (d.opd !== lastOpd) {
+                        $(node).before(
                             '<tr class="group-opd-header"><td colspan="' + VISIBLE_COLS + '">' +
-                            '<i class="me-2">&#9776;</i>' + group +
+                            '<i class="me-2">&#9776;</i>' + d.opd +
                             '</td></tr>'
                         );
-                        last = group;
+                        lastOpd = d.opd;
+                        lastTahun = null; // reset grouping tahun di tiap OPD baru
+                    }
+
+                    if (groupByTahun && d.tahun_anggaran !== lastTahun) {
+                        $(node).before(
+                            '<tr class="group-tahun-header"><td colspan="' + VISIBLE_COLS + '" ' +
+                            'style="background:#eef2ff;font-weight:600;padding-left:2.5rem">' +
+                            '<i data-acorn-icon="calendar" class="me-2"></i>Tahun Anggaran ' + (d.tahun_anggaran || '-') +
+                            '</td></tr>'
+                        );
+                        lastTahun = d.tahun_anggaran;
                     }
                 });
             },
@@ -214,6 +241,7 @@
         $filterOpd.on('change', function () { tableLaporanKelompok.ajax.reload(); });
         $filterStatus.on('change', function () { tableLaporanKelompok.ajax.reload(); });
         $filterBelumVerifikasi.on('change', function () { tableLaporanKelompok.ajax.reload(); });
+        $filterTahun.on('change', function () { tableLaporanKelompok.ajax.reload(); });
 
         const baseAnggotaUrl = "{!! url('laporan-kelompok') !!}";
 
@@ -243,7 +271,7 @@
             }).join('');
         }
 
-        $('#datatable-laporan-kelompok tbody').on('click', 'tr:not(.group-opd-header):not(.child)', function () {
+        $('#datatable-laporan-kelompok tbody').on('click', 'tr:not(.group-opd-header):not(.group-tahun-header):not(.child)', function () {
             var tr  = $(this);
             var row = tableLaporanKelompok.row(tr);
 
@@ -284,6 +312,7 @@
             const params = new URLSearchParams();
             if ($filterOpd.length && $filterOpd.val()) params.set('opd_id', $filterOpd.val());
             if ($filterStatus.val()) params.set('status', $filterStatus.val());
+            if ($filterTahun.val()) params.set('tahun_anggaran', $filterTahun.val());
             const query = params.toString();
             window.open("{!! route('laporan-kelompok.preview') !!}" + (query ? '?' + query : ''), '_blank');
         });
@@ -293,6 +322,7 @@
             const params = new URLSearchParams();
             if ($filterOpd.length && $filterOpd.val()) params.set('opd_id', $filterOpd.val());
             if ($filterStatus.val()) params.set('status', $filterStatus.val());
+            if ($filterTahun.val()) params.set('tahun_anggaran', $filterTahun.val());
             const query = params.toString();
             window.location.href = "{!! route('laporan-kelompok.export') !!}" + (query ? '?' + query : '');
         });

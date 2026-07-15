@@ -79,6 +79,7 @@
                     <thead>
                         <tr>
                             <th class="text-muted text-small text-uppercase">Nama</th>
+                            <th class="text-muted text-small text-uppercase">Tahun</th>
                             <th class="text-muted text-small text-uppercase">Nomor SK / Tgl Pembentukan</th>
                             <th class="text-muted text-small text-uppercase">Kecamatan / Desa</th>
                             <th class="text-muted text-small text-uppercase">Anggota</th>
@@ -232,6 +233,7 @@
             ajax: "{!! route('kelompok-masyarakat.index') !!}",
             columns: [
                 { data: 'nama', name: 'nama' },
+                { data: 'tahun_anggaran', name: 'tahun_anggaran' },
                 { data: 'nomor_tgl', name: 'nomor_tgl' },
                 { data: 'wilayah', name: 'wilayah' },
                 { data: 'anggota', name: 'anggota' },

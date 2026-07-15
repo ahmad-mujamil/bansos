@@ -16,6 +16,7 @@
     <div class="user-container d-flex align-items-center">
         <!-- Tahun Anggaran Switcher (kanan atas) -->
         @auth
+        @unless(auth()->user()->is_dukcapil())
         <div class="dropdown d-inline-block me-3">
             <button class="btn btn-sm btn-outline-primary dropdown-toggle d-flex align-items-center gap-1"
                     type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Tahun Anggaran">
@@ -44,6 +45,7 @@
                 @endforelse
             </div>
         </div>
+        @endunless
         @endauth
 
         <a href="#" class="d-flex user position-relative" data-bs-toggle="dropdown" aria-haspopup="true"
