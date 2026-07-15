@@ -159,6 +159,12 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                            @if(isset($organisasi) && $organisasi->tahun_anggaran)
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label class="form-label text-small text-uppercase">Tahun Anggaran (dibuat)</label>
+                                <input type="text" class="form-control" value="TA {{ $organisasi->tahun_anggaran }}" readonly disabled/>
+                            </div>
+                            @endif
                             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                                 <label class="form-label text-small text-uppercase">Kecamatan <span class="text-danger">*</span></label>
                                 <select name="kecamatan_id" id="kecamatan_id" class="form-control @error('kecamatan_id') is-invalid @enderror" required>

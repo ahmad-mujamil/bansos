@@ -22,8 +22,19 @@ class Organisasi extends Model
         return [
             'tgl_pembentukan' => 'date:Y-m-d',
             'is_active' => 'boolean',
-            'is_blacklist' => 'boolean'
+            'is_blacklist' => 'boolean',
+            'tahun_anggaran' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Tandai tahun anggaran saat kelompok pertama dibuat (bila belum diisi).
+        static::creating(function (Organisasi $organisasi) {
+            if (empty($organisasi->tahun_anggaran)) {
+                $organisasi->tahun_anggaran = tahun_aktif();
+            }
+        });
     }
 
     public function organisasiDetail(): HasMany

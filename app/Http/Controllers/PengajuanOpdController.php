@@ -17,6 +17,7 @@ use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
 use App\Models\PengajuanLog;
 use App\Services\PengajuanSnapshotService;
+use App\Services\RosterKelompokService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -120,6 +121,7 @@ class PengajuanOpdController extends Controller
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
         $selectedOrganisasiId = old('organisasi_id');
+        $this->seedRosterKelompok($selectedOrganisasiId);
         $kelompokSimpanDiblokir = $selectedOrganisasiId
             ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
             : false;
@@ -288,6 +290,7 @@ class PengajuanOpdController extends Controller
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
         $selectedOrganisasiId = old('organisasi_id', $pengajuan->organisasi_id);
+        $this->seedRosterKelompok($selectedOrganisasiId);
         $kelompokSimpanDiblokir = $selectedOrganisasiId
             ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
             : false;
@@ -523,6 +526,8 @@ class PengajuanOpdController extends Controller
             ->where('is_blacklist', false)
             // ->where('opd_id', $opdId)
             ->whereIn('jenis', $jenisOrganisasiValues)
+            // Kelompok hanya muncul bila dibuat pada/atau sebelum tahun terpilih.
+            ->where('tahun_anggaran', '<=', tahun_aktif())
             ->orderBy('nama')
             ->get(['id', 'nama']);
     }
@@ -553,6 +558,22 @@ class PengajuanOpdController extends Controller
             ->where('organisasi_id', $organisasiId)
             ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
             ->exists();
+    }
+
+    /**
+     * Pastikan roster kelompok untuk tahun terpilih sudah ada (copy-on-first-use),
+     * sehingga pemeriksaan anggota mengikuti roster tahun anggaran terpilih.
+     */
+    private function seedRosterKelompok(?string $organisasiId): void
+    {
+        if (! $organisasiId) {
+            return;
+        }
+
+        $organisasi = Organisasi::find($organisasiId);
+        if ($organisasi) {
+            app(RosterKelompokService::class)->ensureSeeded($organisasi, tahun_aktif());
+        }
     }
 
     private function validatePengajuanVerifikasi(Request $request): void
