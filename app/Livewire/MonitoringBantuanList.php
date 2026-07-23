@@ -139,7 +139,11 @@ class MonitoringBantuanList extends Component
     private function baseQuery(): Builder
     {
         return $this->scopedQuery()
-            ->with(['user', 'opd', 'jenisBantuan', 'media', 'verifikasiPengajuan.media', 'bast.media'])
+            ->with([
+                'user', 'opd', 'jenisBantuan', 'media', 'verifikasiPengajuan.media', 'bast.media',
+                // Info penerima: pakai snapshot beku bila ada, fallback ke data live.
+                'organisasi', 'details.penduduk', 'kelompokSnapshots', 'penerimaSnapshots',
+            ])
             ->select('pengajuan.*')
             ->latest('pengajuan.created_at');
     }
