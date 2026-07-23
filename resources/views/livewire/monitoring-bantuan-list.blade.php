@@ -121,6 +121,33 @@
                             ], true);
                             $bisaBatalVerifikasi = $sudahDiverifikasi && ($isAdmin || ! $dokumenBaVerifikasiUrl);
                             $detailId = 'monitoring-detail-'.$pengajuan->id;
+
+                            // Info penerima — utamakan snapshot beku (saat disetujui, lalu diajukan),
+                            // fallback ke data live bila pengajuan lama belum punya snapshot.
+                            $momenDisetujui = \App\Enums\MomenSnapshot::DISETUJUI;
+                            $momenDiajukan = \App\Enums\MomenSnapshot::DIAJUKAN;
+
+                            $snapKelompok = $pengajuan->kelompokSnapshots->firstWhere('momen', $momenDisetujui)
+                                ?? $pengajuan->kelompokSnapshots->firstWhere('momen', $momenDiajukan);
+
+                            $penerimaSnap = $pengajuan->penerimaSnapshots->where('momen', $momenDisetujui);
+                            if ($penerimaSnap->isEmpty()) {
+                                $penerimaSnap = $pengajuan->penerimaSnapshots->where('momen', $momenDiajukan);
+                            }
+
+                            $isKelompok = $pengajuan->organisasi_id !== null;
+                            if ($isKelompok) {
+                                $namaPenerima = $snapKelompok?->nama_kelompok ?? $pengajuan->organisasi?->nama ?? '-';
+                                $jumlahPenerima = $snapKelompok?->jumlah_anggota;
+                                $nikPenerima = null;
+                            } else {
+                                $penerimaUtama = $penerimaSnap->first() ?? $pengajuan->details->first()?->penduduk;
+                                $namaPenerima = $penerimaUtama?->nama ?? '-';
+                                $nikPenerima = $penerimaUtama?->nik;
+                                $jumlahPenerima = $penerimaSnap->isNotEmpty()
+                                    ? $penerimaSnap->count()
+                                    : $pengajuan->details->count();
+                            }
                         @endphp
                         <div class="list-group-item p-0" wire:key="monitoring-{{ $pengajuan->id }}">
                             {{-- Baris ringkasan --}}
@@ -145,6 +172,17 @@
                                             @endif
                                         </div>
                                         <div class="fw-semibold text-truncate" title="{{ $pengajuan->judul }}">{{ $pengajuan->judul ?? '-' }}</div>
+                                        <div class="text-small text-truncate" title="Penerima: {{ $namaPenerima }}">
+                                            <span class="badge bg-{{ $isKelompok ? 'primary' : 'secondary' }} me-1">
+                                                {{ $isKelompok ? 'Kelompok' : 'Individu' }}
+                                            </span>
+                                            <span class="fw-semibold text-body">{{ $namaPenerima }}</span>
+                                            @if ($isKelompok && $jumlahPenerima)
+                                                <span class="text-muted">· {{ $jumlahPenerima }} anggota</span>
+                                            @elseif (! $isKelompok && $nikPenerima)
+                                                <span class="text-muted">· NIK {{ $nikPenerima }}</span>
+                                            @endif
+                                        </div>
                                         <div class="text-small text-muted text-truncate">
                                             {{ $pengajuan->jenisBantuan?->nama ?? '-' }} ·
                                             {{ $pengajuan->user?->nama ?? $pengajuan->user?->email ?? '-' }} ·
@@ -179,6 +217,18 @@
                                         <div class="col-12 col-md-3">
                                             <div class="text-small text-uppercase text-muted mb-1">Pemohon</div>
                                             <div class="fw-semibold">{{ $pengajuan->user?->nama ?? $pengajuan->user?->email ?? '-' }}</div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">Penerima</div>
+                                            <div class="fw-semibold">{{ $namaPenerima }}</div>
+                                            <div class="text-small text-muted">
+                                                {{ $isKelompok ? 'Kelompok' : 'Individu' }}
+                                                @if ($isKelompok && $jumlahPenerima)
+                                                    · {{ $jumlahPenerima }} anggota
+                                                @elseif (! $isKelompok && $nikPenerima)
+                                                    · NIK {{ $nikPenerima }}
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="col-12 col-md-3">
                                             <div class="text-small text-uppercase text-muted mb-1">Dinas / OPD</div>
