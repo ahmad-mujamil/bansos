@@ -16,6 +16,7 @@ use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanLog;
 use App\Services\PengajuanSnapshotService;
+use App\Services\RosterKelompokService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -45,6 +46,8 @@ class PengajuanController extends Controller
         $kelompokList = Organisasi::query()
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->where('is_active', true)
+            // Kelompok hanya muncul bila dibuat pada/atau sebelum tahun terpilih.
+            ->where('tahun_anggaran', '<=', tahun_aktif())
             ->orderBy('nama')
             ->get(['id', 'nama']);
         $pendudukList = Penduduk::query()
@@ -61,6 +64,7 @@ class PengajuanController extends Controller
         $kecamatans = Kecamatan::query()->with('desa')->orderBy('nama')->get();
 
         $organisasiId = auth()->user()->userDetail?->organisasi_id;
+        $this->seedRosterKelompok($organisasiId);
         $selectedPendudukId = old('penduduk_id');
         $pendudukIsValidMap = $this->pendudukIsValidMap();
         $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
@@ -194,6 +198,8 @@ class PengajuanController extends Controller
         $kelompokList = Organisasi::query()
             ->where('jenis', JenisOrganisasi::KELOMPOK)
             ->where('is_active', true)
+            // Kelompok hanya muncul bila dibuat pada/atau sebelum tahun terpilih.
+            ->where('tahun_anggaran', '<=', tahun_aktif())
             ->orderBy('nama')
             ->get(['id', 'nama']);
         $pendudukList = Penduduk::query()
@@ -209,6 +215,7 @@ class PengajuanController extends Controller
 
         $jenis = $this->jenisPengajuanForUser();
         $organisasiId = auth()->user()->userDetail?->organisasi_id;
+        $this->seedRosterKelompok($organisasiId);
         $selectedPendudukId = old('penduduk_id', $pengajuan->details->first()?->penduduk_id);
         $pendudukIsValidMap = $this->pendudukIsValidMap();
         $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
@@ -391,6 +398,22 @@ class PengajuanController extends Controller
             ->get(['id', 'is_valid'])
             ->mapWithKeys(fn (Penduduk $p) => [$p->id => (bool) $p->is_valid])
             ->all();
+    }
+
+    /**
+     * Pastikan roster kelompok untuk tahun terpilih sudah ada (copy-on-first-use),
+     * sehingga pemeriksaan anggota mengikuti roster tahun anggaran terpilih.
+     */
+    private function seedRosterKelompok(?string $organisasiId): void
+    {
+        if (! $organisasiId) {
+            return;
+        }
+
+        $organisasi = Organisasi::find($organisasiId);
+        if ($organisasi) {
+            app(RosterKelompokService::class)->ensureSeeded($organisasi, tahun_aktif());
+        }
     }
 
     private function kelompokMemilikiAnggotaBelumTerverifikasi(string $organisasiId): bool

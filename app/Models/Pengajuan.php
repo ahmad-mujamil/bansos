@@ -6,6 +6,7 @@ use App\Enums\JenisPenerimaBantuan;
 use App\Enums\JenisPengajuan;
 use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
+use App\Models\Concerns\BelongsToTahunAnggaran;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Pengajuan extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia;
+    use BelongsToTahunAnggaran, HasUuids, InteractsWithMedia;
 
     /**
      * @var mixed|true

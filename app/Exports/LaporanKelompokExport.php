@@ -41,6 +41,7 @@ class LaporanKelompokExport implements FromCollection, WithHeadings, ShouldAutoS
             'Desa/Kelurahan',
             'Jumlah Anggota',
             'Status',
+            'Tahun Anggaran',
             'NIK',
             'Nama Anggota',
             'Jabatan',
@@ -69,6 +70,7 @@ class LaporanKelompokExport implements FromCollection, WithHeadings, ShouldAutoS
                 $kelompok->desa?->nama ?? '-',
                 $kelompok->organisasi_detail_count ?? $kelompok->organisasiDetail->count(),
                 $kelompok->is_active ? 'Aktif' : 'Nonaktif',
+                $kelompok->tahun_anggaran ?? '-',
             ];
 
             $details = $kelompok->organisasiDetail
@@ -120,7 +122,7 @@ class LaporanKelompokExport implements FromCollection, WithHeadings, ShouldAutoS
     public function columnFormats(): array
     {
         return [
-            'L' => NumberFormat::FORMAT_TEXT,
+            'M' => NumberFormat::FORMAT_TEXT,
         ];
     }
 
@@ -132,7 +134,7 @@ class LaporanKelompokExport implements FromCollection, WithHeadings, ShouldAutoS
                 $highestRow = $sheet->getHighestRow();
 
                 for ($row = 2; $row <= $highestRow; $row++) {
-                    $cell = $sheet->getCell("L{$row}");
+                    $cell = $sheet->getCell("M{$row}");
                     $cell->setValueExplicit((string) $cell->getValue(), DataType::TYPE_STRING);
                 }
             },

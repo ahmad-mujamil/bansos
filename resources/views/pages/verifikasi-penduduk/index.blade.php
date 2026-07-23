@@ -119,6 +119,9 @@
                     previous: '<i class="cs-chevron-left"></i>',
                     next: '<i class="cs-chevron-right"></i>',
                 },
+                info: 'Menampilkan _START_–_END_ dari <strong>_TOTAL_</strong> data',
+                infoEmpty: 'Menampilkan 0 dari 0 data',
+                infoFiltered: '(disaring dari _MAX_ total data)',
             },
             buttons: ['copy', 'excel', 'csv', 'print'],
             processing: true,
@@ -127,7 +130,7 @@
             lengthChange: true,
             order: [[6, 'desc']],
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
+            sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-4"l><"col-sm-4 text-center text-muted small"i><"col-sm-4"p>>',
             ajax: {
                 url: "{!! route('verifikasi-penduduk.index') !!}",
                 data: function (d) {

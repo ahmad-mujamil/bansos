@@ -7,6 +7,7 @@ use App\Models\OrganisasiDetail;
 use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
 use App\Models\PengajuanKelompokSnapshot;
+use App\Models\Scopes\TahunAnggaranScope;
 use Illuminate\Support\Facades\Auth;
 
 class PengajuanSnapshotService
@@ -57,7 +58,15 @@ class PengajuanSnapshotService
             return null;
         }
 
+        // Pastikan roster tahun pengajuan sudah ada (copy-on-first-use), lalu
+        // ambil roster untuk TAHUN PENGAJUAN (bukan tahun yang sedang dipilih di UI,
+        // karena verifikator bisa memakai konteks tahun yang berbeda).
+        $tahun = (int) $pengajuan->tahun_anggaran ?: tahun_aktif();
+        app(RosterKelompokService::class)->ensureSeeded($organisasi, $tahun);
+
         $anggota = $organisasi->organisasiDetail()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
+            ->where('tahun_anggaran', $tahun)
             ->with('penduduk')
             ->orderBy('created_at')
             ->get();
