@@ -44,7 +44,8 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             'Judul',
             'Jenis Pengajuan',
             'Jenis Bantuan',
-            'Pemohon',
+            'Kelompok Pemohon',
+            'Anggota Kelompok',
             'NIK/Wilayah',
             'Desil Penduduk',
             'OPD',
@@ -116,7 +117,8 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                     $rows->push($this->buildRow(
                         $row,
                         ++$no,
-                        $org->nama . ($anggota?->nama ? ' - ' . $anggota->nama : ''),
+                        $org->nama,
+                        $anggota?->nama ?? '-',
                         $anggota?->nik ?? ($wilayah !== '' ? $wilayah : '-'),
                         $this->desilLabel($anggota),
                     ));
@@ -142,6 +144,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $row,
                 ++$no,
                 $pemohon,
+                '-',
                 $nikWilayah !== '' ? $nikWilayah : '-',
                 $this->desilLabel($penduduk),
             ));
@@ -150,7 +153,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         return $rows;
     }
 
-    private function buildRow(Pengajuan $row, int $no, string $pemohon, string $nikWilayah, string $desilLabel): array
+    private function buildRow(Pengajuan $row, int $no, string $pemohon, string $anggota, string $nikWilayah, string $desilLabel): array
     {
         $yaTidak = fn(?bool $v) => $v === null ? '-' : ($v ? 'Ya' : 'Tidak');
         $org = $row->organisasi;
@@ -173,6 +176,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 ?? '-',
             $row->jenisBantuan?->nama ?? '-',
             $pemohon,
+            $anggota !== '' ? $anggota : '-',
             $nikWilayah !== '' ? $nikWilayah : '-',
             $desilLabel,
             $row->opd?->nama ?? '-',
@@ -218,7 +222,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
     public function columnFormats(): array
     {
         return [
-            'G' => NumberFormat::FORMAT_TEXT,
+            'H' => NumberFormat::FORMAT_TEXT,
         ];
     }
 
@@ -230,7 +234,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $highestRow = $sheet->getHighestRow();
 
                 for ($row = 2; $row <= $highestRow; $row++) {
-                    $cell = $sheet->getCell("G{$row}");
+                    $cell = $sheet->getCell("H{$row}");
                     $cell->setValueExplicit((string) $cell->getValue(), DataType::TYPE_STRING);
                 }
             },
