@@ -50,37 +50,10 @@
                 @csrf
                 @method($method)
                 <div class="card-body">
+                    {{-- Langkah 1: pilih pengajuan lebih dulu --}}
                     <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Nomor BAST</label>
-                            <input type="text" class="form-control @error('nomor') is-invalid @enderror" name="nomor"
-                                   value="{{ old('nomor', $bast->nomor ?? '') }}" required />
-                            @error('nomor')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Tanggal</label>
-                            <input type="text" id="tanggal" autocomplete="off"
-                                   class="form-control @error('tanggal') is-invalid @enderror" name="tanggal"
-                                   value="{{ old('tanggal', isset($bast) ? $bast->tanggal?->format('d-m-Y') : '') }}"
-                                   placeholder="dd-mm-yyyy" required />
-                            @error('tanggal')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Penerima</label>
-                            <input type="text" class="form-control @error('penerima') is-invalid @enderror" name="penerima"
-                                   value="{{ old('penerima', $bast->penerima ?? '') }}" required />
-                            @error('penerima')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-lg-8 col-md-8 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Pengajuan</label>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Pengajuan <span class="text-danger">*</span></label>
                             <select name="pengajuan_id" id="pengajuan_id"
                                     class="form-control @error('pengajuan_id') is-invalid @enderror" required>
                                 <option value="">Pilih Pengajuan</option>
@@ -94,8 +67,67 @@
                             @error('pengajuan_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="text-muted">Pilih pengajuan yang akan dibuatkan BAST terlebih dahulu.</small>
                         </div>
                     </div>
+
+                    {{-- Resume singkat pengajuan terpilih --}}
+                    <div class="row" id="resume-row" style="display:none;">
+                        <div class="col-12 mb-3">
+                            <div class="border rounded p-3 bg-light" id="resume-pengajuan"></div>
+                        </div>
+                    </div>
+
+                    {{-- Nilai rekomendasi (khusus subsidi bunga, diisi saat BAST) --}}
+                    <div class="row" id="nilai-rekomendasi-row" style="display:none;">
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                            <label class="form-label text-small text-uppercase">Nilai Usulan Rekomendasi (Kredit) <span class="text-danger">*</span></label>
+                            <input type="text" inputmode="numeric" autocomplete="off"
+                                   class="form-control @error('nilai_rekomendasi') is-invalid @enderror"
+                                   id="nilai_rekomendasi" name="nilai_rekomendasi"
+                                   value="{{ old('nilai_rekomendasi', isset($bast) && $bast->pengajuan?->verifikasiPengajuan?->nilai_rekomendasi !== null ? number_format((float) $bast->pengajuan->verifikasiPengajuan->nilai_rekomendasi, 0, ',', '.') : '') }}"
+                                   placeholder="0" />
+                            @error('nilai_rekomendasi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Diisi khusus untuk pengajuan subsidi bunga.</small>
+                        </div>
+                    </div>
+
+                    {{-- Langkah 2: detail BAST (muncul setelah pengajuan dipilih) --}}
+                    <div id="bast-detail-fields" style="display:none;">
+                        <hr class="my-3">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label class="form-label text-small text-uppercase">Nomor BAST</label>
+                                <input type="text" class="form-control @error('nomor') is-invalid @enderror" name="nomor"
+                                       value="{{ old('nomor', $bast->nomor ?? '') }}" required />
+                                @error('nomor')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label class="form-label text-small text-uppercase">Tanggal</label>
+                                <input type="text" id="tanggal" autocomplete="off"
+                                       class="form-control @error('tanggal') is-invalid @enderror" name="tanggal"
+                                       value="{{ old('tanggal', isset($bast) ? $bast->tanggal?->format('d-m-Y') : '') }}"
+                                       placeholder="dd-mm-yyyy" required />
+                                @error('tanggal')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-small text-uppercase">Penerima</label>
+                                <input type="text" class="form-control @error('penerima') is-invalid @enderror" name="penerima"
+                                       value="{{ old('penerima', $bast->penerima ?? '') }}" required />
+                                @error('penerima')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                             <label class="form-label text-small text-uppercase">
@@ -142,7 +174,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary mt-3">Simpan Data</button>
+                        <button type="submit" class="btn btn-primary mt-3">Simpan Data</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -157,7 +190,72 @@
 @push('js_vendor')
     <script src="{{ asset('js/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
     <script src="{{ asset('js/vendor/select2.full.min.js') }}"></script>
+    @php
+        $pengajuanResume = $pengajuan->mapWithKeys(function ($p) {
+            $isSubsidi = $p->kategori_pengajuan === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA;
+            $pemohon = $p->organisasi_id ? $p->organisasi?->nama : $p->details->first()?->penduduk?->nama;
+            $rek = $p->verifikasiPengajuan?->nilai_rekomendasi;
+
+            return [$p->id => [
+                'is_subsidi'        => $isSubsidi,
+                'jenis'             => $p->kategori_pengajuan?->getDescription() ?? '-',
+                'tipe_pemohon'      => $p->organisasi_id ? 'Kelompok' : 'Individu',
+                'pemohon'           => $pemohon ?: '-',
+                'judul_label'       => $isSubsidi ? 'Nama Usaha' : 'Judul',
+                'judul'             => $p->judul ?: '-',
+                'nilai_label'       => $isSubsidi ? 'Nilai Usulan Kredit' : 'Nilai Usulan',
+                'nilai'             => $p->nilai !== null ? 'Rp '.number_format((float) $p->nilai, 0, ',', '.') : '-',
+                'nilai_rekomendasi' => $rek !== null ? 'Rp '.number_format((float) $rek, 0, ',', '.') : null,
+                'jenis_bantuan'     => $p->jenisBantuan?->nama,
+                'wilayah'           => trim(($p->desa?->nama ?? '').($p->desa?->kecamatan?->nama ? ', '.$p->desa->kecamatan->nama : '')) ?: '-',
+            ]];
+        });
+    @endphp
     <script>
+        var pengajuanResume = @json($pengajuanResume);
+
+        function renderResumePengajuan(id) {
+            var d = pengajuanResume[id];
+            if (!d) {
+                $('#resume-row').hide();
+                $('#nilai-rekomendasi-row').hide();
+                $('#bast-detail-fields').hide();
+                $('#nilai_rekomendasi').prop('required', false);
+                return;
+            }
+
+            // Pengajuan terpilih → tampilkan field detail BAST.
+            $('#bast-detail-fields').show();
+
+            var lbl = function (t) { return '<span class="text-muted text-uppercase" style="font-size:.7rem">' + t + '</span>'; };
+            var cell = function (t, v) { return '<div class="col-md-6 mb-1">' + lbl(t) + '<div class="fw-semibold">' + v + '</div></div>'; };
+
+            var html = ''
+                + '<div class="d-flex flex-wrap align-items-center gap-2 mb-2">'
+                +   '<span class="badge bg-info text-dark">' + d.jenis + '</span>'
+                +   '<span class="badge bg-secondary">' + d.tipe_pemohon + '</span>'
+                + '</div>'
+                + '<div class="row g-2 small">'
+                +   cell('Pemohon', d.pemohon)
+                +   cell(d.judul_label, d.judul)
+                +   cell(d.nilai_label, d.nilai)
+                +   (d.nilai_rekomendasi ? cell('Nilai Rekomendasi', d.nilai_rekomendasi) : '')
+                +   cell('Wilayah', d.wilayah)
+                +   (d.jenis_bantuan ? cell('Jenis Bantuan', d.jenis_bantuan) : '')
+                + '</div>';
+
+            $('#resume-pengajuan').html(html);
+            $('#resume-row').show();
+
+            if (d.is_subsidi) {
+                $('#nilai-rekomendasi-row').show();
+                $('#nilai_rekomendasi').prop('required', true);
+            } else {
+                $('#nilai-rekomendasi-row').hide();
+                $('#nilai_rekomendasi').prop('required', false);
+            }
+        }
+
         $("document").ready(function () {
             $('#tanggal').datepicker({
                 autoclose: true,
@@ -169,6 +267,19 @@
                 placeholder: 'Pilih Pengajuan',
                 allowClear: true,
             });
+
+            // Format ribuan pada input nilai rekomendasi.
+            $('#nilai_rekomendasi').on('input', function () {
+                var v = this.value.replace(/[^\d]/g, '');
+                this.value = v ? Number(v).toLocaleString('id-ID') : '';
+            });
+
+            $('#pengajuan_id').on('change', function () {
+                renderResumePengajuan($(this).val());
+            });
+
+            // Tampilkan resume awal (mis. saat edit / old input).
+            renderResumePengajuan($('#pengajuan_id').val());
         });
     </script>
 @endpush

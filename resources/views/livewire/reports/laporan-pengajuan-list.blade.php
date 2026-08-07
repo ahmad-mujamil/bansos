@@ -1,12 +1,13 @@
 <div class="laporan-pengajuan-list">
     {{-- Tab kategori --}}
-    <div class="laporan-tabs d-flex flex-wrap gap-3 mb-4" role="tablist">
+    <div class="laporan-tabs d-flex flex-wrap gap-2 mb-4" role="tablist">
         @php
             $tabMeta = [
                 'all'                                               => ['class' => 'laporan-tab-all',      'icon' => 'layout-3',  'title' => 'Semua',           'sub' => 'Semua Jenis Pengajuan'],
                 \App\Enums\JenisPengajuan::BANSOS->value             => ['class' => 'laporan-tab-bansos',   'icon' => 'user',     'title' => 'Bansos',           'sub' => 'Bantuan Sosial'],
                 \App\Enums\JenisPengajuan::HIBAH->value              => ['class' => 'laporan-tab-hibah',    'icon' => 'gift',     'title' => 'Hibah',            'sub' => 'Bantuan Hibah'],
                 \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value   => ['class' => 'laporan-tab-kelompok', 'icon' => 'building', 'title' => 'Bantuan Kelompok', 'sub' => 'Barang Diserahkan ke Masyarakat'],
+                \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value      => ['class' => 'laporan-tab-subsidi',  'icon' => 'dollar',   'title' => 'Subsidi Bunga',    'sub' => 'Subsidi Bunga Kredit'],
             ];
         @endphp
         @foreach($tabMeta as $value => $meta)
@@ -27,7 +28,7 @@
     {{-- Filter row --}}
     <div class="row g-2 align-items-center mb-3">
         @if($this->showOpdFilter())
-            <div class="col-12 col-md-3" wire:ignore>
+            <div class="col-12 col-md-2" wire:ignore>
                 <select id="laporan-filter-opd" class="form-select form-select-sm" data-placeholder="Semua OPD">
                     <option value="all" @selected($opd === 'all')>Semua OPD</option>
                     @foreach($opdOptions as $op)
@@ -36,7 +37,7 @@
                 </select>
             </div>
         @endif
-        <div class="col-12 col-md-{{ $this->showOpdFilter() ? '2' : '3' }}">
+        <div class="col-6 col-md-2">
             <select class="form-select form-select-sm" wire:model.live="status">
                 <option value="all">Semua status</option>
                 @foreach($statusOptions as $st)
@@ -44,7 +45,18 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-md-2">
+            @php
+                $namaBulan = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+            @endphp
+            <select class="form-select form-select-sm" wire:model.live="bulan" title="Periode bulan (tahun mengikuti Tahun Anggaran)">
+                <option value="all">Semua bulan</option>
+                @foreach($namaBulan as $num => $label)
+                    <option value="{{ $num }}">{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
                        class="form-control form-control-sm"
@@ -54,10 +66,23 @@
             </div>
         </div>
         <div class="col-12 col-md-3 text-md-end">
-            <a href="{{ route('laporan-pengajuan.export', ['kategori' => $kategori, 'status' => $status, 'opd' => $opd]) }}"
-               class="btn btn-sm btn-success">
-                <i data-acorn-icon="download" class="me-1"></i> Export Excel
-            </a>
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i data-acorn-icon="download" class="me-1"></i> Export Excel
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('laporan-pengajuan.export', ['mode' => 'detail', 'kategori' => $kategori, 'status' => $status, 'opd' => $opd, 'bulan' => $bulan]) }}">
+                            <i data-acorn-icon="file-text" class="me-2"></i> Detail (per anggota)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('laporan-pengajuan.export', ['mode' => 'rekap', 'kategori' => $kategori, 'status' => $status, 'opd' => $opd, 'bulan' => $bulan]) }}">
+                            <i data-acorn-icon="list" class="me-2"></i> Rekap (per pengajuan)
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 

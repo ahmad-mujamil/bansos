@@ -45,6 +45,7 @@
                     </div>
 
                     <div class="row">
+                        @unless($isSubsidiBunga)
                         <div class="col-12 col-lg-6 mt-3">
                             <label class="form-label text-muted text-small text-uppercase" for="nilai-rekomendasi-verifikasi">Nilai Rekomendasi</label>
                             <div wire:ignore.self>
@@ -60,17 +61,23 @@
                             </div>
                             @error('nilai_rekomendasi') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
+                        @endunless
 
                         <div class="col-12 col-lg-6 mt-3">
                             <label class="form-label text-muted text-small text-uppercase" for="select-rupa-bantuan">Rupa Bantuan</label>
-                            <div wire:ignore>
-                                <select class="form-select" id="select-rupa-bantuan" data-placeholder="- Pilih -">
-                                    <option value="">- Pilih -</option>
-                                    @foreach($rupaOptions as $rupa)
-                                        <option value="{{ $rupa->value }}" @selected($rupa_bantuan === $rupa->value)>{{ $rupa->getDescription() }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            @if($isSubsidiBunga)
+                                <input type="text" class="form-control" value="{{ \App\Enums\RupaBantuan::SUBSIDI_BUNGA->getDescription() }}" readonly disabled>
+                                <div class="form-text">Rupa bantuan otomatis terpilih untuk pengajuan subsidi bunga.</div>
+                            @else
+                                <div wire:ignore>
+                                    <select class="form-select" id="select-rupa-bantuan" data-placeholder="- Pilih -">
+                                        <option value="">- Pilih -</option>
+                                        @foreach($rupaOptions as $rupa)
+                                            <option value="{{ $rupa->value }}" @selected($rupa_bantuan === $rupa->value)>{{ $rupa->getDescription() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                             @error('rupa_bantuan') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>

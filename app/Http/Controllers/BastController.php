@@ -14,11 +14,29 @@ class BastController extends Controller
 {
     private function data()
     {
-        $data = Bast::query()->with(['pengajuan.verifikasiPengajuan', 'user'])->latest();
+        $opdId = Auth::user()->opd_id;
+
+        $data = Bast::query()
+            ->with(['pengajuan.verifikasiPengajuan', 'user'])
+            // Hanya BAST dari pengajuan milik OPD user yang login (super/admin tanpa OPD: semua).
+            ->when($opdId !== null, fn ($q) => $q->whereHas('pengajuan', fn ($p) => $p->where('opd_id', $opdId)))
+            ->latest();
 
         return DataTables::of($data)
             ->editColumn('tanggal', fn ($row) => $row->tanggal->format('d-m-Y'))
             ->addColumn('kode_pengajuan', fn ($row) => $row->pengajuan?->kode_pengajuan ?? '-')
+            ->addColumn('jenis_bantuan', function ($row) {
+                $kategori = $row->pengajuan?->kategori_pengajuan;
+                $warna = match ($kategori) {
+                    \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                    \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                    \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                    \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                    default => 'bg-secondary',
+                };
+
+                return '<span class="badge '.$warna.'">'.e($kategori?->getDescription() ?? '-').'</span>';
+            })
             ->addColumn('nilai_rekomendasi', function ($row) {
                 $nilai = $row->pengajuan?->verifikasiPengajuan?->nilai_rekomendasi;
 
@@ -34,7 +52,7 @@ class BastController extends Controller
 
                 return $navActionStart.$show.$edit.$delete.$navActionEnd;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['jenis_bantuan', 'action'])
             ->toJson();
     }
 
@@ -52,7 +70,9 @@ class BastController extends Controller
     {
         $opdId = Auth::user()->opd_id;
 
-        $pengajuan = $this->pengajuanSiapBast($opdId)->get();
+        $pengajuan = $this->pengajuanSiapBast($opdId)
+            ->with(['organisasi', 'details.penduduk', 'verifikasiPengajuan', 'jenisBantuan', 'desa.kecamatan'])
+            ->get();
 
         return view('pages.bast.create', compact('pengajuan'));
     }
@@ -92,6 +112,18 @@ class BastController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
+            // Subsidi bunga: nilai rekomendasi kredit diisi saat BAST → simpan ke verifikasi.
+            $pengajuanBast = Pengajuan::query()->with('verifikasiPengajuan')->find($validated['pengajuan_id']);
+            if (
+                $pengajuanBast?->kategori_pengajuan === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA
+                && ($validated['nilai_rekomendasi'] ?? null) !== null
+                && $pengajuanBast->verifikasiPengajuan
+            ) {
+                $pengajuanBast->verifikasiPengajuan->update([
+                    'nilai_rekomendasi' => $validated['nilai_rekomendasi'],
+                ]);
+            }
+
             if ($request->hasFile('dokumen')) {
                 $bast->addMediaFromRequest('dokumen')->toMediaCollection('dokumen');
             }
@@ -129,7 +161,10 @@ class BastController extends Controller
         // (yang sudah punya BAST) agar tetap terpilih di form.
         $pengajuan = $this->pengajuanSiapBast($opdId)
             ->orWhere('pengajuan.id', $bast->pengajuan_id)
+            ->with(['organisasi', 'details.penduduk', 'verifikasiPengajuan', 'jenisBantuan', 'desa.kecamatan'])
             ->get();
+
+        $bast->load('pengajuan.verifikasiPengajuan');
 
         return view('pages.bast.create', compact('bast', 'pengajuan'));
     }
@@ -146,6 +181,18 @@ class BastController extends Controller
                 'tanggal' => \Carbon\Carbon::createFromFormat('d-m-Y', $validated['tanggal'])->format('Y-m-d'),
                 'penerima' => $validated['penerima'],
             ]);
+
+            // Subsidi bunga: perbarui nilai rekomendasi kredit bila diisi.
+            $pengajuanBast = Pengajuan::query()->with('verifikasiPengajuan')->find($validated['pengajuan_id']);
+            if (
+                $pengajuanBast?->kategori_pengajuan === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA
+                && ($validated['nilai_rekomendasi'] ?? null) !== null
+                && $pengajuanBast->verifikasiPengajuan
+            ) {
+                $pengajuanBast->verifikasiPengajuan->update([
+                    'nilai_rekomendasi' => $validated['nilai_rekomendasi'],
+                ]);
+            }
 
             if ($request->hasFile('dokumen')) {
                 $bast->addMediaFromRequest('dokumen')->toMediaCollection('dokumen');

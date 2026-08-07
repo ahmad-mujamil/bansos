@@ -6,6 +6,7 @@ use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RoleUser;
 use App\Exports\LaporanPengajuanExport;
+use App\Exports\LaporanPengajuanRekapExport;
 use App\Models\Pengajuan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -174,9 +175,18 @@ class LaporanPengajuanController extends Controller
         $kategori = (string) request('kategori', 'all');
         $status = (string) request('status', 'all');
         $opd = (string) request('opd', 'all');
+        $bulan = (string) request('bulan', 'all');
+        $mode = (string) request('mode', 'detail');
+
+        if ($mode === 'rekap') {
+            $filename = 'rekap-pengajuan-'.date('YmdHis').'.xlsx';
+
+            return Excel::download(new LaporanPengajuanRekapExport($kategori, $status, $opd, $bulan), $filename);
+        }
+
         $filename = 'laporan-pengajuan-'.date('YmdHis').'.xlsx';
 
-        return Excel::download(new LaporanPengajuanExport($kategori, $status, $opd), $filename);
+        return Excel::download(new LaporanPengajuanExport($kategori, $status, $opd, $bulan), $filename);
     }
 
     public function show(Pengajuan $pengajuan)

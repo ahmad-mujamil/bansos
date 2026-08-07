@@ -202,6 +202,17 @@
                                     @if ($pengajuan->bast)
                                         <a href="{{ route('bast.show', $pengajuan->bast) }}" class="btn btn-sm btn-outline-success">Lihat BAST</a>
                                     @endif
+                                    @if ($pengajuan->bast && $isBendahara)
+                                        @if ($pengajuan->sp2d)
+                                            <button type="button" class="btn btn-sm btn-success" wire:click="viewSp2d('{{ $pengajuan->id }}')" title="Lihat detail SP2D">
+                                                Sudah SP2D
+                                            </button>
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-primary" wire:click="openSp2d('{{ $pengajuan->id }}')">
+                                                Input SP2D
+                                            </button>
+                                        @endif
+                                    @endif
                                     @if ($bisaBatalVerifikasi)
                                         <button type="button" class="btn btn-sm btn-outline-danger btn-batal-verifikasi" data-url="{{ route('verifikasi-pengajuan.batal-verifikasi', $pengajuan) }}">
                                             Batal Verifikasi
@@ -251,6 +262,17 @@
                                                 <span class="badge bg-info text-white">Belum ada BAST</span>
                                             @endif
                                         </div>
+                                        @if ($pengajuan->sp2d)
+                                        <div class="col-12 col-md-3">
+                                            <div class="text-small text-uppercase text-muted mb-1">SP2D <span class="badge bg-success ms-1">Diperiksa Bendahara</span></div>
+                                            <div class="fw-semibold">No. {{ $pengajuan->sp2d->nomor }}</div>
+                                            <div class="text-small text-muted">
+                                                {{ $pengajuan->sp2d->tanggal?->translatedFormat('d M Y') ?? '-' }}
+                                                @if ($pengajuan->sp2d->nilai !== null) · Rp {{ number_format((float) $pengajuan->sp2d->nilai, 0, ',', '.') }} @endif
+                                            </div>
+                                            <div class="text-small text-muted">Oleh: {{ $pengajuan->sp2d->user?->nama ?? 'bendahara' }}</div>
+                                        </div>
+                                        @endif
                                     </div>
 
                                     <div class="mt-3">
@@ -275,6 +297,10 @@
                                             @endif
                                             @if ($dokumenBastUrl)
                                                 <a href="{{ $dokumenBastUrl }}" target="_blank" class="btn btn-sm btn-outline-success">Dokumen BAST</a>
+                                            @endif
+                                            @php $dokumenSp2dUrl = $pengajuan->sp2d?->getFirstMediaUrl('dokumen'); @endphp
+                                            @if ($dokumenSp2dUrl)
+                                                <a href="{{ $dokumenSp2dUrl }}" target="_blank" class="btn btn-sm btn-outline-warning">Dokumen SP2D</a>
                                             @endif
                                             @if (! $dokumenPengajuanUrl && ! $dokumenBaVerifikasiUrl && ! $dokumenBastUrl && ! auth()->user()?->is_opd())
                                                 <span class="text-small text-muted">Belum ada dokumen.</span>
@@ -358,6 +384,114 @@
             </div>
         </div>
     </div>
+
+    @if($isBendahara && $showSp2dModal)
+            {{-- Modal Input SP2D (bendahara) --}}
+            <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);" wire:click.self="closeSp2d">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form wire:submit="saveSp2d">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Input SP2D</h5>
+                                <button type="button" class="btn-close" wire:click="closeSp2d" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-3">Menginput SP2D menandai pengajuan telah diperiksa/diverifikasi oleh bendahara.</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Nomor SP2D <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('sp2dNomor') is-invalid @enderror" wire:model.blur="sp2dNomor">
+                                    @error('sp2dNomor') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal SP2D <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control @error('sp2dTanggal') is-invalid @enderror" wire:model.blur="sp2dTanggal">
+                                        @error('sp2dTanggal') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Nilai (Rp)</label>
+                                        <input type="text" class="form-control bg-light"
+                                               value="{{ ($sp2dNilai !== null && $sp2dNilai !== '') ? 'Rp '.number_format((float) $sp2dNilai, 0, ',', '.') : '-' }}"
+                                               readonly disabled>
+                                        <small class="text-muted">Mengikuti nilai rekomendasi, tidak dapat diubah.</small>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Keterangan</label>
+                                    <textarea class="form-control @error('sp2dKeterangan') is-invalid @enderror" rows="2" wire:model.blur="sp2dKeterangan"></textarea>
+                                    @error('sp2dKeterangan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Dokumen SP2D (PDF, opsional)</label>
+                                    <input type="file" accept="application/pdf" class="form-control @error('sp2dDokumen') is-invalid @enderror" wire:model="sp2dDokumen">
+                                    <div wire:loading wire:target="sp2dDokumen" class="form-text">Mengunggah…</div>
+                                    @error('sp2dDokumen') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                @error('sp2dPengajuanId') <div class="text-danger small">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" wire:click="closeSp2d">Batal</button>
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveSp2d,sp2dDokumen">
+                                    <span wire:loading.remove wire:target="saveSp2d">Simpan SP2D</span>
+                                    <span wire:loading wire:target="saveSp2d">Menyimpan…</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    @endif
+
+    @if($showSp2dDetail && !empty($sp2dDetail))
+    {{-- Modal Detail SP2D (read-only) --}}
+    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,.5);" wire:click.self="closeSp2dDetail">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail SP2D</h5>
+                    <button type="button" class="btn-close" wire:click="closeSp2dDetail" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="text-small text-uppercase text-muted mb-1">Kode Pengajuan</div>
+                            <div class="fw-semibold">{{ $sp2dDetail['kode_pengajuan'] ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-small text-uppercase text-muted mb-1">Nomor SP2D</div>
+                            <div class="fw-semibold">{{ $sp2dDetail['nomor'] ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-small text-uppercase text-muted mb-1">Tanggal SP2D</div>
+                            <div class="fw-semibold">{{ $sp2dDetail['tanggal'] ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-small text-uppercase text-muted mb-1">Nilai</div>
+                            <div class="fw-semibold">{{ $sp2dDetail['nilai'] ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-small text-uppercase text-muted mb-1">Diperiksa oleh</div>
+                            <div class="fw-semibold">{{ $sp2dDetail['oleh'] ?? '-' }}</div>
+                            <div class="text-small text-muted">{{ $sp2dDetail['dibuat'] ?? '' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="text-small text-uppercase text-muted mb-1">Keterangan</div>
+                            <div>{{ $sp2dDetail['keterangan'] ?? '-' }}</div>
+                        </div>
+                        @if(!empty($sp2dDetail['dokumen_url']))
+                        <div class="col-12">
+                            <a href="{{ $sp2dDetail['dokumen_url'] }}" target="_blank" class="btn btn-sm btn-outline-warning">Lihat Dokumen SP2D</a>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" wire:click="closeSp2dDetail">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 @script

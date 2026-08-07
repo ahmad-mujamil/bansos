@@ -33,7 +33,23 @@
         {{-- BAST Info --}}
         <div class="card mb-3">
             <div class="card-body py-3">
-                <h2 class="small-title mb-3">Informasi BAST</h2>
+                @php
+                    $kategoriBast = $bast->pengajuan?->kategori_pengajuan;
+                    $jenisWarnaBast = match ($kategoriBast) {
+                        \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                        \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                        \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                        \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                        default => 'bg-secondary',
+                    };
+                @endphp
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <h2 class="small-title mb-0">Informasi BAST</h2>
+                    <span class="badge {{ $jenisWarnaBast }} fs-6 px-3 py-2">
+                        <i data-acorn-icon="tag" data-acorn-size="16" class="me-1 align-middle"></i>
+                        {{ $kategoriBast?->getDescription() ?? 'Jenis bantuan tidak diketahui' }}
+                    </span>
+                </div>
                 <div class="row g-2">
                     <div class="col-6 col-md-3">
                         <p class="text-small text-uppercase text-muted mb-1">Nomor BAST</p>
@@ -85,7 +101,12 @@
                                 </div>
                                 <div class="col-6">
                                     <p class="text-small text-uppercase text-muted mb-1">Jenis Bantuan</p>
-                                    <p class="mb-0">{{ $pengajuan->jenisBantuan?->nama ?? '-' }}</p>
+                                    <p class="mb-0">
+                                        <span class="badge {{ $jenisWarnaBast }}">{{ $kategoriBast?->getDescription() ?? '-' }}</span>
+                                        @if($pengajuan->jenisBantuan?->nama)
+                                            <span class="text-muted small ms-1">{{ $pengajuan->jenisBantuan->nama }}</span>
+                                        @endif
+                                    </p>
                                 </div>
                                 <div class="col-6">
                                     <p class="text-small text-uppercase text-muted mb-1">Nilai Pengajuan</p>
