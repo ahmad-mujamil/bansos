@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Enums\RupaBantuan;
 use App\Enums\SatuanBarang;
@@ -65,6 +66,11 @@ class VerifikasiPengajuanForm extends Component
     {
         $this->pengajuan = $pengajuan->loadMissing(['details.penduduk', 'logs', 'user', 'verifiedBy']);
 
+        // Subsidi bunga: rupa bantuan otomatis terpilih dan terkunci.
+        if ($this->isSubsidiBunga()) {
+            $this->rupa_bantuan = RupaBantuan::SUBSIDI_BUNGA->value;
+        }
+
         $this->disahkan_oleh = Auth::user()?->opd?->kepala_opd ?? null;
         $this->disahkan_nip = auth()->user()?->opd?->nip ?? null;
 
@@ -121,6 +127,11 @@ class VerifikasiPengajuanForm extends Component
         ];
     }
 
+    public function isSubsidiBunga(): bool
+    {
+        return $this->pengajuan->kategori_pengajuan === JenisPengajuan::SUBSIDI_BUNGA;
+    }
+
     public function rules(): array
     {
         $rules = [
@@ -139,8 +150,11 @@ class VerifikasiPengajuanForm extends Component
             'pemeriksa.*.jabatan' => ['required', 'string', 'max:255'],
         ];
 
-        if ($this->allPassed()) {
-            $rules['rupa_bantuan'] = ['required', Rule::in(array_map(fn (RupaBantuan $e) => $e->value, RupaBantuan::cases()))];
+        if ($this->allPassed() && $this->isSubsidiBunga()) {
+            // Subsidi bunga: rupa terkunci ke subsidi_bunga, tanpa detail uang/barang/jasa.
+            $rules['rupa_bantuan'] = ['required', Rule::in([RupaBantuan::SUBSIDI_BUNGA->value])];
+        } elseif ($this->allPassed()) {
+            $rules['rupa_bantuan'] = ['required', Rule::in([RupaBantuan::UANG->value, RupaBantuan::BARANG->value, RupaBantuan::JASA->value])];
 
             if ($this->rupa_bantuan === RupaBantuan::UANG->value && ! $this->pengajuan->organisasi_id) {
                 $rules['detail'] = ['required', 'array', 'min:1'];
@@ -368,7 +382,12 @@ class VerifikasiPengajuanForm extends Component
     {
         return view('livewire.verifikasi-pengajuan-form', [
             'canVerify' => $this->pengajuan->status === PengajuanStatus::DIAJUKAN,
-            'rupaOptions' => RupaBantuan::cases(),
+            // Subsidi bunga tidak ditawarkan sebagai pilihan pada pengajuan lain.
+            'rupaOptions' => array_values(array_filter(
+                RupaBantuan::cases(),
+                fn (RupaBantuan $r) => $r !== RupaBantuan::SUBSIDI_BUNGA,
+            )),
+            'isSubsidiBunga' => $this->isSubsidiBunga(),
             'satuanOptions' => SatuanBarang::cases(),
         ]);
     }

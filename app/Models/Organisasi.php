@@ -24,6 +24,7 @@ class Organisasi extends Model
             'is_active' => 'boolean',
             'is_blacklist' => 'boolean',
             'tahun_anggaran' => 'integer',
+            'jenis_pengajuan' => \App\Enums\JenisPengajuan::class,
         ];
     }
 

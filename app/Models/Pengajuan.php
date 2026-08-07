@@ -157,6 +157,11 @@ class Pengajuan extends Model implements HasMedia
         return $this->hasOne(Bast::class);
     }
 
+    public function sp2d(): HasOne
+    {
+        return $this->hasOne(Sp2d::class);
+    }
+
     public function realisasi(): HasOne
     {
         return $this->hasOne(PengajuanRealisasi::class);

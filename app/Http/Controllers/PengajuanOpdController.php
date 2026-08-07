@@ -49,7 +49,7 @@ class PengajuanOpdController extends Controller
         ];
 
         $query = Pengajuan::query()
-            ->with(['organisasi', 'verifikasiPengajuan'])
+            ->with(['organisasi', 'details.penduduk', 'verifikasiPengajuan'])
             ->where('user_id', Auth::id())
             ->latest();
 
@@ -59,7 +59,29 @@ class PengajuanOpdController extends Controller
 
         return DataTables::of($query)
             ->addColumn('kode_pengajuan', fn ($row) => e($row->kode_pengajuan))
-            ->addColumn('kelompok', fn ($row) => e($row->organisasi?->nama ?? '-'))
+            ->addColumn('jenis_bantuan', function ($row) {
+                $jp = $row->kategori_pengajuan;
+                if ($jp === null) {
+                    return '<span class="badge bg-light text-muted">-</span>';
+                }
+                $warna = match ($jp) {
+                    \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                    \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                    \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                    \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                };
+
+                return '<span class="badge '.$warna.'">'.e($jp->getDescription()).'</span>';
+            })
+            ->addColumn('pemohon', function ($row) {
+                if ($row->organisasi_id) {
+                    return '<span class="badge bg-primary me-1">Kelompok</span>'.e($row->organisasi?->nama ?? '-');
+                }
+
+                $nama = $row->details->first()?->penduduk?->nama;
+
+                return '<span class="badge bg-secondary me-1">Individu</span>'.e($nama ?? '-');
+            })
             ->addColumn('judul', fn ($row) => e($row->judul ?? '-'))
             ->addColumn('status', function ($row) {
                 $status = $row->status;
@@ -100,7 +122,7 @@ class PengajuanOpdController extends Controller
 
                 return $html;
             })
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['jenis_bantuan', 'pemohon', 'status', 'action'])
             ->toJson();
     }
 
@@ -277,8 +299,9 @@ class PengajuanOpdController extends Controller
         $opdId = $user->opd_id;
         $pengajuan->load(['desa.kecamatan', 'details.penduduk']);
 
-        $jenis = JenisPengajuan::BANTUAN_KELOMPOK->value;
-        $jenisOptions = [JenisPengajuan::BANTUAN_KELOMPOK];
+        // Pertahankan jenis asli pengajuan (mis. subsidi_bunga) agar tidak berubah saat diedit.
+        $jenis = $pengajuan->kategori_pengajuan?->value ?? JenisPengajuan::BANTUAN_KELOMPOK->value;
+        $jenisOptions = [$pengajuan->kategori_pengajuan ?? JenisPengajuan::BANTUAN_KELOMPOK];
 
         $kelompokList = $this->kelompokListForOpd($opdId, $jenis, $pengajuan->organisasi_id);
 

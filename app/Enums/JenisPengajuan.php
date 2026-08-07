@@ -7,6 +7,7 @@ enum JenisPengajuan: string
     case HIBAH = 'hibah';
     case BANTUAN_KELOMPOK = 'bantuan_kelompok';
     case BANSOS = 'bansos';
+    case SUBSIDI_BUNGA = 'subsidi_bunga';
 
     public function getDescription(): string
     {
@@ -14,6 +15,7 @@ enum JenisPengajuan: string
             self::HIBAH => 'Hibah',
             self::BANTUAN_KELOMPOK => 'Bantuan Kelompok',
             self::BANSOS => 'Bansos',
+            self::SUBSIDI_BUNGA => 'Subsidi Bunga',
         };
     }
 
@@ -34,6 +36,9 @@ enum JenisPengajuan: string
             ],
             self::BANSOS => [
                 JenisOrganisasi::LEMBAGA_NON_PEMERINTAH,
+            ],
+            self::SUBSIDI_BUNGA => [
+               JenisOrganisasi::KELOMPOK,
             ],
         };
     }

@@ -29,6 +29,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         private ?string $kategori = null,
         private ?string $status = null,
         private ?string $opd = null,
+        private ?string $bulan = null,
     ) {}
 
     public function title(): string
@@ -44,7 +45,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             'Judul',
             'Jenis Pengajuan',
             'Jenis Bantuan',
-            'Kelompok Pemohon',
+            'Pemohon (Kelompok/Individu)',
             'Anggota Kelompok',
             'NIK/Wilayah',
             'Desil Penduduk',
@@ -98,6 +99,11 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
 
         if ($this->status && $this->status !== 'all' && PengajuanStatus::tryFrom($this->status) !== null) {
             $query->where('status', $this->status);
+        }
+
+        // Periode bulan; tahun mengikuti Tahun Anggaran terpilih (via global scope).
+        if ($this->bulan && $this->bulan !== 'all' && in_array((int) $this->bulan, range(1, 12), true)) {
+            $query->whereMonth('created_at', (int) $this->bulan);
         }
 
         $rows = collect();

@@ -33,10 +33,10 @@
             </g>
         </svg>
 
-        {{-- Foto pejabat (Bupati / Wakil Bupati) --}}
-        <div class="login-hero-officials"
+        {{-- Foto pejabat (Bupati / Wakil Bupati) — disembunyikan sementara --}}
+        {{-- <div class="login-hero-officials"
              role="img"
-             aria-label="Bupati dan Wakil Bupati Lombok Barat"></div>
+             aria-label="Bupati dan Wakil Bupati Lombok Barat"></div> --}}
 
         {{-- Logo Daerah (top right) --}}
         <div class="login-hero-logo-daerah">

@@ -37,21 +37,39 @@
     $catatan = $pengajuan->catatan_verifikator ?? $pengajuan->catatan;
     $laporanReadOnly = $laporanReadOnly ?? false;
     $canVerify = ! $laporanReadOnly && in_array($pengajuan->status, [\App\Enums\PengajuanStatus::DIAJUKAN], true);
+    $isSubsidiBunga = $pengajuan->kategori_pengajuan === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA;
+    $namaIndividu = $pengajuan->details->first()?->penduduk?->nama;
     @endphp
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="small-title mb-4">Informasi Pengajuan {{ $pengajuan->kode_pengajuan }}</h2>
+            @php
+                $kategori = $pengajuan->kategori_pengajuan;
+                $jenisWarna = match ($kategori) {
+                    \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                    \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                    \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                    \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                    default => 'bg-secondary',
+                };
+            @endphp
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                <h2 class="small-title mb-0">Informasi Pengajuan {{ $pengajuan->kode_pengajuan }}</h2>
+                <span class="badge {{ $jenisWarna }} fs-6 px-3 py-2">
+                    <i data-acorn-icon="tag" data-acorn-size="16" class="me-1 align-middle"></i>
+                    {{ $kategori?->getDescription() ?? 'Jenis bantuan tidak diketahui' }}
+                </span>
+            </div>
             <div class="row">
 
                 <div class="col-md-4 mb-3">
-                    <span class="text-small text-uppercase text-muted">Judul</span>
+                    <span class="text-small text-uppercase text-muted">{{ $isSubsidiBunga ? 'Nama Usaha' : 'Judul' }}</span>
                     <div class="fw-semibold">
                         {{ $pengajuan->judul ?? '-' }}
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <span class="text-small text-uppercase text-muted">Nilai Usulan</span>
+                    <span class="text-small text-uppercase text-muted">{{ $isSubsidiBunga ? 'Nilai Usulan Kredit' : 'Nilai Usulan' }}</span>
                     <div class="fw-semibold">{{ number_format($pengajuan->nilai, 0, ',', '.') }}</div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -69,8 +87,12 @@
                     <div>{{ $pengajuan->user?->nama ?? ($pengajuan->user ?? '-') }}</div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <span class="text-small text-uppercase text-muted">Kelompok</span>
-                    <div class="fw-semibold">{{ $pengajuan->organisasi?->nama ?? '—' }}</div>
+                    <span class="text-small text-uppercase text-muted">Pemohon</span>
+                    @if($pengajuan->organisasi_id)
+                        <div class="fw-semibold"><span class="badge bg-primary me-1">Kelompok</span>{{ $pengajuan->organisasi?->nama ?? '—' }}</div>
+                    @else
+                        <div class="fw-semibold"><span class="badge bg-secondary me-1">Individu</span>{{ $namaIndividu ?? '—' }}</div>
+                    @endif
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="text-small text-uppercase text-muted">Lokasi Kegiatan</span>
@@ -87,7 +109,7 @@
                 </div>
                 @endif
                 <div class="col-md-4 mb-3">
-                    <span class="text-small text-uppercase text-muted">Lampiran</span>
+                    <span class="text-small text-uppercase text-muted">{{ $isSubsidiBunga ? 'NIB dan Dokumentasi Usaha' : 'Lampiran' }}</span>
                     <div>
                         @php
                         $lampiran = $pengajuan->getFirstMedia('pengajuan');
@@ -180,7 +202,7 @@
                     </div>
                     @if($verifikasi->nilai_rekomendasi !== null)
                     <div class="col-6 col-md-3">
-                        <p class="text-small text-uppercase text-muted mb-1">Nilai Rekomendasi</p>
+                        <p class="text-small text-uppercase text-muted mb-1">{{ $isSubsidiBunga ? 'Nilai Rekomendasi Kredit' : 'Nilai Rekomendasi' }}</p>
                         <p class="fw-semibold mb-0">Rp {{ number_format($verifikasi->nilai_rekomendasi, 0, ',', '.') }}</p>
                     </div>
                     @endif
