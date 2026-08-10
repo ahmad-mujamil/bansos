@@ -190,7 +190,7 @@
             },
             columns: [
                 { data: 'kode_pengajuan', name: 'kode_pengajuan' },
-                { data: 'jenis', name: 'jenis' },
+                { data: 'jenis', name: 'jenis', orderable: false, searchable: false },
                 { data: 'judul', name: 'judul' },
                 { data: 'status', name: 'status' },
                 { data: 'tanggal', name: 'tanggal' },

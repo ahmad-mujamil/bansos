@@ -49,7 +49,22 @@ class VerifikasiPengajuanController extends Controller
 
         return DataTables::of($query)
             ->addColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
-            ->addColumn('jenis', fn($row) => $row->jenisBantuan?->nama ?? '-')
+            ->addColumn('jenis', function ($row) {
+                $kategori = $row->kategori_pengajuan;
+                $warna = match ($kategori) {
+                    \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                    \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                    \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                    \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                    default => 'bg-secondary',
+                };
+                $badge = '<span class="badge ' . $warna . '">' . e($kategori?->getDescription() ?? '-') . '</span>';
+                if ($row->jenisBantuan?->nama) {
+                    $badge .= '<div class="text-muted text-small mt-1">' . e($row->jenisBantuan->nama) . '</div>';
+                }
+
+                return $badge;
+            })
             ->addColumn('judul', fn($row) => $row->judul ?? '-')
             ->addColumn('status', function ($row) {
                 $status = $row->status;
@@ -103,7 +118,7 @@ class VerifikasiPengajuanController extends Controller
 
                 return $action;
             })
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['jenis', 'status', 'action'])
             ->toJson();
     }
 

@@ -66,7 +66,8 @@
                 <thead>
                     <tr>
                         <th class="text-muted text-small text-uppercase">Kode</th>
-                        <th class="text-muted text-small text-uppercase">Kelompok</th>
+                        <th class="text-muted text-small text-uppercase">Jenis Bantuan</th>
+                        <th class="text-muted text-small text-uppercase">Pemohon</th>
                         <th class="text-muted text-small text-uppercase">Judul</th>
                         <th class="text-muted text-small text-uppercase">Status</th>
                         <th class="text-muted text-small text-uppercase">Tanggal</th>
@@ -88,7 +89,7 @@
                 <div class="modal-body">
                     <p class="text-muted mb-4">Silakan pilih jenis bantuan yang ingin Anda ajukan. Klik kartu untuk melanjutkan.</p>
                     <div class="row g-4">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6 col-lg-3">
                             <a href="{{ route('pengajuan-opd.create', ['jenis' => 'bansos']) }}" class="text-decoration-none d-block h-100">
                                 <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                                     <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #ea580c 0%, #c2410c 50%, #9a3412 100%); min-height: 200px;">
@@ -110,7 +111,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6 col-lg-3">
                             <a href="{{ route('pengajuan-opd.create', ['jenis' => 'bantuan_kelompok']) }}" class="text-decoration-none d-block h-100">
                                 <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                                     <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #0d9488 0%, #0f766e 50%, #115e59 100%); min-height: 200px;">
@@ -132,7 +133,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6 col-lg-3">
                             <a href="{{ route('pengajuan-opd.create', ['jenis' => 'hibah']) }}" class="text-decoration-none d-block h-100">
                                 <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
                                     <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%); min-height: 200px;">
@@ -149,6 +150,28 @@
                                         </div>
                                         <div class="position-absolute bottom-0 end-0 opacity-10" style="font-size: 6rem; line-height: 1;">
                                             <i data-acorn-icon="gift" class="text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <a href="{{ route('pengajuan-opd.create', ['jenis' => 'subsidi_bunga']) }}" class="text-decoration-none d-block h-100">
+                                <div class="card border-0 shadow-sm h-100 overflow-hidden menu-bantuan-card" style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
+                                    <div class="card-body p-0 position-relative" style="background: linear-gradient(145deg, #d97706 0%, #b45309 50%, #92400e 100%); min-height: 200px;">
+                                        <div class="p-4 position-relative z-1">
+                                            <div class="d-inline-flex align-items-center justify-content-center rounded-3 p-3 mb-3" style="width: 56px; height: 56px; background: rgba(255,255,255,0.25);">
+                                                <i data-acorn-icon="dollar" data-acorn-size="28" class="text-white"></i>
+                                            </div>
+                                            <h5 class="text-white fw-bold mb-2">Subsidi Bunga</h5>
+                                            <p class="text-white mb-0 small opacity-90" style="font-size: 0.875rem; line-height: 1.5;">Bantuan subsidi bunga untuk kelompok masyarakat penerima manfaat.</p>
+                                            <span class="d-inline-flex align-items-center mt-3 text-white fw-semibold" style="font-size: 0.9rem;">
+                                                Ajukan sekarang
+                                                <i data-acorn-icon="chevron-right" data-acorn-size="18" class="ms-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="position-absolute bottom-0 end-0 opacity-10" style="font-size: 6rem; line-height: 1;">
+                                            <i data-acorn-icon="dollar" class="text-white"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -215,7 +238,7 @@
         responsive: true,
         lengthChange: true,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        order: [[4, 'desc']],
+        order: [[5, 'desc']],
         sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
         ajax: {
             url: "{!! route('pengajuan-opd.index') !!}",
@@ -225,7 +248,8 @@
         },
         columns: [
             { data: 'kode_pengajuan', name: 'kode_pengajuan' },
-            { data: 'kelompok', name: 'kelompok', orderable: false, searchable: false },
+            { data: 'jenis_bantuan', name: 'jenis_bantuan', orderable: false, searchable: false },
+            { data: 'pemohon', name: 'pemohon', orderable: false, searchable: false },
             { data: 'judul', name: 'judul' },
             { data: 'status', name: 'status' },
             { data: 'tanggal', name: 'created_at' },

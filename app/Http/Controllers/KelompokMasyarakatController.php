@@ -128,6 +128,19 @@ class KelompokMasyarakatController extends Controller
         $data = $this->getQuery();
         return DataTables::of($data)
             ->addColumn('nomor_tgl', fn ($row) => ($row->nomor ?? '-').' / '.($row->tgl_pembentukan?->format('d-m-Y') ?? '-'))
+            ->addColumn('jenis_pengajuan', function ($row) {
+                $jp = $row->jenis_pengajuan;
+                if ($jp === null) {
+                    return '<span class="badge bg-light text-muted">-</span>';
+                }
+                $warna = match ($jp) {
+                    \App\Enums\JenisPengajuan::SUBSIDI_BUNGA => 'bg-warning text-dark',
+                    \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK => 'bg-primary',
+                    \App\Enums\JenisPengajuan::HIBAH => 'bg-info text-dark',
+                    \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
+                };
+                return '<span class="badge '.$warna.'">'.$jp->getDescription().'</span>';
+            })
             ->addColumn('wilayah', fn ($row) => ($row->kecamatan->nama ?? '-').' / '.($row->desa->nama ?? '-'))
             ->addColumn('status', fn ($row) => $row->is_active ? 'Aktif' : 'Nonaktif')
             ->addColumn('anggota', function ($row) {
@@ -150,7 +163,7 @@ class KelompokMasyarakatController extends Controller
                 $delete = "<li class='breadcrumb-item'><a href='".route('kelompok-masyarakat.destroy', $row->id)."' data-confirm-delete='true' title='Hapus Data' class='fw-bold text-danger'>Delete</a></li>";
                 return $navActionStart.$edit.$delete.$navActionEnd;
             })
-            ->rawColumns(['anggota', 'dokumen', 'action'])
+            ->rawColumns(['jenis_pengajuan', 'anggota', 'dokumen', 'action'])
             ->toJson();
     }
 
@@ -224,10 +237,14 @@ class KelompokMasyarakatController extends Controller
             $validated = $request->validated();
             $anggotaRows = array_values($validated['anggota'] ?? []);
             $dokumenRows = array_values($validated['dokumen'] ?? []);
+            // Flag asal jenis pengajuan (mis. subsidi_bunga vs bantuan_kelompok yang sama-sama KLP).
+            $jenisPengajuan = $validated['jenis_pengajuan']
+                ?? \App\Enums\JenisPengajuan::fromJenisOrganisasi($validated['jenis'] ?? null)?->value;
             unset($validated['anggota'], $validated['dokumen'], $validated['jenis_pengajuan']);
 
             $organisasi = Organisasi::query()->create([
                 ...$validated,
+                'jenis_pengajuan' => $jenisPengajuan,
                 'user_id' => $user->id,
                 'opd_id' => $user->opd_id,
             ]);

@@ -79,6 +79,7 @@
                     <thead>
                         <tr>
                             <th class="text-muted text-small text-uppercase">Nama</th>
+                            <th class="text-muted text-small text-uppercase">Jenis Bantuan</th>
                             <th class="text-muted text-small text-uppercase">Tahun</th>
                             <th class="text-muted text-small text-uppercase">Nomor SK / Tgl Pembentukan</th>
                             <th class="text-muted text-small text-uppercase">Kecamatan / Desa</th>
@@ -106,7 +107,7 @@
                         <p class="text-muted mb-4">Silakan pilih jenis bantuan yang ingin ditambahkan. Klik kartu untuk melanjutkan.</p>
                         <div class="row g-4">
                             <div class="col-12 col-md-4">
-                                <a href="{{ route('kelompok-masyarakat.create', ['jenis' => \App\Enums\JenisPengajuan::BANSOS->value]) }}"
+                                <a href="{{ route('kelompok-masyarakat.create', ['jenis' => \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value]) }}"
                                     class="text-decoration-none d-block h-100">
                                     <div class="card border-0 shadow-sm h-100 overflow-hidden menu-jenis-card"
                                         style="border-radius: 16px; transition: transform 0.25s ease, box-shadow 0.25s ease;">
@@ -115,11 +116,11 @@
                                             <div class="p-4 position-relative z-1">
                                                 <div class="d-inline-flex align-items-center justify-content-center rounded-3 p-3 mb-3"
                                                     style="width: 56px; height: 56px; background: rgba(255,255,255,0.25);">
-                                                    <i data-acorn-icon="heart" data-acorn-size="28" class="text-white"></i>
+                                                    <i data-acorn-icon="dollar" data-acorn-size="28" class="text-white"></i>
                                                 </div>
-                                                <h5 class="text-white fw-bold mb-2">Bantuan Sosial</h5>
+                                                <h5 class="text-white fw-bold mb-2">Subsidi Bunga</h5>
                                                 <p class="text-white mb-0 small opacity-90"
-                                                    style="font-size: 0.875rem; line-height: 1.5;">Untuk kategori bansos, form akan menyesuaikan pilihan jenis organisasi yang relevan sebelum data disimpan.</p>
+                                                    style="font-size: 0.875rem; line-height: 1.5;">Untuk kategori subsidi bunga, form akan menyesuaikan pilihan jenis organisasi yang relevan sebelum data disimpan.</p>
                                                 <span class="d-inline-flex align-items-center mt-3 text-white fw-semibold"
                                                     style="font-size: 0.9rem;">
                                                     Lanjutkan
@@ -128,7 +129,7 @@
                                             </div>
                                             <div class="position-absolute bottom-0 end-0 opacity-10"
                                                 style="font-size: 6rem; line-height: 1;">
-                                                <i data-acorn-icon="heart" class="text-white"></i>
+                                                <i data-acorn-icon="dollar" class="text-white"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -233,6 +234,7 @@
             ajax: "{!! route('kelompok-masyarakat.index') !!}",
             columns: [
                 { data: 'nama', name: 'nama' },
+                { data: 'jenis_pengajuan', name: 'jenis_pengajuan', searchable: false },
                 { data: 'tahun_anggaran', name: 'tahun_anggaran' },
                 { data: 'nomor_tgl', name: 'nomor_tgl' },
                 { data: 'wilayah', name: 'wilayah' },

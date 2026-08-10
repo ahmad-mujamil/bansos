@@ -17,6 +17,7 @@ class LaporanPengajuanList extends DataList
     public string $kategori = '';
     public string $status = 'all';
     public string $opd = 'all';
+    public string $bulan = 'all';
     public ?string $expandedId = null;
 
     public function mount(): void
@@ -66,6 +67,15 @@ class LaporanPengajuanList extends DataList
         $this->resetPage();
     }
 
+    public function updatedBulan(): void
+    {
+        if ($this->bulan !== 'all' && ! in_array((int) $this->bulan, range(1, 12), true)) {
+            $this->bulan = 'all';
+        }
+
+        $this->resetPage();
+    }
+
     public function updatedOpd(): void
     {
         $this->expandedId = null;
@@ -112,6 +122,11 @@ class LaporanPengajuanList extends DataList
 
         if ($this->status !== 'all' && PengajuanStatus::tryFrom($this->status) !== null) {
             $query->where('status', $this->status);
+        }
+
+        // Periode bulan; tahun mengikuti Tahun Anggaran terpilih (via global scope tahun_anggaran).
+        if ($this->bulan !== 'all' && in_array((int) $this->bulan, range(1, 12), true)) {
+            $query->whereMonth('pengajuan.created_at', (int) $this->bulan);
         }
 
         if ($this->showOpdFilter() && $this->opd !== 'all') {
@@ -196,6 +211,7 @@ class LaporanPengajuanList extends DataList
                 JenisPengajuan::BANSOS,
                 JenisPengajuan::HIBAH,
                 JenisPengajuan::BANTUAN_KELOMPOK,
+                JenisPengajuan::SUBSIDI_BUNGA,
             ],
             'statusOptions' => PengajuanStatus::cases(),
             'opdOptions' => $this->showOpdFilter()

@@ -29,6 +29,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         private ?string $kategori = null,
         private ?string $status = null,
         private ?string $opd = null,
+        private ?string $bulan = null,
     ) {}
 
     public function title(): string
@@ -44,7 +45,8 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             'Judul',
             'Jenis Pengajuan',
             'Jenis Bantuan',
-            'Pemohon',
+            'Pemohon (Kelompok/Individu)',
+            'Anggota Kelompok',
             'NIK/Wilayah',
             'Desil Penduduk',
             'OPD',
@@ -99,6 +101,11 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
             $query->where('status', $this->status);
         }
 
+        // Periode bulan; tahun mengikuti Tahun Anggaran terpilih (via global scope).
+        if ($this->bulan && $this->bulan !== 'all' && in_array((int) $this->bulan, range(1, 12), true)) {
+            $query->whereMonth('created_at', (int) $this->bulan);
+        }
+
         $rows = collect();
         $no = 0;
 
@@ -116,7 +123,8 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                     $rows->push($this->buildRow(
                         $row,
                         ++$no,
-                        $org->nama . ($anggota?->nama ? ' - ' . $anggota->nama : ''),
+                        $org->nama,
+                        $anggota?->nama ?? '-',
                         $anggota?->nik ?? ($wilayah !== '' ? $wilayah : '-'),
                         $this->desilLabel($anggota),
                     ));
@@ -142,6 +150,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $row,
                 ++$no,
                 $pemohon,
+                '-',
                 $nikWilayah !== '' ? $nikWilayah : '-',
                 $this->desilLabel($penduduk),
             ));
@@ -150,7 +159,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
         return $rows;
     }
 
-    private function buildRow(Pengajuan $row, int $no, string $pemohon, string $nikWilayah, string $desilLabel): array
+    private function buildRow(Pengajuan $row, int $no, string $pemohon, string $anggota, string $nikWilayah, string $desilLabel): array
     {
         $yaTidak = fn(?bool $v) => $v === null ? '-' : ($v ? 'Ya' : 'Tidak');
         $org = $row->organisasi;
@@ -173,6 +182,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 ?? '-',
             $row->jenisBantuan?->nama ?? '-',
             $pemohon,
+            $anggota !== '' ? $anggota : '-',
             $nikWilayah !== '' ? $nikWilayah : '-',
             $desilLabel,
             $row->opd?->nama ?? '-',
@@ -218,7 +228,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
     public function columnFormats(): array
     {
         return [
-            'G' => NumberFormat::FORMAT_TEXT,
+            'H' => NumberFormat::FORMAT_TEXT,
         ];
     }
 
@@ -230,7 +240,7 @@ class LaporanPengajuanExport implements FromCollection, WithHeadings, ShouldAuto
                 $highestRow = $sheet->getHighestRow();
 
                 for ($row = 2; $row <= $highestRow; $row++) {
-                    $cell = $sheet->getCell("G{$row}");
+                    $cell = $sheet->getCell("H{$row}");
                     $cell->setValueExplicit((string) $cell->getValue(), DataType::TYPE_STRING);
                 }
             },

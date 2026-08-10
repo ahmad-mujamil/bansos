@@ -46,14 +46,15 @@
             position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 0.85rem;
-            padding: 0.85rem 1.25rem;
+            gap: 0.6rem;
+            padding: 0.7rem 0.9rem;
             border-radius: 0.85rem;
             border: 1.5px solid #e9ecef;
             background: #ffffff;
             color: #6c757d;
             cursor: pointer;
-            min-width: 220px;
+            flex: 1 1 0;
+            min-width: 0;
             text-align: left;
             transition: transform 0.18s ease, box-shadow 0.18s ease,
                         background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
@@ -62,17 +63,17 @@
         .laporan-tab:focus { outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18); }
         .laporan-tab-icon {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 42px; height: 42px;
+            width: 38px; height: 38px;
             border-radius: 0.6rem;
             background: #f1f3f5;
             color: #495057;
             flex-shrink: 0;
             transition: background 0.25s ease, color 0.25s ease;
         }
-        .laporan-tab-icon i { width: 20px; height: 20px; }
-        .laporan-tab-label { display: flex; flex-direction: column; line-height: 1.2; }
-        .laporan-tab-title { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.01em; }
-        .laporan-tab-sub { font-size: 0.72rem; opacity: 0.7; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .laporan-tab-icon i { width: 18px; height: 18px; }
+        .laporan-tab-label { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+        .laporan-tab-title { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .laporan-tab-sub { font-size: 0.68rem; opacity: 0.7; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .laporan-tab-all:hover { border-color: #64748b; color: #334155; }
         .laporan-tab-all:hover .laporan-tab-icon { background: #e2e8f0; color: #334155; }
@@ -101,6 +102,13 @@
             color: #ffffff; border-color: transparent;
             background: linear-gradient(135deg, #34d399 0%, #059669 100%);
             box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28);
+        }
+        .laporan-tab-subsidi:hover { border-color: #f59e0b; color: #b45309; }
+        .laporan-tab-subsidi:hover .laporan-tab-icon { background: #fef3c7; color: #b45309; }
+        .laporan-tab-subsidi.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 10px 22px rgba(217, 119, 6, 0.28);
         }
         .laporan-tab.active .laporan-tab-icon { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
         .laporan-tab.active .laporan-tab-sub { opacity: 0.85; }

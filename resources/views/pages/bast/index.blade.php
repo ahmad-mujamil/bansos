@@ -79,6 +79,7 @@
                         <th class="text-muted text-small text-uppercase">Tanggal</th>
                         <th class="text-muted text-small text-uppercase">Penerima</th>
                         <th class="text-muted text-small text-uppercase">Kode Pengajuan</th>
+                        <th class="text-muted text-small text-uppercase">Jenis Bantuan</th>
                         <th class="text-muted text-small text-uppercase">Nilai Rekomendasi</th>
                         <th class="text-muted text-small text-uppercase w-15">Aksi</th>
                     </tr>
@@ -121,6 +122,7 @@
                 { data: 'tanggal', name: 'tanggal' },
                 { data: 'penerima', name: 'penerima' },
                 { data: 'kode_pengajuan', name: 'kode_pengajuan' },
+                { data: 'jenis_bantuan', name: 'jenis_bantuan', orderable: false, searchable: false },
                 { data: 'nilai_rekomendasi', name: 'nilai_rekomendasi', orderable: false, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ],

@@ -48,6 +48,9 @@
     // $jenis = old('jenis', $pengajuan?->jenis?->value ?? request('jenis', ''));
     $isBansos = $jenis === \App\Enums\JenisPengajuan::BANSOS->value;
     $isBantuanKelompok = $jenis === \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value;
+    $isSubsidiBunga = $jenis === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value;
+    // Subsidi bunga memakai alur seperti bansos: pilih jenis penerima (kelompok/individu).
+    $isBansosLike = $isBansos || $isSubsidiBunga;
     $pendudukIsValidMap = $pendudukIsValidMap ?? [];
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
@@ -75,12 +78,21 @@
 
                     <div class="col-12">
                         <div class="row g-3 align-items-end">
-                            <div class="col-md-6 col-sm-12 {{ $isBansos ? '' : 'd-none' }}">
+                            <div class="col-md-6 col-sm-12 {{ $isBansosLike ? '' : 'd-none' }}">
                                 <label class="form-label text-small text-uppercase fw-semibold" for="jenis_penerima_bantuan">Jenis penerima bantuan <span class="text-danger">*</span></label>
+                                @php
+                                    // Subsidi bunga: hanya Kelompok & Individu (tanpa Keluarga).
+                                    $jpbCases = $isSubsidiBunga
+                                        ? [\App\Enums\JenisPenerimaBantuan::NON_INDIVIDU, \App\Enums\JenisPenerimaBantuan::INDIVIDU]
+                                        : \App\Enums\JenisPenerimaBantuan::cases();
+                                    $jpbLabel = fn ($jpb) => $isSubsidiBunga
+                                        ? ($jpb === \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU ? 'Kelompok' : 'Individu')
+                                        : $jpb->getDescription();
+                                @endphp
                                 <select name="jenis_penerima_bantuan" id="jenis_penerima_bantuan" class="form-select @error('jenis_penerima_bantuan') is-invalid @enderror" required>
-                                    @foreach(\App\Enums\JenisPenerimaBantuan::cases() as $jpb)
+                                    @foreach($jpbCases as $jpb)
                                         <option value="{{ $jpb->value }}" @selected(old('jenis_penerima_bantuan', $pengajuan?->jenis_penerima_bantuan?->value ?? \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value) === $jpb->value)>
-                                            {{ $jpb->getDescription() }}
+                                            {{ $jpbLabel($jpb) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -89,7 +101,7 @@
                                 @enderror
                             </div>
 
-                            <div class="{{ $isBansos ? 'col-md-6 col-sm-12' : 'col-12' }}" id="wrap-kolom-penerima-target">
+                            <div class="{{ $isBansosLike ? 'col-md-6 col-sm-12' : 'col-12' }}" id="wrap-kolom-penerima-target">
                                 @if($isBansos)
                                     <div id="wrap-penduduk" class="{{ $hidePendudukBansosTarget ? 'd-none' : '' }}">
                                         <label class="form-label text-small text-uppercase">Penduduk <span class="text-danger">*</span></label>
@@ -173,9 +185,9 @@
                     @endif
 
                     <div class="col-lg-12 col-md-12 col-sm-12">
-                        <label class="form-label text-small text-uppercase">Judul Usulan <span class="text-danger">*</span></label>
+                        <label class="form-label text-small text-uppercase">{{ $isSubsidiBunga ? 'Nama Usaha' : 'Judul Usulan' }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('judul') is-invalid @enderror" name="judul" required
-                            value="{{ old('judul', $detail?->judul ?? '') }}" placeholder="Judul usulan bantuan" />
+                            value="{{ old('judul', $detail?->judul ?? '') }}" placeholder="{{ $isSubsidiBunga ? 'Nama usaha' : 'Judul usulan bantuan' }}" />
                         @error('judul')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -220,7 +232,7 @@
                     </div>
                     <div class="col-md-12 col-sm-12">
                         <label class="form-label text-small text-uppercase">
-                            Nilai Usulan (Rp) <span class="text-danger">*</span>
+                            {{ $isSubsidiBunga ? 'Nilai Usulan Kredit (Rp)' : 'Nilai Usulan (Rp)' }} <span class="text-danger">*</span>
                         </label>
                         <input
                             type="text"
@@ -239,9 +251,9 @@
                     </div>
 
                     <div class="col-md-12 col-sm-12">
-                        <label class="form-label text-small text-uppercase">File Pengajuan (PDF)</label>
+                        <label class="form-label text-small text-uppercase">{{ $isSubsidiBunga ? 'NIB dan Dokumentasi Usaha (PDF)' : 'File Pengajuan (PDF)' }}</label>
                         <input type="file" class="form-control @error('file_pengajuan') is-invalid @enderror" name="file_pengajuan" accept="application/pdf">
-                        <small class="text-muted">Format PDF, maksimal 5 MB.</small>
+                        <small class="text-muted">{{ $isSubsidiBunga ? 'Gabungkan NIB dan dokumentasi usaha dalam satu file PDF, maksimal 5 MB.' : 'Format PDF, maksimal 5 MB.' }}</small>
                         @if($mediaPengajuan)
                         <div class="mt-2">
                             <a href="{{ $mediaPengajuan->getUrl() }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
