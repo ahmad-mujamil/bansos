@@ -280,6 +280,10 @@
 
 <body>
     @php
+        // Subsidi bunga: rupa bantuan dikunci ke subsidi_bunga saat verifikasi, tapi
+        // kategori pengajuan tetap diperiksa agar dokumen lama tanpa rupa ikut terbaca.
+        $isSubsidiBunga = $pengajuan->kategori_pengajuan === \App\Enums\JenisPengajuan::SUBSIDI_BUNGA
+            || $verifikasi->rupa_bantuan === \App\Enums\RupaBantuan::SUBSIDI_BUNGA;
         $opd = $pengajuan->organisasi?->opd ?? $pengajuan->opd;
         $logoPath = public_path('img/logo-only.png');
         $logoSrc = is_file($logoPath)
@@ -318,6 +322,8 @@
             Berita Acara Hasil Verifikasi Usulan Permohonan Bantuan Sosial Tahun Anggaran {{ $tahunAnggaran }}
         @elseif ($pengajuan->kategori_pengajuan === \App\Enums\JenisPengajuan::HIBAH)
             Berita Acara Hasil Verifikasi Usulan Permohonan Bantuan Hibah Tahun Anggaran {{ $tahunAnggaran }}
+        @elseif ($isSubsidiBunga)
+            Berita Acara Hasil Verifikasi Usulan Permohonan Bantuan Subsidi Bunga Tahun Anggaran {{ $tahunAnggaran }}
         @else
             Berita Acara Hasil Verifikasi Usulan Permohonan Belanja Barang
             Diserahkan Kepada Masyarakat Tahun Anggaran {{ $tahunAnggaran }}
@@ -438,13 +444,13 @@
             <table class="kriteria-list">
                 <tr>
                     <td class="num">1.</td>
-                    <td class="lbl bold">Memenuhi kriteria pemberian bantuan barang</td>
+                    <td class="lbl bold">Memenuhi kriteria pemberian {{ $isSubsidiBunga ? 'subsidi bunga' : 'bantuan barang' }}</td>
                     <td class="sep">:</td>
                     <td>{{ $verifikasi->lulus_kriteria ? 'Ya' : 'Tidak' }}</td>
                 </tr>
                 <tr>
                     <td class="num">2.</td>
-                    <td class="lbl bold">Kelengkapan administrasi penerima bantuan barang sesuai perbup</td>
+                    <td class="lbl bold">Kelengkapan administrasi penerima {{ $isSubsidiBunga ? 'subsidi bunga' : 'bantuan barang' }} sesuai perbup</td>
                     <td class="sep">:</td>
                     <td>{{ $verifikasi->lulus_administrasi ? 'Lengkap' : 'Tidak Lengkap' }}</td>
                 </tr>
@@ -474,8 +480,13 @@
     <div class="section">
         <div class="bold lvl-0">II. Rekomendasi</div>
         <div class="row lvl-1" style="margin-top: 6px;">
-            Berkenaan dengan hal tersebut, permohonan/proposal dinilai layak untuk diberikan belanja barang yang
-            diserahkan kepada masyarakat berupa sebagaimana tercantum dalam tabel di atas dengan nilai sebesar Rp.
+            @if ($isSubsidiBunga)
+                Berkenaan dengan hal tersebut, permohonan/proposal dinilai layak untuk diberikan bantuan subsidi bunga
+                sebagaimana tercantum dalam tabel di atas dengan nilai sebesar Rp.
+            @else
+                Berkenaan dengan hal tersebut, permohonan/proposal dinilai layak untuk diberikan belanja barang yang
+                diserahkan kepada masyarakat berupa sebagaimana tercantum dalam tabel di atas dengan nilai sebesar Rp.
+            @endif
             {{ $nilaiBesar }}
             ({{ $nilaiBesarTerbilang }}).
         </div>

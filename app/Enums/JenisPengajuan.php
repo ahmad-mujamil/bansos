@@ -38,7 +38,8 @@ enum JenisPengajuan: string
                 JenisOrganisasi::LEMBAGA_NON_PEMERINTAH,
             ],
             self::SUBSIDI_BUNGA => [
-               JenisOrganisasi::KELOMPOK,
+                JenisOrganisasi::UMKM,
+                JenisOrganisasi::PERTANIAN,
             ],
         };
     }

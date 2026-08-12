@@ -68,9 +68,12 @@ class PengajuanController extends Controller
         $selectedPendudukId = old('penduduk_id');
         $pendudukIsValidMap = $this->pendudukIsValidMap();
         $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
-        $kelompokSimpanDiblokir = $jenis !== JenisPengajuan::BANSOS->value
+        $kelompokTanpaAnggota = $jenis !== JenisPengajuan::BANSOS->value
             && $organisasiId
-            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
+            && $this->jumlahAnggotaKelompok($organisasiId) < 1;
+        $kelompokSimpanDiblokir = $kelompokTanpaAnggota || ($jenis !== JenisPengajuan::BANSOS->value
+            && $organisasiId
+            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId));
 
         $anggotaBelumTerverifikasi = $organisasiId
             ? (Organisasi::query()->find($organisasiId)?->anggotaBelumTerverifikasiData() ?? collect())
@@ -88,6 +91,7 @@ class PengajuanController extends Controller
             'pendudukIsValidMap' => $pendudukIsValidMap,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
         ]);
     }
@@ -219,9 +223,12 @@ class PengajuanController extends Controller
         $selectedPendudukId = old('penduduk_id', $pengajuan->details->first()?->penduduk_id);
         $pendudukIsValidMap = $this->pendudukIsValidMap();
         $simpanDiblokir = $this->shouldBlockSimpanPengajuan($jenis, $selectedPendudukId, $organisasiId, $pendudukIsValidMap);
-        $kelompokSimpanDiblokir = $jenis !== JenisPengajuan::BANSOS->value
+        $kelompokTanpaAnggota = $jenis !== JenisPengajuan::BANSOS->value
             && $organisasiId
-            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
+            && $this->jumlahAnggotaKelompok($organisasiId) < 1;
+        $kelompokSimpanDiblokir = $kelompokTanpaAnggota || ($jenis !== JenisPengajuan::BANSOS->value
+            && $organisasiId
+            && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId));
 
         $anggotaBelumTerverifikasi = $organisasiId
             ? (Organisasi::query()->find($organisasiId)?->anggotaBelumTerverifikasiData() ?? collect())
@@ -239,6 +246,7 @@ class PengajuanController extends Controller
             'pendudukIsValidMap' => $pendudukIsValidMap,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
         ]);
     }
@@ -386,7 +394,8 @@ class PengajuanController extends Controller
             return false;
         }
 
-        return $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
+        return $this->jumlahAnggotaKelompok($organisasiId) < 1
+            || $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId);
     }
 
     /**
@@ -424,6 +433,16 @@ class PengajuanController extends Controller
             ->exists();
     }
 
+    /**
+     * Jumlah anggota kelompok pada roster tahun anggaran aktif.
+     */
+    private function jumlahAnggotaKelompok(string $organisasiId): int
+    {
+        return OrganisasiDetail::query()
+            ->where('organisasi_id', $organisasiId)
+            ->count();
+    }
+
     private function validatePengajuanVerifikasi(Request $request): void
     {
         $jenis = $this->jenisPengajuanForUser();
@@ -439,7 +458,20 @@ class PengajuanController extends Controller
         }
 
         $organisasiId = $request->input('organisasi_id');
-        if ($organisasiId && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
+        if (! $organisasiId) {
+            return;
+        }
+
+        // Pastikan roster tahun aktif sudah terisi sebelum anggotanya diperiksa.
+        $this->seedRosterKelompok($organisasiId);
+
+        if ($this->jumlahAnggotaKelompok($organisasiId) < 1) {
+            throw ValidationException::withMessages([
+                'organisasi_id' => ['Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.'],
+            ]);
+        }
+
+        if ($this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
             throw ValidationException::withMessages([
                 'organisasi_id' => ['Masih ada anggota kelompok yang data penduduknya belum diverifikasi.'],
             ]);
