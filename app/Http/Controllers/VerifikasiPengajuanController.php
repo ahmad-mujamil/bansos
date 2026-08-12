@@ -529,6 +529,11 @@ class VerifikasiPengajuanController extends Controller
             $jumlahUsulan = (float) $pengajuan->nilai;
             $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? (float) $verifikasi->nilai_rekomendasi : 0;
             $jenisBarang = 'Uang';
+        } elseif ($rupaBantuan === RupaBantuan::SUBSIDI_BUNGA) {
+            // Subsidi bunga tidak memakai rincian barang/jasa, jadi satuan & spesifikasi tetap '-'.
+            $jumlahUsulan = (float) $pengajuan->nilai;
+            $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? (float) $verifikasi->nilai_rekomendasi : 0;
+            $jenisBarang = RupaBantuan::SUBSIDI_BUNGA->getDescription();
         } elseif ($rupaBantuan) {
             $jumlahUsulan = $pengajuan->nilai;
             $jumlahDisetujui = $pengajuanStatus === PengajuanStatus::DISETUJUI ? $verifikasi->nilai_rekomendasi : 0;

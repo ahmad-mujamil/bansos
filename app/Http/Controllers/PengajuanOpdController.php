@@ -16,6 +16,7 @@ use App\Models\Penduduk;
 use App\Models\Pengajuan;
 use App\Models\PengajuanDetail;
 use App\Models\PengajuanLog;
+use App\Models\Scopes\TahunAnggaranScope;
 use App\Services\PengajuanSnapshotService;
 use App\Services\RosterKelompokService;
 use Illuminate\Http\JsonResponse;
@@ -144,8 +145,11 @@ class PengajuanOpdController extends Controller
 
         $selectedOrganisasiId = old('organisasi_id');
         $this->seedRosterKelompok($selectedOrganisasiId);
+        $kelompokTanpaAnggota = $selectedOrganisasiId
+            ? $this->jumlahAnggotaKelompok($selectedOrganisasiId) < 1
+            : false;
         $kelompokSimpanDiblokir = $selectedOrganisasiId
-            ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
+            ? ($kelompokTanpaAnggota || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
             : false;
 
         $anggotaBelumTerverifikasi = $selectedOrganisasiId
@@ -184,6 +188,9 @@ class PengajuanOpdController extends Controller
             'kecamatans' => $kecamatans,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
+            'kelompokStatusMap' => $this->kelompokStatusMap($kelompokList),
+            'selectedOrganisasiId' => $selectedOrganisasiId,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
             'detailPendudukForIndividu' => $detailPendudukForIndividu,
         ]);
@@ -314,8 +321,11 @@ class PengajuanOpdController extends Controller
 
         $selectedOrganisasiId = old('organisasi_id', $pengajuan->organisasi_id);
         $this->seedRosterKelompok($selectedOrganisasiId);
+        $kelompokTanpaAnggota = $selectedOrganisasiId
+            ? $this->jumlahAnggotaKelompok($selectedOrganisasiId) < 1
+            : false;
         $kelompokSimpanDiblokir = $selectedOrganisasiId
-            ? $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId)
+            ? ($kelompokTanpaAnggota || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
             : false;
 
         $anggotaBelumTerverifikasi = $selectedOrganisasiId
@@ -355,6 +365,9 @@ class PengajuanOpdController extends Controller
             'kecamatans' => $kecamatans,
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
+            'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
+            'kelompokStatusMap' => $this->kelompokStatusMap($kelompokList),
+            'selectedOrganisasiId' => $selectedOrganisasiId,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
             'pendudukList' => $pendudukList,
             'pendudukIsValidMap' => $pendudukIsValidMap,
@@ -584,6 +597,78 @@ class PengajuanOpdController extends Controller
     }
 
     /**
+     * Jumlah anggota kelompok pada roster tahun anggaran aktif.
+     */
+    private function jumlahAnggotaKelompok(string $organisasiId): int
+    {
+        return OrganisasiDetail::query()
+            ->where('organisasi_id', $organisasiId)
+            ->count();
+    }
+
+    /**
+     * Status ringkas tiap kelompok (jumlah anggota & ada anggota belum terverifikasi)
+     * agar tombol Simpan bisa langsung diblokir saat kelompok diganti di form.
+     *
+     * @param  iterable<int, Organisasi>  $kelompokList
+     * @return array<string, array{jumlah_anggota: int, ada_belum_terverifikasi: bool}>
+     */
+    private function kelompokStatusMap($kelompokList): array
+    {
+        $ids = collect($kelompokList)->pluck('id')->filter()->values()->all();
+        if ($ids === []) {
+            return [];
+        }
+
+        $tahun = tahun_aktif();
+
+        // Roster tahun aktif bisa belum di-seed (copy-on-first-use di RosterKelompokService),
+        // jadi status memakai roster tahun terisi terdekat — sama seperti hasil seeding nanti.
+        $jumlahPerTahun = OrganisasiDetail::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
+            ->whereIn('organisasi_id', $ids)
+            ->where('tahun_anggaran', '<=', $tahun)
+            ->selectRaw('organisasi_id, tahun_anggaran, COUNT(*) as jumlah')
+            ->groupBy('organisasi_id', 'tahun_anggaran')
+            ->get();
+
+        $belumTerverifikasi = OrganisasiDetail::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
+            ->whereIn('organisasi_id', $ids)
+            ->where('tahun_anggaran', '<=', $tahun)
+            ->whereHas('penduduk', fn ($q) => $q->where('is_valid', false))
+            ->selectRaw('organisasi_id, tahun_anggaran')
+            ->distinct()
+            ->get()
+            ->map(fn ($row) => $row->organisasi_id.'|'.(int) $row->tahun_anggaran)
+            ->all();
+
+        $tahunRoster = $jumlahPerTahun
+            ->groupBy('organisasi_id')
+            ->map(fn ($rows) => $rows->contains(fn ($r) => (int) $r->tahun_anggaran === $tahun)
+                ? $tahun
+                : (int) $rows->max('tahun_anggaran'));
+
+        return collect($ids)
+            ->mapWithKeys(function ($id) use ($jumlahPerTahun, $belumTerverifikasi, $tahunRoster) {
+                $tahunDipakai = $tahunRoster[$id] ?? null;
+                if ($tahunDipakai === null) {
+                    return [$id => ['jumlah_anggota' => 0, 'ada_belum_terverifikasi' => false]];
+                }
+
+                $baris = $jumlahPerTahun->first(
+                    fn ($r) => (string) $r->organisasi_id === (string) $id && (int) $r->tahun_anggaran === $tahunDipakai
+                );
+
+                return [$id => [
+                    'jumlah_anggota' => (int) ($baris->jumlah ?? 0),
+                    'ada_belum_terverifikasi' => in_array($id.'|'.$tahunDipakai, $belumTerverifikasi, true),
+                ]];
+            })
+            ->all();
+    }
+
+    /**
      * Pastikan roster kelompok untuk tahun terpilih sudah ada (copy-on-first-use),
      * sehingga pemeriksaan anggota mengikuti roster tahun anggaran terpilih.
      */
@@ -605,7 +690,20 @@ class PengajuanOpdController extends Controller
 
         if ($jenisPenerima === JenisPenerimaBantuan::NON_INDIVIDU) {
             $organisasiId = (string) $request->input('organisasi_id');
-            if ($organisasiId !== '' && $this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
+            if ($organisasiId === '') {
+                return;
+            }
+
+            // Pastikan roster tahun aktif sudah terisi sebelum anggotanya diperiksa.
+            $this->seedRosterKelompok($organisasiId);
+
+            if ($this->jumlahAnggotaKelompok($organisasiId) < 1) {
+                throw ValidationException::withMessages([
+                    'organisasi_id' => ['Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.'],
+                ]);
+            }
+
+            if ($this->kelompokMemilikiAnggotaBelumTerverifikasi($organisasiId)) {
                 throw ValidationException::withMessages([
                     'organisasi_id' => ['Masih ada anggota kelompok yang data penduduknya belum diverifikasi.'],
                 ]);

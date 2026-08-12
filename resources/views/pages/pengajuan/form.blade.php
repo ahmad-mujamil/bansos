@@ -46,6 +46,7 @@
     $pendudukIsValidMap = $pendudukIsValidMap ?? [];
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
+    $kelompokTanpaAnggota = $kelompokTanpaAnggota ?? false;
     $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
     @endphp
 
@@ -100,14 +101,28 @@
                         @enderror
                     </div>
 
+                    @if(! $isBansos && $kelompokTanpaAnggota)
+                    <div class="col-12">
+                        <div class="alert alert-danger border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
+                                <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
+                                Kelompok belum memiliki anggota
+                            </div>
+                            <p class="text-small mb-0">Kelompok Anda belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu sebelum mengajukan bantuan.</p>
+                        </div>
+                    </div>
+                    @endif
+
                     @if($isBantuanKelompok && $anggotaBelumTerverifikasi->isNotEmpty())
                     <div class="col-12">
-                        <div class="alert alert-warning border-0 shadow-sm mb-0">
-                            <div class="fw-semibold mb-2">
+                        <div class="alert alert-danger border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
                                 <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
-                                Anggota kelompok yang data penduduknya belum terverifikasi (is_valid)
+                                Anggota kelompok belum terverifikasi
                             </div>
-                            <div class="table-responsive">
+                            <p class="text-small mb-0">Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu sebelum mengajukan bantuan.</p>
+
+                            <div class="table-responsive mt-2">
                                 <table class="table table-sm table-bordered bg-white mb-0">
                                     <thead class="table-light">
                                         <tr>
@@ -133,7 +148,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <p class="text-muted text-small mb-0 mt-2">Selesaikan verifikasi data penduduk anggota di halaman administrasi penduduk/kelompok sebelum menyimpan pengajuan.</p>
                         </div>
                     </div>
                     @endif
@@ -261,6 +275,8 @@
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
                     @if($isBansos)
                         Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @elseif($kelompokTanpaAnggota)
+                        Kelompok Anda belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.
                     @else
                         Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.
                     @endif

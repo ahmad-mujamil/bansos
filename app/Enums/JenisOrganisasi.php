@@ -15,6 +15,8 @@ enum JenisOrganisasi: string
     case ORMAS = "ORM";
     case PARTAI_POLITIK = "PARPOL";
     case LEMBAGA_NON_PEMERINTAH = "LNP";
+    case UMKM = "UMKM";
+    case PERTANIAN = "PTN"; 
 
 
     public function getDescription(): string
@@ -29,7 +31,8 @@ enum JenisOrganisasi: string
             self::BUMN => "BUMN",
             self::BUMD => "BUMD",
             self::LEMBAGA_NON_PEMERINTAH => "Lembaga Non Pemerintah",
-
+            self::UMKM => "Usaha Mikro, Kecil, dan Menengah",
+            self::PERTANIAN => "Kelompok Pertanian",
         };
     }
 }

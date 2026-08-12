@@ -54,6 +54,9 @@
     $pendudukIsValidMap = $pendudukIsValidMap ?? [];
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
+    $kelompokTanpaAnggota = $kelompokTanpaAnggota ?? false;
+    $kelompokStatusMap = $kelompokStatusMap ?? [];
+    $selectedOrganisasiId = $selectedOrganisasiId ?? old('organisasi_id', $pengajuan?->organisasi_id);
     $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
     $detailPendudukForIndividu = $detailPendudukForIndividu ?? null;
     $pendudukIndividuInitial = $detailPendudukForIndividu
@@ -146,14 +149,26 @@
                         </div>
                     </div>
 
-                    @if($isBantuanKelompok && $anggotaBelumTerverifikasi->isNotEmpty())
-                    <div class="col-12">
-                        <div class="alert alert-warning border-0 shadow-sm mb-0">
-                            <div class="fw-semibold mb-2">
+                    <div class="col-12 {{ $isNonIndividuJpb && $kelompokTanpaAnggota ? '' : 'd-none' }}" id="alertKelompokKosong">
+                        <div class="alert alert-danger border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
                                 <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
-                                Anggota kelompok yang data penduduknya belum terverifikasi (is_valid)
+                                Kelompok belum memiliki anggota
                             </div>
-                            <div class="table-responsive">
+                            <p class="text-small mb-0">Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu sebelum mengajukan bantuan.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 {{ $isNonIndividuJpb && $anggotaBelumTerverifikasi->isNotEmpty() ? '' : 'd-none' }}" id="alertAnggotaBelumVerifikasi" data-organisasi-id="{{ $selectedOrganisasiId }}">
+                        <div class="alert alert-danger border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
+                                <i data-acorn-icon="user" data-acorn-size="18" class="me-1 align-middle"></i>
+                                Anggota kelompok belum terverifikasi
+                            </div>
+                            <p class="text-small mb-0">Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu sebelum mengajukan bantuan.</p>
+
+                            @if($anggotaBelumTerverifikasi->isNotEmpty())
+                            <div class="table-responsive mt-2" id="tabelAnggotaBelumVerifikasi">
                                 <table class="table table-sm table-bordered bg-white mb-0">
                                     <thead class="table-light">
                                         <tr>
@@ -179,10 +194,9 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <p class="text-muted text-small mb-0 mt-2">Selesaikan verifikasi data penduduk anggota di halaman administrasi penduduk/kelompok sebelum menyimpan pengajuan.</p>
+                            @endif
                         </div>
                     </div>
-                    @endif
 
                     <div class="col-lg-12 col-md-12 col-sm-12">
                         <label class="form-label text-small text-uppercase">{{ $isSubsidiBunga ? 'Nama Usaha' : 'Judul Usulan' }} <span class="text-danger">*</span></label>
@@ -224,7 +238,7 @@
                     </div>
 
                     <div class="col-md-12 col-sm-12">
-                        <label class="form-label text-small text-uppercase">Lokasi Detail Usulan (opsional)</label>
+                        <label class="form-label text-small text-uppercase">{{ $isSubsidiBunga ? 'Detail Usulan' : 'Lokasi Detail Usulan' }} (opsional)</label>
                         <textarea class="form-control @error('lokasi') is-invalid @enderror" name="lokasi" rows="2">{{ old('lokasi', $detail->lokasi ?? '') }}</textarea>
                         @error('lokasi')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -301,10 +315,10 @@
                 </div>
                 @if($simpanDiblokir)
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
-                    @if($isBansos)
+                    @if(! $isNonIndividuJpb)
                         Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
-                    @elseif(old('jenis_penerima_bantuan', $pengajuan?->jenis_penerima_bantuan?->value ?? \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value) !== \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value)
-                        Penduduk yang dipilih belum terverifikasi (is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @elseif($kelompokTanpaAnggota)
+                        Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.
                     @else
                         Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.
                     @endif
@@ -337,26 +351,65 @@
         var jenisPengajuan = '{{ $jenis }}';
         var pendudukIsValidMap = @json($pendudukIsValidMap);
         var kelompokSimpanDiblokir = {{ $kelompokSimpanDiblokir ? 'true' : 'false' }};
+        var kelompokStatusMap = @json($kelompokStatusMap);
+        var HINT_KELOMPOK_KOSONG = 'Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.';
+        var HINT_ANGGOTA_BELUM_VERIFIKASI = 'Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.';
         var NON_INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value }}';
         var INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::INDIVIDU->value }}';
         var KELUARGA_JPB = '{{ \App\Enums\JenisPenerimaBantuan::KELUARGA->value }}';
         var pendudukIndividuInitial = @json($pendudukIndividuInitial);
         window._pendudukIndividuIsValid = null;
 
+        // Sinkronkan panel peringatan kelompok dengan kelompok yang sedang dipilih.
+        function updateAlertKelompok(organisasiId, status) {
+            var kosong = !!organisasiId && !!status && !status.jumlah_anggota;
+            $('#alertKelompokKosong').toggleClass('d-none', !kosong);
+
+            var belumVerifikasi = !!organisasiId && !!status && !kosong && status.ada_belum_terverifikasi === true;
+            $('#alertAnggotaBelumVerifikasi').toggleClass('d-none', !belumVerifikasi);
+
+            // Rincian anggota hanya tersedia untuk kelompok yang dirender server-side.
+            var $tabel = $('#tabelAnggotaBelumVerifikasi');
+            if ($tabel.length) {
+                var samaDenganServer = String($('#alertAnggotaBelumVerifikasi').data('organisasi-id') || '') === String(organisasiId || '');
+                $tabel.toggleClass('d-none', !samaDenganServer);
+            }
+        }
+
         function updateSimpanBlokir() {
             var blokir = false;
             var hint = '';
             var jp = $('#jenis_penerima_bantuan').val();
 
-            if (jenisPengajuan === BANSOS) {
+            if (jp === NON_INDIVIDU_JPB) {
+                var oid = $('#organisasi_id').val();
+                var status = oid ? kelompokStatusMap[oid] : null;
+                updateAlertKelompok(oid, status);
+            } else {
+                updateAlertKelompok(null, null);
+            }
+
+            if (jenisPengajuan === BANSOS && jp !== NON_INDIVIDU_JPB) {
                 var pid = $('#penduduk_id').val();
                 if (pid && pendudukIsValidMap[pid] !== true) {
                     blokir = true;
                     hint = 'Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.';
                 }
-            } else if (jp === NON_INDIVIDU_JPB && kelompokSimpanDiblokir) {
-                blokir = true;
-                hint = 'Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.';
+            } else if (jp === NON_INDIVIDU_JPB) {
+                var oidCek = $('#organisasi_id').val();
+                var statusCek = oidCek ? kelompokStatusMap[oidCek] : null;
+                if (statusCek) {
+                    if (!statusCek.jumlah_anggota) {
+                        blokir = true;
+                        hint = HINT_KELOMPOK_KOSONG;
+                    } else if (statusCek.ada_belum_terverifikasi) {
+                        blokir = true;
+                        hint = HINT_ANGGOTA_BELUM_VERIFIKASI;
+                    }
+                } else if (kelompokSimpanDiblokir) {
+                    blokir = true;
+                    hint = HINT_ANGGOTA_BELUM_VERIFIKASI;
+                }
             } else if (jp === INDIVIDU_JPB || jp === KELUARGA_JPB) {
                 var pidI = $('#penduduk_id_individu').val();
                 if (pidI) {
@@ -498,6 +551,9 @@
             theme: 'bootstrap4',
             placeholder: 'Pilih Kelompok',
             allowClear: true
+        });
+        $('#organisasi_id').on('change', function() {
+            updateSimpanBlokir();
         });
         if ($('#penduduk_id').length) {
             $('#penduduk_id').select2({
