@@ -47,10 +47,10 @@
         <h5 class="fw-bold mb-3" style="color: #1f2937;">Jumlah Usulan Calon Penerima Bantuan</h5>
 
         {{-- ===== Baris 1: Total per jenis pengajuan ===== --}}
-        @php $warnaKartu = ['dash-blue', 'dash-cyan', 'dash-amber']; @endphp
+        @php $warnaKartu = ['dash-blue', 'dash-cyan', 'dash-amber', 'dash-purple']; @endphp
         <div class="row g-3 mb-3">
             @foreach ($kartuKategori as $kartu)
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6 col-xl-3">
                     <div class="card dash-card {{ $warnaKartu[$loop->index % count($warnaKartu)] }} dash-card--center h-100">
                         <div class="card-body">
                             @php
@@ -204,7 +204,7 @@
             const pengajuanEl = document.getElementById('chartPengajuan');
             if (pengajuanEl) {
                 const series = @json($chartPengajuan['series']);
-                const colors = ['#e8734f', '#4ec3e0', '#2f43b5'];
+                const colors = ['#e8734f', '#4ec3e0', '#2f43b5', '#8b5cf6'];
                 const datasets = series.map((s, i) => ({
                     label: s.label,
                     data: s.data,

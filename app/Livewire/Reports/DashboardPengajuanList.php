@@ -80,6 +80,7 @@ class DashboardPengajuanList extends LaporanPengajuanList
                 JenisPengajuan::BANSOS,
                 JenisPengajuan::HIBAH,
                 JenisPengajuan::BANTUAN_KELOMPOK,
+                JenisPengajuan::SUBSIDI_BUNGA,
             ],
             'statusOptions' => PengajuanStatus::cases(),
             'opdOptions' => Opd::query()->orderBy('nama')->get(['id', 'nama']),

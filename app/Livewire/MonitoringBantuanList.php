@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Models\Opd;
 use App\Models\Pengajuan;
@@ -21,6 +22,8 @@ class MonitoringBantuanList extends Component
     protected string $paginationTheme = 'bootstrap';
 
     public string $tahap = 'semua';
+
+    public string $kategori = 'all';
 
     public string $search = '';
 
@@ -52,6 +55,7 @@ class MonitoringBantuanList extends Component
     public function mount(): void
     {
         $this->tahap = $this->sanitizeTahap((string) request('tahap', 'semua'));
+        $this->kategori = $this->sanitizeKategori((string) request('kategori', 'all'));
         $this->tahun = $this->sanitizeTahun((string) request('tahun', ''));
     }
 
@@ -59,6 +63,19 @@ class MonitoringBantuanList extends Component
     {
         $this->tahap = $this->sanitizeTahap($this->tahap);
         $this->resetPage();
+    }
+
+    public function updatedKategori(): void
+    {
+        $this->kategori = $this->sanitizeKategori($this->kategori);
+        $this->resetPage();
+    }
+
+    /** Dipakai tab jenis bantuan (mengikuti pola laporan pengajuan). */
+    public function setKategori(string $kategori): void
+    {
+        $this->kategori = $kategori;
+        $this->updatedKategori();
     }
 
     public function updatedSearch(): void
@@ -87,6 +104,11 @@ class MonitoringBantuanList extends Component
     private function sanitizeTahap(string $tahap): string
     {
         return in_array($tahap, ['semua', 'belum_bast', 'sudah_bast'], true) ? $tahap : 'semua';
+    }
+
+    private function sanitizeKategori(string $kategori): string
+    {
+        return JenisPengajuan::tryFrom($kategori) !== null ? $kategori : 'all';
     }
 
     private function sanitizeOpdId(string $opdId): string
@@ -151,12 +173,38 @@ class MonitoringBantuanList extends Component
             $query->where('pengajuan.opd_id', $this->opdId);
         }
 
+        $this->applyKategoriFilter($query);
+
         $selectedYear = $this->selectedYear();
         if ($selectedYear !== null) {
             $query->whereYear('pengajuan.created_at', $selectedYear);
         }
 
         return $query;
+    }
+
+    /**
+     * Filter jenis bantuan — pola sama dengan laporan pengajuan: pakai
+     * kategori_pengajuan, dengan fallback ke kategori jenis bantuan untuk
+     * pengajuan lama yang kategorinya masih kosong.
+     */
+    private function applyKategoriFilter(Builder $query): void
+    {
+        if ($this->kategori === 'all' || JenisPengajuan::tryFrom($this->kategori) === null) {
+            return;
+        }
+
+        $kategori = $this->kategori;
+
+        $query->where(function (Builder $builder) use ($kategori): void {
+            $builder
+                ->where('pengajuan.kategori_pengajuan', $kategori)
+                ->orWhere(function (Builder $subQuery) use ($kategori): void {
+                    $subQuery
+                        ->whereNull('pengajuan.kategori_pengajuan')
+                        ->whereHas('jenisBantuan', fn (Builder $jb) => $jb->where('kategori', $kategori));
+                });
+        });
     }
 
     private function baseQuery(): Builder

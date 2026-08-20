@@ -1,10 +1,111 @@
 <div>
+    @include('livewire.partials.acorn-icon-observer')
+
     <style>
         .monitoring-row { cursor: pointer; }
         .monitoring-row .chevron { transition: transform .2s ease; }
         .monitoring-row[aria-expanded="true"] .chevron { transform: rotate(90deg); }
         .monitoring-row:hover { background-color: rgba(0, 0, 0, .02); }
+
+        .laporan-tabs { padding: 0.25rem 0; }
+        .laporan-tab {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 0.9rem;
+            border-radius: 0.85rem;
+            border: 1.5px solid #e9ecef;
+            background: #ffffff;
+            color: #6c757d;
+            cursor: pointer;
+            flex: 1 1 0;
+            min-width: 0;
+            text-align: left;
+            transition: transform 0.18s ease, box-shadow 0.18s ease,
+                        background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+        .laporan-tab:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08); }
+        .laporan-tab:focus { outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18); }
+        .laporan-tab-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px;
+            border-radius: 0.6rem;
+            background: #f1f3f5;
+            color: #495057;
+            flex-shrink: 0;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+        .laporan-tab-icon i { width: 18px; height: 18px; }
+        .laporan-tab-label { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+        .laporan-tab-title { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .laporan-tab-sub { font-size: 0.68rem; opacity: 0.7; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .laporan-tab-all:hover { border-color: #64748b; color: #334155; }
+        .laporan-tab-all:hover .laporan-tab-icon { background: #e2e8f0; color: #334155; }
+        .laporan-tab-all.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+            box-shadow: 0 10px 22px rgba(51, 65, 85, 0.28);
+        }
+        .laporan-tab-bansos:hover { border-color: #3b82f6; color: #1d4ed8; }
+        .laporan-tab-bansos:hover .laporan-tab-icon { background: #dbeafe; color: #1d4ed8; }
+        .laporan-tab-bansos.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+        }
+        .laporan-tab-hibah:hover { border-color: #a855f7; color: #7c3aed; }
+        .laporan-tab-hibah:hover .laporan-tab-icon { background: #f3e8ff; color: #7c3aed; }
+        .laporan-tab-hibah.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #c084fc 0%, #7c3aed 100%);
+            box-shadow: 0 10px 22px rgba(124, 58, 237, 0.28);
+        }
+        .laporan-tab-kelompok:hover { border-color: #10b981; color: #047857; }
+        .laporan-tab-kelompok:hover .laporan-tab-icon { background: #d1fae5; color: #047857; }
+        .laporan-tab-kelompok.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+            box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28);
+        }
+        .laporan-tab-subsidi:hover { border-color: #f59e0b; color: #b45309; }
+        .laporan-tab-subsidi:hover .laporan-tab-icon { background: #fef3c7; color: #b45309; }
+        .laporan-tab-subsidi.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 10px 22px rgba(217, 119, 6, 0.28);
+        }
+        .laporan-tab.active .laporan-tab-icon { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
+        .laporan-tab.active .laporan-tab-sub { opacity: 0.85; }
+        @media (max-width: 575.98px) { .laporan-tab { min-width: 0; flex: 1 1 100%; } }
     </style>
+
+    {{-- Tab jenis bantuan (selaras dengan laporan pengajuan) --}}
+    <div class="laporan-tabs d-flex flex-wrap gap-2 mb-3" role="tablist">
+        @php
+            $tabMeta = [
+                'all'                                               => ['class' => 'laporan-tab-all',      'icon' => 'layout-3', 'title' => 'Semua',            'sub' => 'Semua Jenis Bantuan'],
+                \App\Enums\JenisPengajuan::BANSOS->value             => ['class' => 'laporan-tab-bansos',   'icon' => 'user',     'title' => 'Bansos',           'sub' => 'Bantuan Sosial'],
+                \App\Enums\JenisPengajuan::HIBAH->value              => ['class' => 'laporan-tab-hibah',    'icon' => 'gift',     'title' => 'Hibah',            'sub' => 'Bantuan Hibah'],
+                \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value   => ['class' => 'laporan-tab-kelompok', 'icon' => 'building', 'title' => 'Bantuan Kelompok', 'sub' => 'Barang Diserahkan ke Masyarakat'],
+                \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value      => ['class' => 'laporan-tab-subsidi',  'icon' => 'dollar',   'title' => 'Subsidi Bunga',    'sub' => 'Subsidi Bunga Kredit'],
+            ];
+        @endphp
+        @foreach ($tabMeta as $value => $meta)
+            <button type="button"
+                wire:click="setKategori('{{ $value }}')"
+                class="laporan-tab {{ $meta['class'] }} {{ $kategori === $value ? 'active' : '' }}"
+                role="tab"
+                aria-selected="{{ $kategori === $value ? 'true' : 'false' }}">
+                <span class="laporan-tab-icon"><i data-acorn-icon="{{ $meta['icon'] }}"></i></span>
+                <span class="laporan-tab-label">
+                    <span class="laporan-tab-title">{{ $meta['title'] }}</span>
+                    <span class="laporan-tab-sub">{{ $meta['sub'] }}</span>
+                </span>
+            </button>
+        @endforeach
+    </div>
 
     {{-- Filter selalu tampil di atas (berlaku untuk kedua tab) --}}
     <div class="card mb-3">
@@ -68,7 +169,7 @@
                 </div>
             </div>
 
-            <div class="mt-2 text-muted text-small" wire:loading wire:target="tahap,search,opdId,tahun,setSemuaTahun">
+            <div class="mt-2 text-muted text-small" wire:loading wire:target="tahap,kategori,setKategori,search,opdId,tahun,setSemuaTahun">
                 Memuat data...
             </div>
         </div>
