@@ -100,6 +100,13 @@
             background: linear-gradient(135deg, #34d399 0%, #059669 100%);
             box-shadow: 0 10px 22px rgba(5, 150, 105, 0.28);
         }
+        .laporan-tab-subsidi:hover { border-color: #f59e0b; color: #b45309; }
+        .laporan-tab-subsidi:hover .laporan-tab-icon { background: #fef3c7; color: #b45309; }
+        .laporan-tab-subsidi.active {
+            color: #ffffff; border-color: transparent;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 10px 22px rgba(217, 119, 6, 0.28);
+        }
         .laporan-tab.active .laporan-tab-icon { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
         .laporan-tab.active .laporan-tab-sub { opacity: 0.85; }
         @media (max-width: 575.98px) { .laporan-tab { min-width: 0; flex: 1 1 100%; } }
