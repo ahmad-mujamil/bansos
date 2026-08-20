@@ -7,6 +7,7 @@ use App\Enums\JenisPengajuan;
 use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
 use App\Models\Concerns\BelongsToTahunAnggaran;
+use App\Models\Scopes\TahunAnggaranScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -121,6 +122,48 @@ class Pengajuan extends Model implements HasMedia
         $this->addMediaCollection('pengajuan')
             ->singleFile()
             ->acceptsMimeTypes(['application/pdf']);
+    }
+
+    /**
+     * Status yang membuat kelompok terkunci untuk mengajukan lagi di tahun
+     * anggaran yang sama. Pengajuan yang ditolak tidak mengunci — kelompoknya
+     * boleh mengajukan ulang.
+     *
+     * @return array<int, PengajuanStatus>
+     */
+    public static function statusMengunciPengajuanKelompok(): array
+    {
+        return [
+            PengajuanStatus::DRAFT,
+            PengajuanStatus::DIAJUKAN,
+            PengajuanStatus::DISETUJUI,
+        ];
+    }
+
+    /**
+     * Pengajuan milik kelompok yang sama pada satu tahun anggaran yang membuat
+     * kelompok tidak boleh mengajukan lagi (draft/diajukan/disetujui).
+     *
+     * Global scope tahun dilepas dan tahunnya ditulis eksplisit supaya
+     * pengecekan tetap benar di konteks non-web (console/queue) yang tidak
+     * mem-bind tahun terpilih.
+     */
+    public static function pengajuanKelompokTahun(
+        string $organisasiId,
+        ?string $kecualiPengajuanId = null,
+        ?int $tahun = null,
+    ): ?self {
+        return static::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
+            ->where('tahun_anggaran', $tahun ?? tahun_aktif())
+            ->where('organisasi_id', $organisasiId)
+            ->whereIn('status', array_map(
+                static fn (PengajuanStatus $s) => $s->value,
+                static::statusMengunciPengajuanKelompok(),
+            ))
+            ->when($kecualiPengajuanId !== null, fn ($q) => $q->whereKeyNot($kecualiPengajuanId))
+            ->oldest('created_at')
+            ->first();
     }
 
     public function canEdit(): bool
