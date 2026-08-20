@@ -148,8 +148,11 @@ class PengajuanOpdController extends Controller
         $kelompokTanpaAnggota = $selectedOrganisasiId
             ? $this->jumlahAnggotaKelompok($selectedOrganisasiId) < 1
             : false;
+        $kelompokSudahMengajukan = $selectedOrganisasiId
+            ? Pengajuan::pengajuanKelompokTahun($selectedOrganisasiId) !== null
+            : false;
         $kelompokSimpanDiblokir = $selectedOrganisasiId
-            ? ($kelompokTanpaAnggota || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
+            ? ($kelompokTanpaAnggota || $kelompokSudahMengajukan || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
             : false;
 
         $anggotaBelumTerverifikasi = $selectedOrganisasiId
@@ -189,6 +192,7 @@ class PengajuanOpdController extends Controller
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
             'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
+            'kelompokSudahMengajukan' => $kelompokSudahMengajukan,
             'kelompokStatusMap' => $this->kelompokStatusMap($kelompokList),
             'selectedOrganisasiId' => $selectedOrganisasiId,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
@@ -324,8 +328,12 @@ class PengajuanOpdController extends Controller
         $kelompokTanpaAnggota = $selectedOrganisasiId
             ? $this->jumlahAnggotaKelompok($selectedOrganisasiId) < 1
             : false;
+        // Pengajuan yang sedang diedit tidak dihitung sebagai duplikat.
+        $kelompokSudahMengajukan = $selectedOrganisasiId
+            ? Pengajuan::pengajuanKelompokTahun($selectedOrganisasiId, $pengajuan->id) !== null
+            : false;
         $kelompokSimpanDiblokir = $selectedOrganisasiId
-            ? ($kelompokTanpaAnggota || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
+            ? ($kelompokTanpaAnggota || $kelompokSudahMengajukan || $this->kelompokMemilikiAnggotaBelumTerverifikasi($selectedOrganisasiId))
             : false;
 
         $anggotaBelumTerverifikasi = $selectedOrganisasiId
@@ -366,7 +374,8 @@ class PengajuanOpdController extends Controller
             'simpanDiblokir' => $simpanDiblokir,
             'kelompokSimpanDiblokir' => $kelompokSimpanDiblokir,
             'kelompokTanpaAnggota' => $kelompokTanpaAnggota,
-            'kelompokStatusMap' => $this->kelompokStatusMap($kelompokList),
+            'kelompokSudahMengajukan' => $kelompokSudahMengajukan,
+            'kelompokStatusMap' => $this->kelompokStatusMap($kelompokList, $pengajuan->id),
             'selectedOrganisasiId' => $selectedOrganisasiId,
             'anggotaBelumTerverifikasi' => $anggotaBelumTerverifikasi,
             'pendudukList' => $pendudukList,
@@ -385,7 +394,7 @@ class PengajuanOpdController extends Controller
         }
 
         $validated = $this->validatePengajuan($request);
-        $this->validatePengajuanVerifikasi($request);
+        $this->validatePengajuanVerifikasi($request, $pengajuan);
 
         try {
             DB::beginTransaction();
@@ -467,6 +476,16 @@ class PengajuanOpdController extends Controller
         $this->authorizeUser($pengajuan);
         if (! $pengajuan->canSubmit()) {
             toast()->warning('Tidak dapat diajukan', 'Status pengajuan tidak memungkinkan untuk diajukan.');
+
+            return redirect()->route('pengajuan-opd.index');
+        }
+
+        // Satu kelompok hanya boleh mengajukan sekali per tahun anggaran.
+        $duplikat = $pengajuan->organisasi_id
+            ? Pengajuan::pengajuanKelompokTahun($pengajuan->organisasi_id, $pengajuan->id, (int) $pengajuan->tahun_anggaran)
+            : null;
+        if ($duplikat !== null) {
+            toast()->warning('Tidak dapat diajukan', $this->pesanKelompokSudahMengajukan($duplikat));
 
             return redirect()->route('pengajuan-opd.index');
         }
@@ -613,7 +632,7 @@ class PengajuanOpdController extends Controller
      * @param  iterable<int, Organisasi>  $kelompokList
      * @return array<string, array{jumlah_anggota: int, ada_belum_terverifikasi: bool}>
      */
-    private function kelompokStatusMap($kelompokList): array
+    private function kelompokStatusMap($kelompokList, ?string $kecualiPengajuanId = null): array
     {
         $ids = collect($kelompokList)->pluck('id')->filter()->values()->all();
         if ($ids === []) {
@@ -621,6 +640,21 @@ class PengajuanOpdController extends Controller
         }
 
         $tahun = tahun_aktif();
+
+        // Kelompok yang sudah punya pengajuan di tahun anggaran ini (satu kelompok = satu pengajuan per tahun).
+        // Pengajuan yang ditolak tidak dihitung — kelompoknya boleh mengajukan ulang.
+        $pengajuanTahunIni = Pengajuan::query()
+            ->withoutGlobalScope(TahunAnggaranScope::class)
+            ->where('tahun_anggaran', $tahun)
+            ->whereIn('organisasi_id', $ids)
+            ->whereIn('status', array_map(
+                static fn (PengajuanStatus $s) => $s->value,
+                Pengajuan::statusMengunciPengajuanKelompok(),
+            ))
+            ->when($kecualiPengajuanId !== null, fn ($q) => $q->whereKeyNot($kecualiPengajuanId))
+            ->oldest('created_at')
+            ->get(['id', 'organisasi_id', 'kode_pengajuan', 'status'])
+            ->keyBy('organisasi_id');
 
         // Roster tahun aktif bisa belum di-seed (copy-on-first-use di RosterKelompokService),
         // jadi status memakai roster tahun terisi terdekat — sama seperti hasil seeding nanti.
@@ -650,10 +684,21 @@ class PengajuanOpdController extends Controller
                 : (int) $rows->max('tahun_anggaran'));
 
         return collect($ids)
-            ->mapWithKeys(function ($id) use ($jumlahPerTahun, $belumTerverifikasi, $tahunRoster) {
+            ->mapWithKeys(function ($id) use ($jumlahPerTahun, $belumTerverifikasi, $tahunRoster, $pengajuanTahunIni) {
+                $pengajuan = $pengajuanTahunIni->get($id);
+                $statusPengajuan = [
+                    'sudah_mengajukan' => $pengajuan !== null,
+                    'kode_pengajuan' => $pengajuan?->kode_pengajuan,
+                    'status_pengajuan' => $pengajuan?->status?->getDescription(),
+                ];
+
                 $tahunDipakai = $tahunRoster[$id] ?? null;
                 if ($tahunDipakai === null) {
-                    return [$id => ['jumlah_anggota' => 0, 'ada_belum_terverifikasi' => false]];
+                    return [$id => [
+                        'jumlah_anggota' => 0,
+                        'ada_belum_terverifikasi' => false,
+                        ...$statusPengajuan,
+                    ]];
                 }
 
                 $baris = $jumlahPerTahun->first(
@@ -663,6 +708,7 @@ class PengajuanOpdController extends Controller
                 return [$id => [
                     'jumlah_anggota' => (int) ($baris->jumlah ?? 0),
                     'ada_belum_terverifikasi' => in_array($id.'|'.$tahunDipakai, $belumTerverifikasi, true),
+                    ...$statusPengajuan,
                 ]];
             })
             ->all();
@@ -684,7 +730,7 @@ class PengajuanOpdController extends Controller
         }
     }
 
-    private function validatePengajuanVerifikasi(Request $request): void
+    private function validatePengajuanVerifikasi(Request $request, ?Pengajuan $pengajuanSaatIni = null): void
     {
         $jenisPenerima = JenisPenerimaBantuan::tryFrom((string) $request->input('jenis_penerima_bantuan'));
 
@@ -693,6 +739,8 @@ class PengajuanOpdController extends Controller
             if ($organisasiId === '') {
                 return;
             }
+
+            $this->guardKelompokBelumMengajukanTahunIni($organisasiId, $pengajuanSaatIni);
 
             // Pastikan roster tahun aktif sudah terisi sebelum anggotanya diperiksa.
             $this->seedRosterKelompok($organisasiId);
@@ -724,6 +772,33 @@ class PengajuanOpdController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * Satu kelompok hanya boleh mengajukan sekali dalam satu tahun anggaran.
+     * Pengajuan yang sedang diedit dikecualikan supaya tidak menabrak dirinya sendiri.
+     */
+    private function guardKelompokBelumMengajukanTahunIni(string $organisasiId, ?Pengajuan $pengajuanSaatIni = null): void
+    {
+        $duplikat = Pengajuan::pengajuanKelompokTahun($organisasiId, $pengajuanSaatIni?->id);
+        if ($duplikat === null) {
+            return;
+        }
+
+        $pesan = $this->pesanKelompokSudahMengajukan($duplikat);
+        toast()->warning('Tidak dapat mengajukan', $pesan);
+
+        throw ValidationException::withMessages([
+            'organisasi_id' => [$pesan],
+        ]);
+    }
+
+    private function pesanKelompokSudahMengajukan(Pengajuan $pengajuan): string
+    {
+        return 'Kelompok ini sudah mengajukan bantuan pada tahun anggaran '.(int) $pengajuan->tahun_anggaran
+            .' (kode '.($pengajuan->kode_pengajuan ?? '-').', status '
+            .($pengajuan->status?->getDescription() ?? '-').'). '
+            .'Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.';
     }
 
     /**
