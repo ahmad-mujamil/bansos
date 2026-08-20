@@ -55,6 +55,7 @@
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
     $kelompokTanpaAnggota = $kelompokTanpaAnggota ?? false;
+    $kelompokSudahMengajukan = $kelompokSudahMengajukan ?? false;
     $kelompokStatusMap = $kelompokStatusMap ?? [];
     $selectedOrganisasiId = $selectedOrganisasiId ?? old('organisasi_id', $pengajuan?->organisasi_id);
     $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
@@ -146,6 +147,19 @@
                                     <div class="form-text">Pencarian berdasarkan NIK atau nama penduduk.</div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 {{ $isNonIndividuJpb && $kelompokSudahMengajukan ? '' : 'd-none' }}" id="alertKelompokSudahMengajukan">
+                        <div class="alert alert-warning border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
+                                <i data-acorn-icon="warning-hexagon" data-acorn-size="18" class="me-1 align-middle"></i>
+                                Kelompok sudah mengajukan tahun ini
+                            </div>
+                            <p class="text-small mb-0" id="pesanKelompokSudahMengajukan">
+                                Kelompok yang dipilih sudah mengajukan bantuan pada tahun anggaran {{ tahun_aktif() }}.
+                                Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.
+                            </p>
                         </div>
                     </div>
 
@@ -317,6 +331,8 @@
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
                     @if(! $isNonIndividuJpb)
                         Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @elseif($kelompokSudahMengajukan)
+                        Kelompok yang dipilih sudah mengajukan bantuan pada tahun anggaran {{ tahun_aktif() }}. Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.
                     @elseif($kelompokTanpaAnggota)
                         Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.
                     @else
@@ -353,6 +369,17 @@
         var kelompokSimpanDiblokir = {{ $kelompokSimpanDiblokir ? 'true' : 'false' }};
         var kelompokStatusMap = @json($kelompokStatusMap);
         var HINT_KELOMPOK_KOSONG = 'Kelompok yang dipilih belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.';
+        var TAHUN_ANGGARAN_AKTIF = '{{ tahun_aktif() }}';
+        // Satu kelompok hanya boleh mengajukan sekali per tahun anggaran.
+        function hintKelompokSudahMengajukan(status) {
+            var pesan = 'Kelompok yang dipilih sudah mengajukan bantuan pada tahun anggaran ' + TAHUN_ANGGARAN_AKTIF;
+            if (status && status.kode_pengajuan) {
+                pesan += ' (kode ' + status.kode_pengajuan
+                    + (status.status_pengajuan ? ', status ' + status.status_pengajuan : '') + ')';
+            }
+
+            return pesan + '. Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.';
+        }
         var HINT_ANGGOTA_BELUM_VERIFIKASI = 'Masih ada anggota kelompok yang data penduduknya belum diverifikasi. Selesaikan verifikasi seluruh anggota terlebih dahulu.';
         var NON_INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::NON_INDIVIDU->value }}';
         var INDIVIDU_JPB = '{{ \App\Enums\JenisPenerimaBantuan::INDIVIDU->value }}';
@@ -362,6 +389,12 @@
 
         // Sinkronkan panel peringatan kelompok dengan kelompok yang sedang dipilih.
         function updateAlertKelompok(organisasiId, status) {
+            var sudahMengajukan = !!organisasiId && !!status && status.sudah_mengajukan === true;
+            $('#alertKelompokSudahMengajukan').toggleClass('d-none', !sudahMengajukan);
+            if (sudahMengajukan) {
+                $('#pesanKelompokSudahMengajukan').text(hintKelompokSudahMengajukan(status));
+            }
+
             var kosong = !!organisasiId && !!status && !status.jumlah_anggota;
             $('#alertKelompokKosong').toggleClass('d-none', !kosong);
 
@@ -399,7 +432,10 @@
                 var oidCek = $('#organisasi_id').val();
                 var statusCek = oidCek ? kelompokStatusMap[oidCek] : null;
                 if (statusCek) {
-                    if (!statusCek.jumlah_anggota) {
+                    if (statusCek.sudah_mengajukan) {
+                        blokir = true;
+                        hint = hintKelompokSudahMengajukan(statusCek);
+                    } else if (!statusCek.jumlah_anggota) {
                         blokir = true;
                         hint = HINT_KELOMPOK_KOSONG;
                     } else if (statusCek.ada_belum_terverifikasi) {
