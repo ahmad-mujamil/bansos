@@ -120,7 +120,7 @@ class HomeController extends Controller
      * Daftar pengajuan detail di balik angka dashboard admin/super.
      *
      * Filter via query string:
-     *  - jenis: bansos|hibah|bantuan_kelompok
+     *  - jenis: bansos|hibah|bantuan_kelompok|subsidi_bunga
      *  - penerima: perorangan|organisasi
      *  - verif: usulan|verifikasi
      */
@@ -144,6 +144,7 @@ class HomeController extends Controller
                 JenisPengajuan::BANSOS => 'Bantuan Sosial',
                 JenisPengajuan::HIBAH => 'Hibah',
                 JenisPengajuan::BANTUAN_KELOMPOK => 'Bantuan ke Masyarakat',
+                JenisPengajuan::SUBSIDI_BUNGA => 'Subsidi Bunga',
             };
         }
         if ($penerima === 'perorangan') {
@@ -187,6 +188,7 @@ class HomeController extends Controller
             JenisPengajuan::BANSOS => 'Bantuan Sosial',
             JenisPengajuan::HIBAH => 'Hibah',
             JenisPengajuan::BANTUAN_KELOMPOK => 'Bantuan ke Masyarakat',
+            JenisPengajuan::SUBSIDI_BUNGA => 'Subsidi Bunga',
         };
 
         $judulPengajuan = match ($pengajuan) {
@@ -240,11 +242,12 @@ class HomeController extends Controller
         $verifCount = fn (JenisPengajuan $k): int => (int) $verifikasiPerKategori->get($k->value, 0);
         $statusCount = fn (JenisPengajuan $k, PengajuanStatus $s): int => (int) ($pengajuanPerKategoriStatus[$k->value . '|' . $s->value] ?? 0);
 
-        // Tiga kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
+        // Kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
         $definisiKartu = [
-            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS],
-            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH],
-            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'chartLabel' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'chartLabel' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'chartLabel' => 'BDSKM', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK],
+            ['title' => 'Subsidi Bunga', 'label' => 'Subsidi Bunga', 'chartLabel' => 'Subsidi Bunga', 'jenis' => JenisPengajuan::SUBSIDI_BUNGA],
         ];
 
         // Teregistrasi = jumlah organisasi/kelompok yang jenisnya termasuk kategori pengajuan tsb.
@@ -255,7 +258,7 @@ class HomeController extends Controller
         };
 
         // Jenis pengajuan yang teregistrasinya dihitung dari jumlah organisasi (bukan pengajuan).
-        $teregistrasiDariOrganisasi = [JenisPengajuan::HIBAH, JenisPengajuan::BANTUAN_KELOMPOK, JenisPengajuan::BANSOS];
+        $teregistrasiDariOrganisasi = [JenisPengajuan::HIBAH, JenisPengajuan::BANTUAN_KELOMPOK, JenisPengajuan::BANSOS, JenisPengajuan::SUBSIDI_BUNGA];
 
         $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount, $statusCount, $organisasiTeregistrasiCount, $teregistrasiDariOrganisasi): array {
             $total = $pengCount($def['jenis']);
@@ -270,6 +273,7 @@ class HomeController extends Controller
             return [
                 'title' => $def['title'],
                 'label' => $def['label'],
+                'chartLabel' => $def['chartLabel'],
                 'jenis' => $def['jenis']->value,
                 'total' => $total,
                 'teregistrasi' => $teregistrasi,
@@ -296,6 +300,7 @@ class HomeController extends Controller
         $orgHibah = $orgCount(JenisPengajuan::HIBAH);
         $orgKelompok = $orgCount(JenisPengajuan::BANTUAN_KELOMPOK);
         $orgBansos = $orgCount(JenisPengajuan::BANSOS);
+        $orgSubsidiBunga = $orgCount(JenisPengajuan::SUBSIDI_BUNGA);
 
         // Perorangan = pengajuan dengan penerima individu/keluarga, selain itu organisasi
         $totalPerorangan = Pengajuan::query()
@@ -307,10 +312,11 @@ class HomeController extends Controller
         $pengBansos = $pengCount(JenisPengajuan::BANSOS);
         $pengHibah = $pengCount(JenisPengajuan::HIBAH);
         $pengKelompok = $pengCount(JenisPengajuan::BANTUAN_KELOMPOK);
+        $pengSubsidiBunga = $pengCount(JenisPengajuan::SUBSIDI_BUNGA);
 
         // Chart usulan calon penerima bantuan per jenis — samakan dengan angka utama (Teregistrasi) tiap kartu
         $chartUsulan = [
-            'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
+            'labels' => array_map(fn (array $kartu): string => $kartu['chartLabel'], $kartuKategori),
             'values' => array_map(fn (array $kartu): int => $kartu['teregistrasi'], $kartuKategori),
         ];
 
@@ -332,10 +338,12 @@ class HomeController extends Controller
             'orgHibah' => $orgHibah,
             'orgKelompok' => $orgKelompok,
             'orgBansos' => $orgBansos,
+            'orgSubsidiBunga' => $orgSubsidiBunga,
             'totalPengajuan' => $totalPengajuan,
             'pengBansos' => $pengBansos,
             'pengHibah' => $pengHibah,
             'pengKelompok' => $pengKelompok,
+            'pengSubsidiBunga' => $pengSubsidiBunga,
             'chartUsulan' => $chartUsulan,
             'chartPengajuan' => $chartPengajuan,
             'isDemo' => false,
@@ -350,9 +358,10 @@ class HomeController extends Controller
     private function dummyDashboardData(): array
     {
         $kartuKategori = [
-            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'teregistrasi' => 30, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
-            ['title' => 'Hibah', 'label' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'teregistrasi' => 40, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
-            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'teregistrasi' => 52, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'chartLabel' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'teregistrasi' => 30, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'chartLabel' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'teregistrasi' => 40, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'chartLabel' => 'BDSKM', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'teregistrasi' => 52, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'Subsidi Bunga', 'label' => 'Subsidi Bunga', 'chartLabel' => 'Subsidi Bunga', 'jenis' => JenisPengajuan::SUBSIDI_BUNGA->value, 'total' => 18, 'teregistrasi' => 24, 'teregistrasiOrganisasi' => true, 'usulan' => 13, 'verifikasi' => 5, 'diajukan' => 9, 'disetujui' => 5],
         ];
 
         return [
@@ -362,13 +371,15 @@ class HomeController extends Controller
             'orgHibah' => 74,
             'orgKelompok' => 140,
             'orgBansos' => 0,
+            'orgSubsidiBunga' => 18,
             'totalPengajuan' => 214,
             'pengBansos' => 89,
             'pengHibah' => 7,
             'pengKelompok' => 45,
+            'pengSubsidiBunga' => 18,
             'chartUsulan' => [
-                'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM'],
-                'values' => [30, 40, 52],
+                'labels' => ['Bantuan Sosial', 'Hibah', 'BDSKM', 'Subsidi Bunga'],
+                'values' => [30, 40, 52, 24],
             ],
             'chartPengajuan' => [
                 'labels' => ['Proses Pengajuan SKPD', 'Verifikasi BA'],
@@ -376,6 +387,7 @@ class HomeController extends Controller
                     ['label' => 'Bantuan Sosial', 'data' => [12, 8]],
                     ['label' => 'Hibah', 'data' => [12, 8]],
                     ['label' => 'Bantuan ke Masyarakat', 'data' => [12, 8]],
+                    ['label' => 'Subsidi Bunga', 'data' => [9, 5]],
                 ],
             ],
             'isDemo' => true,
