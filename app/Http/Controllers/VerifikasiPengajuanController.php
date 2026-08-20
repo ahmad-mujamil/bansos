@@ -48,7 +48,7 @@ class VerifikasiPengajuanController extends Controller
         }
 
         return DataTables::of($query)
-            ->addColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
+            ->editColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
             ->addColumn('jenis', function ($row) {
                 $kategori = $row->kategori_pengajuan;
                 $warna = match ($kategori) {
@@ -65,7 +65,7 @@ class VerifikasiPengajuanController extends Controller
 
                 return $badge;
             })
-            ->addColumn('judul', fn($row) => $row->judul ?? '-')
+            ->editColumn('judul', fn($row) => $row->judul ?? '-')
             ->addColumn('status', function ($row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
