@@ -47,6 +47,7 @@
     $simpanDiblokir = $simpanDiblokir ?? false;
     $kelompokSimpanDiblokir = $kelompokSimpanDiblokir ?? false;
     $kelompokTanpaAnggota = $kelompokTanpaAnggota ?? false;
+    $kelompokSudahMengajukan = $kelompokSudahMengajukan ?? false;
     $anggotaBelumTerverifikasi = $anggotaBelumTerverifikasi ?? collect();
     @endphp
 
@@ -100,6 +101,18 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    @if(! $isBansos && $kelompokSudahMengajukan)
+                    <div class="col-12">
+                        <div class="alert alert-warning border-0 shadow-sm mb-0">
+                            <div class="fw-semibold mb-1">
+                                <i data-acorn-icon="warning-hexagon" data-acorn-size="18" class="me-1 align-middle"></i>
+                                Kelompok sudah mengajukan tahun ini
+                            </div>
+                            <p class="text-small mb-0">Kelompok Anda sudah mengajukan bantuan pada tahun anggaran {{ tahun_aktif() }}. Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.</p>
+                        </div>
+                    </div>
+                    @endif
 
                     @if(! $isBansos && $kelompokTanpaAnggota)
                     <div class="col-12">
@@ -275,6 +288,8 @@
                 <p id="hintSimpanDiblokir" class="text-muted text-small mt-2 mb-0">
                     @if($isBansos)
                         Penduduk yang dipilih belum terverifikasi (kolom is_valid). Selesaikan verifikasi data penduduk terlebih dahulu.
+                    @elseif($kelompokSudahMengajukan)
+                        Kelompok Anda sudah mengajukan bantuan pada tahun anggaran {{ tahun_aktif() }}. Satu kelompok hanya dapat mengajukan satu kali per tahun anggaran.
                     @elseif($kelompokTanpaAnggota)
                         Kelompok Anda belum memiliki anggota. Tambahkan minimal 1 anggota kelompok terlebih dahulu.
                     @else
