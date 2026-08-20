@@ -1,12 +1,14 @@
 @extends('layouts.layout_full')
 
 @section('content_left')
+    {{-- Statistik organisasi/kelompok disembunyikan — data tidak ditampilkan di halaman login.
     @php
         $totalKelompok      = (int) collect($organisasiAktif)->sum();
         $klpKelompok        = (int) ($organisasiAktif['KLP'] ?? 0);
         $yysKelompok        = (int) ($organisasiAktif['YYS'] ?? 0);
         $dllKelompok        = max(0, $totalKelompok - $klpKelompok - $yysKelompok);
     @endphp
+    --}}
     <div class="login-hero position-relative overflow-hidden"
          style="min-height: 100vh !important; height: 100vh !important; width: 100% !important; display: block !important; background-color: #2563eb !important; background-image: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 30%, #3b82f6 65%, #93c5fd 100%) !important;">
         {{-- Background gradient teal/hijau (layer cadangan) --}}
@@ -68,6 +70,7 @@
                 </p>
             </div>
 
+{{-- Kartu statistik disembunyikan — data tidak ditampilkan di halaman login.
             <div>
                 <div class="login-hero-section-label mb-3">
                     Organisasi / Kelompok Aktif
@@ -111,6 +114,7 @@
                     </div>
                 </div>
             </div>
+            --}}
         </div>
     </div>
 @endsection
