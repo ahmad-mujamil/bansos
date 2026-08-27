@@ -63,7 +63,7 @@
                     <span class="fw-bold" style="font-size: 0.78rem;">BKAD - LOMBOK BARAT</span>
                 </div>
                 <h2 class="login-hero-title mt-3 mb-2">
-                    BANTU-IN<br/><small>Bantuan Tuntas Terintegrasi</small>
+                    Si-Batur<br/><small>Sistem Informasi Bantuan Rakyat</small>
                 </h2>
                 <p class="login-hero-subtitle mb-0">
                     Layanan terpadu pengajuan bantuan sosial, hibah, dan bantuan kelompok masyarakat di Kabupaten Lombok Barat.
