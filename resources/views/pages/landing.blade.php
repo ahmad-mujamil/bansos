@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Si-Batur</title>
+    <title>Si-BATUR</title>
     <link rel="icon" href="{{ asset('img/logo-only.png') }}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -516,9 +516,9 @@
                         <span class="material-symbols-outlined text-base text-on-primary-container" data-icon="verified">verified</span>
                         <span class="text-xs font-bold tracking-widest uppercase text-on-primary-container">Resmi BKAD</span>
                     </div>
-                    <h2 class="text-3xl font-bold text-white mb-6">Tentang Si-Batur</h2>
+                    <h2 class="text-3xl font-bold text-white mb-6">Tentang Si-BATUR</h2>
                     <p class="text-on-primary-container text-lg leading-relaxed mb-8">
-                        "Si-Batur merupakan aplikasi yang dibuat oleh BKAD Lombok Barat untuk mendukung pengelolaan dan penyaluran bantuan sosial yang tepat sasaran, transparan, dan akuntabel."
+                        "Si-BATUR merupakan aplikasi yang dibuat oleh BKAD Lombok Barat untuk mendukung pengelolaan dan penyaluran bantuan sosial yang tepat sasaran, transparan, dan akuntabel."
                     </p>
                     {{-- <div class="space-y-6">
                         <div class="flex items-start gap-4">
@@ -557,7 +557,7 @@
                     Layanan Bansos Terintegrasi untuk <span class="stat-number">Masyarakat Lombok Barat.</span>
                 </h2>
                 <p class="text-on-primary-container text-xl font-light">
-                    Si-Batur menjadi media kolaborasi antara Pemerintah Kabupaten Lombok Barat dan masyarakat dalam proses pengajuan, verifikasi, hingga pemantauan bantuan sosial.
+                    Si-BATUR menjadi media kolaborasi antara Pemerintah Kabupaten Lombok Barat dan masyarakat dalam proses pengajuan, verifikasi, hingga pemantauan bantuan sosial.
                 </p>
                 <div class="flex flex-wrap gap-6 md:gap-8 border-t border-white/15 pt-10 justify-center md:justify-start">
                     <div class="text-center md:text-left min-w-[9rem] p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors">
