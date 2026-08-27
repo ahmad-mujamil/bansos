@@ -6,7 +6,7 @@
         class="flex {{ $extendedNav ? 'justify-between' : 'flex-wrap justify-between' }} items-center gap-4 px-6 md:px-8 py-4 max-w-7xl mx-auto">
         <a href="{{ route('landing') }}"
             class="font-bold text-blue-900 dark:text-blue-100 font-public-sans tracking-tight inline-flex items-center">
-            <img src="{{ asset('img/logo/logo-wide.png') }}" alt="Si-Batur" class="h-9 w-auto object-contain md:h-10"
+            <img src="{{ asset('img/logo/logo-wide.png') }}" alt="Si-BATUR" class="h-9 w-auto object-contain md:h-10"
                 width="150" height="40" />
         </a>
 
