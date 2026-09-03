@@ -20,10 +20,65 @@
             <div class="card-body">
                 <p class="text-alternate mb-4">
                     Daftar pengajuan yang sudah memiliki BAST. Unggah dokumen laporan kegiatan sebagai bukti realisasi bantuan.
-                    <span class="badge bg-danger text-wrap text-start fw-normal lh-base d-inline-block mt-2 px-3 py-2">
-                        Wajib melakukan realisasi sesuai jadwal; jika tidak, penerima dapat dimasukkan ke daftar hitam (blacklist).
-                    </span>
+                    
                 </p>
+                {{-- Tab jenis bantuan (selaras dengan laporan pengajuan) --}}
+                <div class="laporan-tabs d-flex flex-wrap gap-2 mb-4" role="tablist">
+                    @php
+                        $tabMeta = [
+                            'all'                                               => ['class' => 'laporan-tab-all',      'icon' => 'layout-3', 'title' => 'Semua',            'sub' => 'Semua Jenis Bantuan'],
+                            \App\Enums\JenisPengajuan::BANSOS->value             => ['class' => 'laporan-tab-bansos',   'icon' => 'user',     'title' => 'Bansos',           'sub' => 'Bantuan Sosial'],
+                            \App\Enums\JenisPengajuan::HIBAH->value              => ['class' => 'laporan-tab-hibah',    'icon' => 'gift',     'title' => 'Hibah',            'sub' => 'Bantuan Hibah'],
+                            \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value   => ['class' => 'laporan-tab-kelompok', 'icon' => 'building', 'title' => 'Bantuan Kelompok', 'sub' => 'Barang Diserahkan ke Masyarakat'],
+                            \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value      => ['class' => 'laporan-tab-subsidi',  'icon' => 'dollar',   'title' => 'Subsidi Bunga',    'sub' => 'Subsidi Bunga Kredit'],
+                        ];
+                    @endphp
+                    @foreach ($tabMeta as $value => $meta)
+                        <button type="button"
+                            class="laporan-tab {{ $meta['class'] }} {{ $loop->first ? 'active' : '' }}"
+                            data-kategori="{{ $value }}"
+                            role="tab"
+                            aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                            <span class="laporan-tab-icon"><i data-acorn-icon="{{ $meta['icon'] }}"></i></span>
+                            <span class="laporan-tab-label">
+                                <span class="laporan-tab-title">{{ $meta['title'] }}</span>
+                                <span class="laporan-tab-sub">{{ $meta['sub'] }}</span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="row g-2 mb-3">
+                    @if ($showOpdFilter)
+                        <div class="col-6 col-md-3">
+                            <select id="filter-opd" class="form-select form-select-sm">
+                                <option value="all">Semua OPD</option>
+                                @foreach ($opdOptions as $op)
+                                    <option value="{{ $op->id }}">{{ $op->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                    <div class="col-6 col-md-2">
+                        <select id="filter-realisasi" class="form-select form-select-sm">
+                            <option value="all">Semua realisasi</option>
+                            <option value="sudah">Sudah realisasi</option>
+                            <option value="belum">Belum realisasi</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        @php
+                            $namaBulan = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+                        @endphp
+                        <select id="filter-bulan" class="form-select form-select-sm" title="Periode bulan (tahun mengikuti Tahun Anggaran)">
+                            <option value="all">Semua bulan</option>
+                            @foreach ($namaBulan as $num => $label)
+                                <option value="{{ $num }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-12 col-sm-5 col-lg-3 col-xxl-2 mb-3">
                         <div class="d-inline-block float-md-start me-1 mb-1 search-input-container w-100 border border-separator bg-foreground search-sm">
@@ -85,13 +140,15 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
+    @include('partials.laporan-tabs-style')
 @endpush
 @push('js_vendor')
     <script src="{{ asset('js/cs/datatable.extend.js') }}"></script>
     <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
     <script>
         _extendDatatables()
-        $('#datatable-realisasi').DataTable({
+        var kategoriRealisasi = 'all';
+        var tabelRealisasi = $('#datatable-realisasi').DataTable({
             language: {
                 paginate: {
                     previous: '<i class="cs-chevron-left"></i>',
@@ -106,7 +163,15 @@
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
             order: [[0, 'desc']],
             sDom: '<"row"<"col-sm-12"<"table-container"t>r>><"row align-items-center mt-3"<"col-sm-6"l><"col-sm-6"p>>',
-            ajax: "{!! route('realisasi.index') !!}",
+            ajax: {
+                url: "{!! route('realisasi.index') !!}",
+                data: function (d) {
+                    d.kategori = kategoriRealisasi;
+                    d.opd = $('#filter-opd').val() || 'all';
+                    d.realisasi = $('#filter-realisasi').val() || 'all';
+                    d.bulan = $('#filter-bulan').val() || 'all';
+                },
+            },
             columns: [
                 { data: 'kode_pengajuan', name: 'kode_pengajuan' },
                 { data: 'judul', name: 'judul' },
@@ -117,6 +182,22 @@
                 { data: 'status_realisasi', name: 'status_realisasi', orderable: false, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ],
+        });
+
+        // Tab jenis bantuan & select filter → muat ulang tabel tanpa reload halaman.
+        $('.laporan-tab').on('click', function () {
+            var $tab = $(this);
+            if ($tab.hasClass('active')) {
+                return;
+            }
+            $('.laporan-tab').removeClass('active').attr('aria-selected', 'false');
+            $tab.addClass('active').attr('aria-selected', 'true');
+            kategoriRealisasi = $tab.data('kategori');
+            tabelRealisasi.ajax.reload();
+        });
+
+        $('#filter-opd, #filter-realisasi, #filter-bulan').on('change', function () {
+            tabelRealisasi.ajax.reload();
         });
 
         function _extendDatatables() {
