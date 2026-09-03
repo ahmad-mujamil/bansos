@@ -237,6 +237,65 @@
             </div>
         @endif
 
+        {{-- SP2D (dicatat bendahara pada halaman monitoring bantuan) --}}
+        @if ($pengajuan->sp2d)
+            @php
+                $sp2dDokumen = $pengajuan->sp2d->getFirstMedia('dokumen');
+            @endphp
+            <div class="card mb-4 border-start border-4 border-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+                        <div>
+                            <h2 class="small-title mb-1">Surat Perintah Pencairan Dana (SP2D)</h2>
+                            <p class="text-muted small mb-0">Data pencairan dana untuk pengajuan ini.</p>
+                        </div>
+                        <span class="badge bg-success align-self-center">Sudah SP2D</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <span class="text-small text-uppercase text-muted">Nomor SP2D</span>
+                            <div class="fw-semibold fs-5">{{ $pengajuan->sp2d->nomor }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-small text-uppercase text-muted">Tanggal SP2D</span>
+                            <div class="fw-semibold">{{ $pengajuan->sp2d->tanggal?->translatedFormat('d F Y') ?? '—' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-small text-uppercase text-muted">Nilai</span>
+                            <div class="fw-semibold">
+                                {{ $pengajuan->sp2d->nilai !== null ? 'Rp '.number_format((float) $pengajuan->sp2d->nilai, 0, ',', '.') : '—' }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-small text-uppercase text-muted">Dicatat oleh</span>
+                            <div>{{ $pengajuan->sp2d->user?->nama ?? ($pengajuan->sp2d->user?->email ?? '—') }}</div>
+                        </div>
+                        <div class="col-md-8">
+                            <span class="text-small text-uppercase text-muted">Keterangan</span>
+                            <div>{{ $pengajuan->sp2d->keterangan ?: '—' }}</div>
+                        </div>
+                    </div>
+                    <div class="border-top pt-3 mt-3">
+                        <span class="text-small text-uppercase text-muted d-block mb-2">Dokumen SP2D</span>
+                        @if ($sp2dDokumen)
+                            <a href="{{ $sp2dDokumen->getUrl() }}" target="_blank" rel="noopener noreferrer"
+                               class="btn btn-sm btn-outline-danger btn-icon btn-icon-start">
+                                <i data-acorn-icon="file-text" data-acorn-size="16"></i>
+                                <span class="text-truncate" style="max-width: 12rem;">{{ $sp2dDokumen->file_name }}</span>
+                            </a>
+                        @else
+                            <div class="text-muted small mb-0">Tidak ada dokumen.</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="alert alert-light border d-flex align-items-center gap-2 mb-4" role="alert">
+                <i data-acorn-icon="dollar" data-acorn-size="18" class="flex-shrink-0"></i>
+                <span class="small mb-0">Belum ada SP2D untuk pengajuan ini. Nomor SP2D akan muncul di sini setelah bendahara mencatatnya.</span>
+            </div>
+        @endif
+
         {{-- Form dokumentasi realisasi --}}
         <div class="card mb-5 shadow-sm overflow-hidden">
             <div class="card-header bg-primary text-white py-3 border-0">
