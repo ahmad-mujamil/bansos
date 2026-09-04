@@ -18,19 +18,63 @@
         </div>
         <div class="card mb-5">
             <div class="card-body">
+                {{-- Tab jenis bantuan (selaras dengan laporan pengajuan) --}}
+                <div class="laporan-tabs d-flex flex-wrap gap-2 mb-4" role="tablist">
+                    @php
+                        $tabMeta = [
+                            'all'                                               => ['class' => 'laporan-tab-all',      'icon' => 'layout-3', 'title' => 'Semua',            'sub' => 'Semua Jenis Bantuan'],
+                            \App\Enums\JenisPengajuan::BANSOS->value             => ['class' => 'laporan-tab-bansos',   'icon' => 'user',     'title' => 'Bansos',           'sub' => 'Bantuan Sosial'],
+                            \App\Enums\JenisPengajuan::HIBAH->value              => ['class' => 'laporan-tab-hibah',    'icon' => 'gift',     'title' => 'Hibah',            'sub' => 'Bantuan Hibah'],
+                            \App\Enums\JenisPengajuan::BANTUAN_KELOMPOK->value   => ['class' => 'laporan-tab-kelompok', 'icon' => 'building', 'title' => 'Bantuan Kelompok', 'sub' => 'Barang Diserahkan ke Masyarakat'],
+                            \App\Enums\JenisPengajuan::SUBSIDI_BUNGA->value      => ['class' => 'laporan-tab-subsidi',  'icon' => 'dollar',   'title' => 'Subsidi Bunga',    'sub' => 'Subsidi Bunga Kredit'],
+                        ];
+                    @endphp
+                    @foreach ($tabMeta as $value => $meta)
+                        <button type="button"
+                            class="laporan-tab {{ $meta['class'] }} {{ $loop->first ? 'active' : '' }}"
+                            data-kategori="{{ $value }}"
+                            role="tab"
+                            aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                            <span class="laporan-tab-icon"><i data-acorn-icon="{{ $meta['icon'] }}"></i></span>
+                            <span class="laporan-tab-label">
+                                <span class="laporan-tab-title">{{ $meta['title'] }}</span>
+                                <span class="laporan-tab-sub">{{ $meta['sub'] }}</span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+
                 <div class="row">
-                    <div class="col-12 col-lg-6 col-xxl-5 mb-3">
+                    <div class="col-12 col-lg-8 col-xxl-7 mb-3">
                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                            @if (auth()->user()->is_super() || auth()->user()->is_admin())
+                            @if ($showOpdFilter)
                                 <div class="flex-grow-1" style="min-width: 12rem;">
                                     <select id="filter-opd-laporan-realisasi" class="form-select form-select-sm">
-                                        <option value="">Semua OPD</option>
+                                        <option value="all">Semua OPD</option>
                                         @foreach ($opds as $opd)
-                                            <option value="{{ $opd->id }}" @selected(request('opd_id') === $opd->id)>{{ $opd->nama }}</option>
+                                            <option value="{{ $opd->id }}">{{ $opd->nama }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             @endif
+                            <div class="flex-grow-1" style="min-width: 10rem;">
+                                <select id="filter-realisasi-laporan" class="form-select form-select-sm">
+                                    <option value="all">Semua realisasi</option>
+                                    <option value="sudah">Sudah realisasi</option>
+                                    <option value="belum">Belum realisasi</option>
+                                </select>
+                            </div>
+                            <div class="flex-grow-1" style="min-width: 9rem;">
+                                @php
+                                    $namaBulan = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+                                @endphp
+                                <select id="filter-bulan-laporan-realisasi" class="form-select form-select-sm" title="Periode bulan (tahun mengikuti Tahun Anggaran)">
+                                    <option value="all">Semua bulan</option>
+                                    @foreach ($namaBulan as $num => $label)
+                                        <option value="{{ $num }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="flex-grow-1 search-input-container border border-separator bg-foreground search-sm" style="min-width: 10rem;">
                                 <input class="form-control form-control-sm datatable-search" placeholder="Search" data-datatable="#datatable-laporan-realisasi" />
                                 <span class="search-magnifier-icon">
@@ -42,7 +86,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-6 col-xxl-7 text-lg-end mb-3">
+                    <div class="col-12 col-lg-4 col-xxl-5 text-lg-end mb-3">
                         <div class="d-inline-flex flex-wrap gap-2 justify-content-lg-end align-items-center">
                             <button
                                 class="btn btn-sm btn-outline-primary datatable-print"
@@ -97,6 +141,7 @@
     <link rel="stylesheet" href="{{ asset('/css/vendor/datatables.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/vendor/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/select2-bootstrap4.min.css') }}">
+    @include('partials.laporan-tabs-style')
     <style>
         #filter-opd-laporan-realisasi + .select2-container--bootstrap4 .select2-selection--single {
             height: 31px;
@@ -114,6 +159,7 @@
     <script src="{{ asset('js/vendor/datatables.min.js') }}"></script>
     <script>
         _extendDatatables()
+        let kategoriLaporanRealisasi = 'all';
         const $filterOpd = $('#filter-opd-laporan-realisasi');
         if ($filterOpd.length) {
             $filterOpd.select2({
@@ -139,9 +185,10 @@
             ajax: {
                 url: "{!! route('laporan-realisasi.index') !!}",
                 data: function (d) {
-                    if ($filterOpd.length) {
-                        d.opd_id = $filterOpd.val();
-                    }
+                    d.kategori = kategoriLaporanRealisasi;
+                    d.opd = $filterOpd.length ? ($filterOpd.val() || 'all') : 'all';
+                    d.realisasi = $('#filter-realisasi-laporan').val() || 'all';
+                    d.bulan = $('#filter-bulan-laporan-realisasi').val() || 'all';
                 },
             },
             columns: [
@@ -155,7 +202,19 @@
             ],
         });
 
-        $filterOpd.on('change', function () {
+        // Tab jenis bantuan & select filter → muat ulang tabel tanpa reload halaman.
+        $('.laporan-tab').on('click', function () {
+            const $tab = $(this);
+            if ($tab.hasClass('active')) {
+                return;
+            }
+            $('.laporan-tab').removeClass('active').attr('aria-selected', 'false');
+            $tab.addClass('active').attr('aria-selected', 'true');
+            kategoriLaporanRealisasi = $tab.data('kategori');
+            tableLaporanRealisasi.ajax.reload();
+        });
+
+        $filterOpd.add('#filter-realisasi-laporan, #filter-bulan-laporan-realisasi').on('change', function () {
             tableLaporanRealisasi.ajax.reload();
         });
 
