@@ -81,7 +81,7 @@
     @push('css')
         <style>
             .data-list-table .data-list-sortable { cursor: pointer; user-select: none; }
-            .data-list-table .data-list-sortable:hover { color: #1d4ed8 !important; }
+            .data-list-table .data-list-sortable:hover { color: #8a0f18 !important; }
             .data-list-table .data-list-row { transition: background 0.15s ease; }
             .data-list-table .data-list-row[wire\:click],
             .data-list-table .data-list-row[data-href] { cursor: pointer; }

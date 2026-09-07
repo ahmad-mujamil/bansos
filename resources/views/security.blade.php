@@ -33,7 +33,7 @@
         <h2 class="small-title">Update Password</h2>
         <div class="card mb-5">
             <div class="card-body">
-                <form novalidate enctype="multipart/form-data" action="{{ route('password.update') }}" method="POST" class="needs-validation">
+                <form novalidate enctype="multipart/form-data" action="{{ route('security.password.update') }}" method="POST" class="needs-validation">
                     @csrf
                     @method('PUT')
                     <div class="mb-3 row">

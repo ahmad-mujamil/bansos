@@ -19,7 +19,7 @@
         @if(auth()->user()->is_user() && !auth()->user()->userDetail)
         <!-- Alert Lengkapi Data Diri untuk Verifikasi Start -->
         <div class="alert-lengkapi-detail mb-4">
-            <div class="card border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%); border-radius: 16px;">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, #d4212e 0%, #c1121f 50%, #8a0f18 100%); border-radius: 16px;">
                 <div class="card-body p-4 p-lg-5 position-relative">
                     <div class="row align-items-center g-4">
                         <div class="col-12 col-md-auto">
@@ -176,7 +176,7 @@
             <h2 class="small-title mb-3">Dashboard</h2>
             <div class="row g-3">
                 <div class="col-6 col-lg-3">
-                    <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card stat-card stat-card-primary border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="stat-card-label">Jumlah Pengajuan</div>

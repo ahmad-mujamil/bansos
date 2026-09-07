@@ -3,27 +3,30 @@
 @endphp
 
 @if($variant === 'minimal')
-    <footer class="border-t border-slate-200 dark:border-slate-800 py-8 px-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        © {{ date('Y') }} Si-BATUR
+    <footer class="border-t border-outline-variant py-8 px-6 text-center text-sm text-on-surface-variant">
+        &copy; {{ date('Y') }} Si-BATUR &mdash; Pemerintah Kabupaten Lombok Barat
     </footer>
 @else
-    <footer class="bg-slate-50 dark:bg-slate-950 w-full border-t border-slate-200 dark:border-slate-800">
-        <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 max-w-7xl mx-auto gap-6">
-            <div class="space-y-4 text-center md:text-left">
-                <div class="text-lg font-bold text-blue-800 dark:text-blue-400 font-public-sans">Si-BATUR</div>
-                <p class="text-sm font-public-sans leading-relaxed text-slate-500 max-w-xs">
-                    Platform resmi pemerintah daerah kabupaten lombok barat.
-                </p>
+    <footer class="w-full bg-surface-container-low border-t border-outline-variant">
+        <div class="max-w-7xl mx-auto px-6 md:px-8 py-14">
+            <div class="flex flex-col gap-10 md:flex-row md:justify-between">
+                <div class="max-w-sm space-y-3">
+                    <div class="text-lg font-extrabold tracking-tight text-primary">Si-BATUR</div>
+                    <p class="text-sm leading-relaxed text-on-surface-variant">
+                        Sistem Informasi Bantuan Terpadu dan Terukur, dikelola BKAD Pemerintah
+                        Kabupaten Lombok Barat.
+                    </p>
+                </div>
+                <nav class="grid grid-cols-2 gap-x-12 gap-y-3 sm:flex sm:gap-10" aria-label="Tautan footer">
+                    <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="{{ route('berita.publik.index') }}">Berita</a>
+                    <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="{{ url('/#profil-kantor') }}">Profil kantor</a>
+                    <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="{{ url('/#assistance') }}">Alur bantuan</a>
+                    <a class="text-sm text-on-surface-variant hover:text-primary transition-colors" href="{{ url('/#gallery') }}">Galeri</a>
+                </nav>
             </div>
-            <div class="flex flex-wrap justify-center gap-8">
-                <a class="text-sm font-public-sans leading-relaxed text-slate-500 hover:text-blue-600 dark:hover:text-blue-300 underline-offset-4 hover:underline transition-opacity opacity-90 hover:opacity-100" href="#">Privacy Policy</a>
-                <a class="text-sm font-public-sans leading-relaxed text-slate-500 hover:text-blue-600 dark:hover:text-blue-300 underline-offset-4 hover:underline transition-opacity opacity-90 hover:opacity-100" href="#">Terms of Service</a>
-                <a class="text-sm font-public-sans leading-relaxed text-slate-500 hover:text-blue-600 dark:hover:text-blue-300 underline-offset-4 hover:underline transition-opacity opacity-90 hover:opacity-100" href="#">Contact Us</a>
-                <a class="text-sm font-public-sans leading-relaxed text-slate-500 hover:text-blue-600 dark:hover:text-blue-300 underline-offset-4 hover:underline transition-opacity opacity-90 hover:opacity-100" href="#">Help Center</a>
-            </div>
-            <div class="text-sm font-public-sans text-slate-500 text-center">
-                © {{ date('Y') }} Si-BATUR. All rights reserved.
-            </div>
+            <p class="mt-10 pt-6 border-t border-outline-variant text-sm text-on-surface-variant">
+                &copy; {{ date('Y') }} Pemerintah Kabupaten Lombok Barat
+            </p>
         </div>
     </footer>
 @endif

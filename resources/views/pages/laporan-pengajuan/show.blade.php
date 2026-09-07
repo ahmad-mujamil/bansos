@@ -36,7 +36,7 @@
 
         {{-- Hero --}}
         <div class="card border-0 shadow-sm mb-4 overflow-hidden">
-            <div class="card-body p-4 position-relative" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%); color: #fff;">
+            <div class="card-body p-4 position-relative" style="background: linear-gradient(135deg, #d4212e 0%, #c1121f 55%, #8a0f18 100%); color: #fff;">
                 <div class="row g-3 align-items-center">
                     <div class="col-12 col-md">
                         <div class="text-white-50 text-uppercase small fw-bold mb-1" style="letter-spacing: 0.08em;">

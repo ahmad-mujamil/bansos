@@ -4,7 +4,7 @@
     <style>
         .dash-card { border: 0; border-radius: 14px; color: #fff; box-shadow: 0 6px 18px rgba(15, 23, 42, .12); overflow: hidden; }
         .dash-card .card-body { padding: 1.2rem 1.35rem; }
-        .dash-blue { background: linear-gradient(135deg, #4f8df8 0%, #2563eb 100%); }
+        .dash-primary { background: linear-gradient(135deg, #d4212e 0%, #c1121f 100%); }
         .dash-cyan { background: linear-gradient(135deg, #22b8d4 0%, #0e7490 100%); }
         .dash-amber { background: linear-gradient(135deg, #f9b23c 0%, #ea7d1d 100%); }
         .dash-indigo { background: linear-gradient(135deg, #7c83f7 0%, #4338ca 100%); }
@@ -47,7 +47,7 @@
         <h5 class="fw-bold mb-3" style="color: #1f2937;">Jumlah Usulan Calon Penerima Bantuan</h5>
 
         {{-- ===== Baris 1: Total per jenis pengajuan ===== --}}
-        @php $warnaKartu = ['dash-blue', 'dash-cyan', 'dash-amber', 'dash-purple']; @endphp
+        @php $warnaKartu = ['dash-primary', 'dash-cyan', 'dash-amber', 'dash-purple']; @endphp
         <div class="row g-3 mb-3">
             @foreach ($kartuKategori as $kartu)
                 <div class="col-12 col-md-6 col-xl-3">
@@ -182,8 +182,8 @@
                         datasets: [{
                             label: 'Jumlah Usulan',
                             data: @json($chartUsulan['values']),
-                            backgroundColor: '#4d8af0',
-                            hoverBackgroundColor: '#3b78e0',
+                            backgroundColor: '#c1121f',
+                            hoverBackgroundColor: '#8a0f18',
                             maxBarThickness: 80,
                         }],
                     },
@@ -204,7 +204,8 @@
             const pengajuanEl = document.getElementById('chartPengajuan');
             if (pengajuanEl) {
                 const series = @json($chartPengajuan['series']);
-                const colors = ['#e8734f', '#4ec3e0', '#2f43b5', '#8b5cf6'];
+                // Urutan warna mengikuti kartu di atas: bansos, hibah, BDSKM, subsidi bunga
+                const colors = ['#c1121f', '#1596b0', '#ef9a2b', '#7c47e6'];
                 const datasets = series.map((s, i) => ({
                     label: s.label,
                     data: s.data,
