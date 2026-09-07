@@ -20,7 +20,7 @@ Route::get('/berita/{berita:slug}', [BeritaPublikController::class, 'show'])->na
 Auth::routes([
     'register' => false,
     'confirm' => false,
-    'reset' => false,
+    'reset' => true,
 ]);
 
 // Registration Routes
@@ -78,7 +78,7 @@ Route::group(['middleware' => ['auth:web', 'check.perorangan.detail', 'ensure.us
 
     // SECURITY
     Route::get('/my-profile/security', [App\Http\Controllers\ProfileController::class, 'security'])->name('security.index');
-    Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::put('/my-profile/security/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('security.password.update');
 
     // USERS
     Route::middleware(['role:super,admin'])->group(function () {

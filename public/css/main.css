@@ -1,56 +1,81 @@
 /* This file is reserved for overriding and extending the template styles. */
 
-/* === Bansos Primary Color Override: Blue === */
+/* === Tema Bansos: putih & merah ===
+   Selaras dengan halaman publik dan auth (lihat partials/auth-theme.blade.php). */
 html,
 html[data-color],
 html[data-color="light-blue"] {
-    --primary: #2563eb;
-    --primary-rgb: 37, 99, 235;
-    --primary-darker: #1d4ed8;
+    --primary: #c1121f;
+    --primary-rgb: 193, 18, 31;
+    --primary-darker: #8a0f18;
+
+    /* Tipografi disamakan dengan halaman publik */
+    --font: "Plus Jakarta Sans", "Nunito Sans", sans-serif;
+    --font-heading: "Plus Jakarta Sans", "Montserrat", sans-serif;
 }
 
 .bg-primary,
 .btn-primary {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
+    background-color: #c1121f !important;
+    border-color: #c1121f !important;
 }
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:not(:disabled):not(.disabled):active,
 .btn-primary:not(:disabled):not(.disabled).active {
-    background-color: #1d4ed8 !important;
-    border-color: #1d4ed8 !important;
+    background-color: #8a0f18 !important;
+    border-color: #8a0f18 !important;
 }
-.text-primary { color: #2563eb !important; }
-.border-primary { border-color: #2563eb !important; }
+.text-primary { color: #c1121f !important; }
+.border-primary { border-color: #c1121f !important; }
 .btn-outline-primary {
-    color: #2563eb;
-    border-color: #2563eb;
+    color: #c1121f;
+    border-color: #c1121f;
 }
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:not(:disabled):not(.disabled):active,
 .btn-outline-primary:not(:disabled):not(.disabled).active {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
+    background-color: #c1121f !important;
+    border-color: #c1121f !important;
     color: #ffffff !important;
 }
 .alert-primary {
-    background-color: rgba(37, 99, 235, 0.12);
-    border-color: rgba(37, 99, 235, 0.25);
-    color: #1d4ed8;
+    background-color: rgba(193, 18, 31, 0.10);
+    border-color: rgba(193, 18, 31, 0.22);
+    color: #8a0f18;
 }
-.badge.bg-primary { background-color: #2563eb !important; }
+.badge.bg-primary { background-color: #c1121f !important; }
 .form-check-input:checked {
-    background-color: #2563eb;
-    border-color: #2563eb;
+    background-color: #c1121f;
+    border-color: #c1121f;
+}
+.form-check-input:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: #c1121f;
+    box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.12);
 }
 .page-item.active .page-link {
-    background-color: #2563eb;
-    border-color: #2563eb;
+    background-color: #c1121f;
+    border-color: #c1121f;
 }
-.page-link { color: #1d4ed8; }
-.page-link:hover { color: #1e40af; }
+.page-link { color: #8a0f18; }
+.page-link:hover { color: #c1121f; }
+
+/* Badge status: template memakai biru untuk "secondary", diganti netral hangat
+   agar tidak ada sisa tema biru. "info" jadi amber = sedang diproses. */
+.badge.bg-secondary { background-color: #6e625f !important; }
+.badge.bg-info { background-color: #a8630c !important; }
+
+/* Tautan & fokus keyboard */
+a { color: #c1121f; }
+a:hover { color: #8a0f18; }
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid #c1121f;
+    outline-offset: 2px;
+}
 
 /* === Bansos Stat Cards (Home dashboards) === */
 .stat-card {
@@ -100,7 +125,7 @@ html[data-color="light-blue"] {
     pointer-events: none;
 }
 .stat-card-deco i { color: #ffffff; width: 96px; height: 96px; }
-.stat-card-blue   { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%); }
+.stat-card-primary{ background: linear-gradient(135deg, #d4212e 0%, #c1121f 55%, #8a0f18 100%); }
 .stat-card-emerald{ background: linear-gradient(135deg, #34d399 0%, #10b981 55%, #059669 100%); }
 .stat-card-amber  { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%); }
 .stat-card-rose   { background: linear-gradient(135deg, #fb7185 0%, #f43f5e 55%, #e11d48 100%); }
@@ -172,12 +197,12 @@ html[data-color="light-blue"] {
 }
 .chart-card-violet .chart-card-header { background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 55%, #6d28d9 100%); }
 .chart-card-amber  .chart-card-header { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%); }
-.chart-card-blue   .chart-card-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%); }
+.chart-card-primary .chart-card-header { background: linear-gradient(135deg, #d4212e 0%, #c1121f 55%, #8a0f18 100%); }
 .chart-card-emerald.chart-card-header,
 .chart-card-emerald .chart-card-header { background: linear-gradient(135deg, #34d399 0%, #10b981 55%, #059669 100%); }
 
 .select2-container--bootstrap4 .select2-results__group {
-    color: #3f8be1;
+    color: #8a0f18;
     font-weight: bold;
     padding: 6px 12px;
     background-color: #f8f9fa;

@@ -21,7 +21,7 @@
             <h2 class="small-title">Summary</h2>
             <div class="row g-3">
                 <div class="col-12 col-lg-4 col-xxl-4">
-                    <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card stat-card stat-card-primary border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="stat-card-label">Total Penduduk</div>
@@ -66,7 +66,7 @@
             <div class="row g-3">
                 <div class="col-12 col-lg-4 col-xxl-4">
                     <a href="{{ route('verifikasi-penduduk.index', ['verifikator' => 'me']) }}" class="text-decoration-none">
-                        <div class="card stat-card stat-card-blue border-0 shadow-sm h-100 overflow-hidden">
+                        <div class="card stat-card stat-card-primary border-0 shadow-sm h-100 overflow-hidden">
                             <div class="card-body p-4 position-relative">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div class="stat-card-label">Total Diverifikasi</div>

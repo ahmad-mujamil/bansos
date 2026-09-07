@@ -17,7 +17,7 @@ class EnsureUserActive
         'profile.index',
         'profile.update',
         'security.index',
-        'password.update',
+        'security.password.update',
         'user-detail.create',
         'user-detail.store',
         'user-detail.update',
