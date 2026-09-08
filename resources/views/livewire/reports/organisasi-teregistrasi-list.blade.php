@@ -17,14 +17,21 @@
                 <option value="blacklist">Blacklist</option>
             </select>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-2">
             <select class="form-select form-select-sm" wire:model.live="pengajuan">
                 <option value="all">Semua pengajuan</option>
                 <option value="belum">Belum mengajukan</option>
                 <option value="sudah">Sudah mengajukan</option>
             </select>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-md-2">
+            <select class="form-select form-select-sm" wire:model.live="nik">
+                <option value="all">Semua NIK</option>
+                <option value="belum">Verifikasi NIK</option>
+                <option value="sudah">NIK terverifikasi</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
                        class="form-control form-control-sm"

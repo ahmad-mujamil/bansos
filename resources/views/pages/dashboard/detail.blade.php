@@ -28,8 +28,7 @@
                     :kategori="$kategori"
                     :status="$status"
                     :penerima="$penerima"
-                    :verif="$verif"
-                    :nik="$nik" />
+                    :verif="$verif" />
             </div>
         </div>
     </div>

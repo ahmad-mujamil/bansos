@@ -8,7 +8,6 @@ use App\Enums\MomenSnapshot;
 use App\Enums\PengajuanStatus;
 use App\Models\Concerns\BelongsToTahunAnggaran;
 use App\Models\Scopes\TahunAnggaranScope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -165,22 +164,6 @@ class Pengajuan extends Model implements HasMedia
             ->when($kecualiPengajuanId !== null, fn ($q) => $q->whereKeyNot($kecualiPengajuanId))
             ->oldest('created_at')
             ->first();
-    }
-
-    /**
-     * Pengajuan yang masih menunggu verifikasi NIK: minimal satu orang di
-     * dalamnya belum pernah diverifikasi Dukcapil (penduduk.validated_at
-     * kosong), baik penerima perorangan (pengajuan_detail) maupun anggota
-     * kelompok/organisasi pengusul (organisasi_detail).
-     */
-    public function scopeBelumVerifikasiNik(Builder $query): Builder
-    {
-        $belumDiverifikasi = fn (Builder $q) => $q->whereNull('validated_at');
-
-        return $query->where(function (Builder $q) use ($belumDiverifikasi) {
-            $q->whereHas('details.penduduk', $belumDiverifikasi)
-                ->orWhereHas('organisasi.organisasiDetail.penduduk', $belumDiverifikasi);
-        });
     }
 
     public function canEdit(): bool

@@ -20,11 +20,11 @@
         <div class="mb-5">
             <h2 class="small-title">Summary</h2>
             <div class="row g-3">
-                <div class="col-12 col-lg-3 col-xxl-3">
+                <div class="col-12 col-sm-6 col-xxl-3">
                     <div class="card stat-card stat-card-primary border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="stat-card-label">Total Organisasi/Kelompok</div>
+                                <div class="stat-card-label">Total Organisasi/<wbr>Kelompok</div>
                                 <div class="stat-card-icon"><i data-acorn-icon="building" data-acorn-size="22"></i></div>
                             </div>
                             <div class="stat-card-value">{{ number_format($totalOrganisasi) }}</div>
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-3 col-xxl-3">
+                <div class="col-12 col-sm-6 col-xxl-3">
                     <div class="card stat-card stat-card-violet border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -44,7 +44,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-3 col-xxl-3">
+                <div class="col-12 col-sm-6 col-xxl-3">
                     <div class="card stat-card stat-card-emerald border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-3 col-xxl-3">
+                <div class="col-12 col-sm-6 col-xxl-3">
                     <div class="card stat-card stat-card-rose border-0 shadow-sm h-100 overflow-hidden">
                         <div class="card-body p-4 position-relative">
                             <div class="d-flex justify-content-between align-items-start mb-3">

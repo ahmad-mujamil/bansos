@@ -23,9 +23,7 @@ class DashboardPengajuanList extends LaporanPengajuanList
 
     public string $verif = 'all';
 
-    public string $nik = 'all';
-
-    public function mount(string $kategori = 'all', string $status = 'all', string $penerima = 'all', string $verif = 'all', string $nik = 'all', string $opd = 'all'): void
+    public function mount(string $kategori = 'all', string $status = 'all', string $penerima = 'all', string $verif = 'all', string $opd = 'all'): void
     {
         parent::mount();
 
@@ -33,7 +31,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
         $this->status = PengajuanStatus::tryFrom($status) !== null ? $status : 'all';
         $this->penerima = in_array($penerima, ['perorangan', 'organisasi'], true) ? $penerima : 'all';
         $this->verif = in_array($verif, ['usulan', 'verifikasi'], true) ? $verif : 'all';
-        $this->nik = in_array($nik, ['belum', 'sudah'], true) ? $nik : 'all';
         $this->opd = $opd !== '' ? $opd : 'all';
     }
 
@@ -55,15 +52,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
         $this->resetPage();
     }
 
-    public function updatedNik(): void
-    {
-        if (! in_array($this->nik, ['belum', 'sudah'], true)) {
-            $this->nik = 'all';
-        }
-        $this->expandedId = null;
-        $this->resetPage();
-    }
-
     protected function applyExtraQuery(Builder $query): void
     {
         parent::applyExtraQuery($query);
@@ -80,13 +68,6 @@ class DashboardPengajuanList extends LaporanPengajuanList
             $query->whereHas('verifikasiPengajuan.media', fn (Builder $q) => $q->where('collection_name', 'ba-verifikasi'));
         } elseif ($this->verif === 'usulan') {
             $query->whereDoesntHave('verifikasiPengajuan.media', fn (Builder $q) => $q->where('collection_name', 'ba-verifikasi'));
-        }
-
-        // Pengajuan yang orangnya belum/sudah diverifikasi NIK oleh Dukcapil.
-        if ($this->nik === 'belum') {
-            $query->belumVerifikasiNik();
-        } elseif ($this->nik === 'sudah') {
-            $query->whereNot(fn (Builder $q) => $q->belumVerifikasiNik());
         }
     }
 
