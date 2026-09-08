@@ -63,9 +63,10 @@
                                 <div class="dash-value">{{ number_format($kartu['teregistrasi']) }}</div>
                             </a>
                             <div class="dash-rows">
-                                <a class="dash-row dash-row--link" href="{{ $teregistrasiUrl }}">
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'nik' => 'belum']) }}"
+                                   title="Pengajuan yang penerima perorangan atau anggota kelompoknya belum diverifikasi NIK">
                                     <span class="dash-row__label">Verifikasi NIK</span>
-                                    <span class="dash-row__value">{{ number_format(max(0, $kartu['teregistrasi'] - $kartu['disetujui'] - $kartu['diajukan'])) }}</span>
+                                    <span class="dash-row__value">{{ number_format($kartu['verifikasiNik']) }}</span>
                                 </a>
                                 <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'status' => 'diajukan']) }}">
                                     <span class="dash-row__label">Proses Pengajuan SKPD</span>
