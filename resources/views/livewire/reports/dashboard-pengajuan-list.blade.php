@@ -57,6 +57,13 @@
                 <option value="verifikasi" @selected($verif === 'verifikasi')>Verifikasi BA</option>
             </select>
         </div>
+        <div class="col-6 col-md-2" wire:ignore>
+            <select id="dashboard-filter-nik" class="form-select form-select-sm">
+                <option value="all" @selected($nik === 'all')>Semua NIK</option>
+                <option value="belum" @selected($nik === 'belum')>Verifikasi NIK</option>
+                <option value="sudah" @selected($nik === 'sudah')>NIK Terverifikasi</option>
+            </select>
+        </div>
         <div class="col-6 col-md-3">
             <div class="search-input-container border border-separator bg-foreground search-sm">
                 <input type="text"
@@ -121,6 +128,7 @@
         bind('dashboard-filter-status', 'status', false);
         bind('dashboard-filter-penerima', 'penerima', false);
         bind('dashboard-filter-verif', 'verif', false);
+        bind('dashboard-filter-nik', 'nik', false);
     };
 
     initDashboardFilterSelect2();
