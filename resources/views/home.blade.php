@@ -63,8 +63,8 @@
                                 <div class="dash-value">{{ number_format($kartu['teregistrasi']) }}</div>
                             </a>
                             <div class="dash-rows">
-                                <a class="dash-row dash-row--link" href="{{ route('dashboard.detail', ['jenis' => $kartu['jenis'], 'nik' => 'belum']) }}"
-                                   title="Pengajuan yang penerima perorangan atau anggota kelompoknya belum diverifikasi NIK">
+                                <a class="dash-row dash-row--link" href="{{ route('dashboard.organisasi', ['jenis' => $kartu['jenis'], 'nik' => 'belum']) }}"
+                                   title="Organisasi/kelompok teregistrasi yang masih punya anggota belum diverifikasi NIK (termasuk yang belum mengajukan)">
                                     <span class="dash-row__label">Verifikasi NIK</span>
                                     <span class="dash-row__value">{{ number_format($kartu['verifikasiNik']) }}</span>
                                 </a>

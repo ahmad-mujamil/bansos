@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\PengajuanDetail;
 
 class Penduduk extends Model
 {
@@ -61,6 +60,44 @@ class Penduduk extends Model
     public function historyVerifikasi(): HasMany
     {
         return $this->hasMany(HistoryVerifikasiPenduduk::class, 'penduduk_id')->latest();
+    }
+
+    /**
+     * Label wilayah "Kecamatan / Desa" untuk tampilan tabel.
+     */
+    public function getWilayahLabelAttribute(): string
+    {
+        return ($this->kecamatan?->nama ?? '-').' / '.($this->desa?->nama ?? '-');
+    }
+
+    /**
+     * Kelompok/organisasi tempat penduduk terdaftar, sebagai badge HTML.
+     * Kosong bila penduduk tidak tergabung di kelompok mana pun.
+     */
+    public function getKelompokLabelAttribute(): string
+    {
+        $items = $this->organisasiDetails
+            ->filter(fn ($d) => $d->organisasi !== null)
+            ->map(fn ($d) => [
+                'nama' => $d->organisasi->nama,
+                'jabatan' => $d->jabatan?->getDescription() ?? $d->jabatan?->value,
+            ])
+            ->unique('nama')
+            ->values();
+
+        if ($items->isEmpty()) {
+            return '<span class="text-muted">—</span>';
+        }
+
+        return $items
+            ->map(function (array $item): string {
+                $jabatan = $item['jabatan']
+                    ? '<small class="text-muted ms-1">'.e($item['jabatan']).'</small>'
+                    : '';
+
+                return '<div class="mb-1"><span class="badge bg-primary">'.e($item['nama']).'</span>'.$jabatan.'</div>';
+            })
+            ->implode('');
     }
 
     public function labelStatusVerifikasi(): string

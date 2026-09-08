@@ -123,21 +123,18 @@ class HomeController extends Controller
      *  - jenis: bansos|hibah|bantuan_kelompok|subsidi_bunga
      *  - penerima: perorangan|organisasi
      *  - verif: usulan|verifikasi
-     *  - nik: belum|sudah (status verifikasi NIK orang di dalam pengajuan)
      */
     public function detail()
     {
         $jenis = JenisPengajuan::tryFrom((string) request()->query('jenis'));
         $penerimaParam = (string) request()->query('penerima');
         $verifParam = (string) request()->query('verif');
-        $nikParam = (string) request()->query('nik');
 
         $statusEnum = PengajuanStatus::tryFrom((string) request()->query('status'));
 
         $kategori = $jenis?->value ?? 'all';
         $penerima = in_array($penerimaParam, ['perorangan', 'organisasi'], true) ? $penerimaParam : 'all';
         $verif = in_array($verifParam, ['usulan', 'verifikasi'], true) ? $verifParam : 'all';
-        $nik = in_array($nikParam, ['belum', 'sudah'], true) ? $nikParam : 'all';
         $status = $statusEnum?->value ?? 'all';
 
         $titleParts = [];
@@ -163,11 +160,6 @@ class HomeController extends Controller
         } elseif ($verif === 'usulan') {
             $titleParts[] = 'Proses Pengajuan';
         }
-        if ($nik === 'belum') {
-            $titleParts[] = 'Verifikasi NIK';
-        } elseif ($nik === 'sudah') {
-            $titleParts[] = 'NIK Terverifikasi';
-        }
 
         $judul = 'Detail '.(empty($titleParts) ? 'Semua Pengajuan' : implode(' · ', $titleParts));
 
@@ -176,7 +168,6 @@ class HomeController extends Controller
             'kategori' => $kategori,
             'penerima' => $penerima,
             'verif' => $verif,
-            'nik' => $nik,
             'status' => $status,
         ]);
     }
@@ -193,6 +184,13 @@ class HomeController extends Controller
         $pengajuanParam = (string) request()->query('pengajuan');
         $pengajuan = in_array($pengajuanParam, ['belum', 'sudah'], true) ? $pengajuanParam : 'all';
 
+        $nikParam = (string) request()->query('nik');
+        $nik = in_array($nikParam, ['belum', 'sudah'], true) ? $nikParam : 'all';
+
+        // nik=belum menampilkan daftar penduduk; ?tampilan=kelompok mengembalikan
+        // ke daftar organisasi dengan filter yang sama.
+        $perKelompok = request()->query('tampilan') === 'kelompok';
+
         $judulJenis = match ($jenis) {
             JenisPengajuan::BANSOS => 'Bantuan Sosial',
             JenisPengajuan::HIBAH => 'Hibah',
@@ -206,10 +204,18 @@ class HomeController extends Controller
             default => '',
         };
 
+        $judulNik = match ($nik) {
+            'belum' => ' · Verifikasi NIK',
+            'sudah' => ' · NIK Terverifikasi',
+            default => '',
+        };
+
         return view('pages.dashboard.organisasi', [
             'jenis' => $jenis->value,
             'pengajuan' => $pengajuan,
-            'judul' => 'Organisasi Teregistrasi · '.$judulJenis.$judulPengajuan,
+            'nik' => $nik,
+            'perKelompok' => $perKelompok,
+            'judul' => 'Organisasi Teregistrasi · '.$judulJenis.$judulPengajuan.$judulNik,
         ]);
     }
 
@@ -238,14 +244,6 @@ class HomeController extends Controller
             ->groupBy('kategori_pengajuan')
             ->pluck('total', 'kategori_pengajuan');
 
-        // Pengajuan yang orangnya (penerima perorangan / anggota kelompok) belum
-        // diverifikasi NIK-nya oleh Dukcapil, per kategori (1 query)
-        $verifikasiNikPerKategori = Pengajuan::query()
-            ->belumVerifikasiNik()
-            ->selectRaw('kategori_pengajuan, COUNT(*) as total')
-            ->groupBy('kategori_pengajuan')
-            ->pluck('total', 'kategori_pengajuan');
-
         // Jumlah pengajuan per kategori per status (1 query)
         $pengajuanPerKategoriStatus = Pengajuan::query()
             ->selectRaw('kategori_pengajuan, status, COUNT(*) as total')
@@ -257,7 +255,6 @@ class HomeController extends Controller
 
         $pengCount = fn (JenisPengajuan $k): int => (int) $pengajuanPerKategori->get($k->value, 0);
         $verifCount = fn (JenisPengajuan $k): int => (int) $verifikasiPerKategori->get($k->value, 0);
-        $verifikasiNikCount = fn (JenisPengajuan $k): int => (int) $verifikasiNikPerKategori->get($k->value, 0);
         $statusCount = fn (JenisPengajuan $k, PengajuanStatus $s): int => (int) ($pengajuanPerKategoriStatus[$k->value.'|'.$s->value] ?? 0);
 
         // Kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
@@ -273,6 +270,22 @@ class HomeController extends Controller
             $jenisOrganisasi = array_map(fn ($j) => $j->value, $k->getJenisOrganisasi());
 
             return Organisasi::query()->whereIn('jenis', $jenisOrganisasi)->count();
+        };
+
+        // Verifikasi NIK = jumlah orang yang NIK-nya belum pernah diverifikasi Dukcapil,
+        // di antara anggota organisasi/kelompok yang jenisnya sesuai jenis pengajuan ini.
+        // Ikut dihitung meski kelompoknya belum pernah mengajukan. Satuannya orang agar
+        // sama dengan daftar pada halaman detail (dashboard.organisasi?nik=belum).
+        $verifikasiNikCount = function (JenisPengajuan $k): int {
+            $jenisOrganisasi = array_map(fn ($j) => $j->value, $k->getJenisOrganisasi());
+
+            return Penduduk::query()
+                ->whereNull('validated_at')
+                ->whereHas(
+                    'organisasiDetails.organisasi',
+                    fn ($q) => $q->whereIn('jenis', $jenisOrganisasi)
+                )
+                ->count();
         };
 
         // Jenis pengajuan yang teregistrasinya dihitung dari jumlah organisasi (bukan pengajuan).
