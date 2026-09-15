@@ -18,12 +18,18 @@ use Illuminate\Database\Eloquent\Builder;
 class OrganisasiTeregistrasiList extends DataList
 {
     public string $jenis = '';
+
     public string $status = 'all';
+
     public string $kecamatanId = 'all';
+
     public string $pengajuan = 'all';
+
+    public string $nik = 'all';
+
     public ?string $expandedId = null;
 
-    public function mount(string $jenis = '', string $pengajuan = 'all'): void
+    public function mount(string $jenis = '', string $pengajuan = 'all', string $nik = 'all'): void
     {
         $this->configure([
             'model' => Organisasi::class,
@@ -39,6 +45,7 @@ class OrganisasiTeregistrasiList extends DataList
 
         $this->jenis = $jenis;
         $this->pengajuan = in_array($pengajuan, ['belum', 'sudah'], true) ? $pengajuan : 'all';
+        $this->nik = in_array($nik, ['belum', 'sudah'], true) ? $nik : 'all';
     }
 
     public function updatedStatus(): void
@@ -60,6 +67,15 @@ class OrganisasiTeregistrasiList extends DataList
     {
         if (! in_array($this->pengajuan, ['belum', 'sudah'], true)) {
             $this->pengajuan = 'all';
+        }
+        $this->expandedId = null;
+        $this->resetPage();
+    }
+
+    public function updatedNik(): void
+    {
+        if (! in_array($this->nik, ['belum', 'sudah'], true)) {
+            $this->nik = 'all';
         }
         $this->expandedId = null;
         $this->resetPage();
@@ -94,6 +110,16 @@ class OrganisasiTeregistrasiList extends DataList
             $query->whereDoesntHave('pengajuans');
         } elseif ($this->pengajuan === 'sudah') {
             $query->whereHas('pengajuans');
+        }
+
+        // Verifikasi NIK: organisasi yang masih / sudah tidak punya anggota
+        // dengan NIK belum diverifikasi Dukcapil.
+        $belumDiverifikasi = fn (Builder $q) => $q->whereNull('validated_at');
+
+        if ($this->nik === 'belum') {
+            $query->whereHas('organisasiDetail.penduduk', $belumDiverifikasi);
+        } elseif ($this->nik === 'sudah') {
+            $query->whereDoesntHave('organisasiDetail.penduduk', $belumDiverifikasi);
         }
 
         $query->withCount('organisasiDetail');

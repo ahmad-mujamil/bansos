@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Reports;
 
-use App\Enums\JenisPengajuan;
 use App\Enums\JenisPenerimaBantuan;
+use App\Enums\JenisPengajuan;
 use App\Enums\PengajuanStatus;
 use App\Models\Opd;
 use Illuminate\Contracts\View\View;
@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 class DashboardPengajuanList extends LaporanPengajuanList
 {
     public string $penerima = 'all';
+
     public string $verif = 'all';
 
     public function mount(string $kategori = 'all', string $status = 'all', string $penerima = 'all', string $verif = 'all', string $opd = 'all'): void

@@ -175,9 +175,9 @@
   <!-- Flag pole top -->
   <circle cx="800" cy="288" r="5" fill="#fbbf24"/>
 
-  <!-- "Bantu-In" text on building -->
+  <!-- "Si-Batur" text on building -->
   <text x="800" y="650" font-family="Arial, sans-serif" font-size="36" font-weight="bold"
-        text-anchor="middle" fill="#92400e" opacity="0.85">BANTU-IN</text>
+        text-anchor="middle" fill="#92400e" opacity="0.85">Si-Batur</text>
 
   <!-- Ground / road -->
   <rect x="0" y="900" width="1600" height="300" fill="url(#ground)"/>

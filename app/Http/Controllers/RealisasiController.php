@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JenisPengajuan;
+use App\Enums\RoleUser;
 use App\Http\Requests\PengajuanRealisasiRequest;
+use App\Models\Opd;
 use App\Models\Pengajuan;
 use App\Models\PengajuanRealisasi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -21,7 +25,55 @@ class RealisasiController extends Controller
             $q->where('user_id', $user->id);
         }
 
+        $this->applyFilters($q);
+
         return $q;
+    }
+
+    /**
+     * Filter daftar realisasi — mengikuti laporan pengajuan (jenis bantuan, OPD,
+     * bulan) ditambah status realisasi yang khas halaman ini.
+     */
+    private function applyFilters(Builder $query): void
+    {
+        $kategori = (string) request('kategori', 'all');
+        if ($kategori !== 'all' && JenisPengajuan::tryFrom($kategori) !== null) {
+            $query->where(function (Builder $q) use ($kategori) {
+                $q->where('kategori_pengajuan', $kategori)
+                    ->orWhere(function (Builder $q2) use ($kategori) {
+                        $q2->whereNull('kategori_pengajuan')
+                            ->whereHas('jenisBantuan', fn (Builder $jb) => $jb->where('kategori', $kategori));
+                    });
+            });
+        }
+
+        $opd = (string) request('opd', 'all');
+        if ($this->showOpdFilter() && $opd !== 'all' && $opd !== '') {
+            $query->where('opd_id', $opd);
+        }
+
+        // Periode bulan; tahun mengikuti Tahun Anggaran terpilih (global scope tahun_anggaran).
+        $bulan = (int) request('bulan', 0);
+        if (in_array($bulan, range(1, 12), true)) {
+            $query->whereMonth('pengajuan.created_at', $bulan);
+        }
+
+        $realisasi = (string) request('realisasi', 'all');
+        if ($realisasi === 'sudah') {
+            $query->whereHas('realisasi');
+        } elseif ($realisasi === 'belum') {
+            $query->whereDoesntHave('realisasi');
+        }
+    }
+
+    /**
+     * Filter OPD hanya untuk role yang melihat lintas OPD.
+     */
+    private function showOpdFilter(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->role === RoleUser::SUPER || $user?->role === RoleUser::ADMIN;
     }
 
     private function authorizePengajuan(Pengajuan $pengajuan): void
@@ -68,7 +120,18 @@ class RealisasiController extends Controller
             return $this->data();
         }
 
-        return view('pages.realisasi.index');
+        return view('pages.realisasi.index', [
+            'kategoriOptions' => [
+                JenisPengajuan::BANSOS,
+                JenisPengajuan::HIBAH,
+                JenisPengajuan::BANTUAN_KELOMPOK,
+                JenisPengajuan::SUBSIDI_BUNGA,
+            ],
+            'showOpdFilter' => $this->showOpdFilter(),
+            'opdOptions' => $this->showOpdFilter()
+                ? Opd::query()->orderBy('nama')->get(['id', 'nama'])
+                : collect(),
+        ]);
     }
 
     public function create(Pengajuan $pengajuan)
@@ -86,6 +149,8 @@ class RealisasiController extends Controller
             'bast.media',
             'verifikasiPengajuan',
             'realisasi',
+            'sp2d.user',
+            'sp2d.media',
         ]);
 
         return view('pages.realisasi.create', compact('pengajuan'));

@@ -35,7 +35,7 @@ class VerifikasiPengajuanController extends Controller
 
         $query = Pengajuan::query()
             ->with(['user', 'verifiedBy', 'logs', 'verifikasiPengajuan.media'])
-            ->where('opd_id', Auth::user()->opd_id)
+            ->when(!in_array(Auth::user()?->role, [RoleUser::SUPER, RoleUser::ADMIN], true), fn($query) => $query->where('opd_id', Auth::user()->opd_id))
             ->latest();
 
         if ($statusRequest !== 'all' && in_array($statusRequest, $allowedStatuses, true)) {
@@ -48,7 +48,7 @@ class VerifikasiPengajuanController extends Controller
         }
 
         return DataTables::of($query)
-            ->addColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
+            ->editColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
             ->addColumn('jenis', function ($row) {
                 $kategori = $row->kategori_pengajuan;
                 $warna = match ($kategori) {
@@ -65,7 +65,7 @@ class VerifikasiPengajuanController extends Controller
 
                 return $badge;
             })
-            ->addColumn('judul', fn($row) => $row->judul ?? '-')
+            ->editColumn('judul', fn($row) => $row->judul ?? '-')
             ->addColumn('status', function ($row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
@@ -445,9 +445,9 @@ class VerifikasiPengajuanController extends Controller
 
         $pemohon = $pengajuan->organisasi
             ?->organisasiDetail()
-                ->where('jabatan', JabatanOrganisasi::KETUA)
-                ->first()
-                ?->penduduk?->nama
+            ->where('jabatan', JabatanOrganisasi::KETUA)
+            ->first()
+            ?->penduduk?->nama
             ?? $pengajuan->user?->userDetail?->nama_user
             ?? $pengajuan->user?->nama
             ?? $pengajuan->user?->email
@@ -471,7 +471,7 @@ class VerifikasiPengajuanController extends Controller
 
                     return $idx === false ? count($prioritasJabatan) : $idx;
                 })
-                ->first(fn ($detail) => $detail->penduduk?->nama);
+                ->first(fn($detail) => $detail->penduduk?->nama);
 
             if ($ketua?->penduduk?->nama) {
                 $pemohon = $ketua->penduduk->nama;
@@ -505,7 +505,7 @@ class VerifikasiPengajuanController extends Controller
 
                     return $idx === false ? count($prioritasJabatanSnapshot) : $idx;
                 })
-                ->first(fn ($anggota) => $anggota->nama);
+                ->first(fn($anggota) => $anggota->nama);
 
             if ($ketuaSnapshot?->nama) {
                 $pemohon = $ketuaSnapshot->nama;

@@ -3,7 +3,7 @@
 @push('css')
 <style>
     .pengajuan-hero {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 45%, #1e3a8a 100%);
+        background: linear-gradient(135deg, #c1121f 0%, #8a0f18 45%, #5a0c12 100%);
         border-radius: 1rem;
         color: #fff;
         overflow: hidden;

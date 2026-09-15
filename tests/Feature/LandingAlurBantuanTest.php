@@ -29,9 +29,12 @@ it('menampilkan alur bantuan dari konfigurasi admin di landing page', function (
 
     $response = get('/');
 
+    // Nomor urut dirender sebagai elemen struktural (badge), sehingga prefix
+    // "1." / "2." pada judul dari admin dibuang agar tidak tampil dua kali.
     $response
         ->assertSuccessful()
         ->assertSee('Bantuan Sosial')
-        ->assertSee('1. Registrasi Warga')
+        ->assertSee('Registrasi Warga')
+        ->assertDontSee('1. Registrasi Warga')
         ->assertSee('Petugas memeriksa kelengkapan dokumen pengajuan.');
 });

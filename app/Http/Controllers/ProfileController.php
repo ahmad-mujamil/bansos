@@ -61,11 +61,12 @@ class ProfileController extends Controller
             ]);
 
             DB::commit();
-            toast()->success('Yeeayy !!','Password Berhasil diubah');
+            toast()->success('Berhasil', 'Password berhasil diubah.');
             return redirect()->back();
         } catch (\Throwable $e) {
-            $message = app()->isLocal() ? $e->getMessage(): 'Failed to update password';
-            toast()->success('Yeeayy !!', $message);
+            DB::rollBack();
+            $message = app()->isLocal() ? $e->getMessage() : 'Password gagal diubah.';
+            toast()->error('Gagal', $message);
             return redirect()->back()->withErrors(['error' => $message]);
         }
 

@@ -24,7 +24,23 @@
 
         <div class="card mb-5">
             <div class="card-body">
-                <livewire:reports.organisasi-teregistrasi-list :jenis="$jenis" :pengajuan="$pengajuan" />
+                @if($nik === 'belum' && ! $perKelompok)
+                    {{-- Detail metrik "Verifikasi NIK": tampilkan orangnya, bukan kelompoknya. --}}
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <p class="text-alternate mb-0">
+                            Penduduk yang NIK-nya belum pernah diverifikasi Dukcapil, beserta kelompok
+                            tempat mereka terdaftar. Termasuk kelompok yang belum pernah mengajukan.
+                        </p>
+                        <a href="{{ route('dashboard.organisasi', ['jenis' => $jenis, 'nik' => 'belum', 'tampilan' => 'kelompok']) }}"
+                           class="btn btn-sm btn-outline-primary flex-shrink-0">
+                            <i data-acorn-icon="building" data-acorn-size="15" class="me-1"></i>
+                            Lihat per kelompok
+                        </a>
+                    </div>
+                    <livewire:reports.penduduk-belum-verifikasi-list :jenis="$jenis" />
+                @else
+                    <livewire:reports.organisasi-teregistrasi-list :jenis="$jenis" :pengajuan="$pengajuan" :nik="$nik" />
+                @endif
             </div>
         </div>
     </div>

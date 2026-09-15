@@ -161,7 +161,7 @@ class HomeController extends Controller
             $titleParts[] = 'Proses Pengajuan';
         }
 
-        $judul = 'Detail ' . (empty($titleParts) ? 'Semua Pengajuan' : implode(' · ', $titleParts));
+        $judul = 'Detail '.(empty($titleParts) ? 'Semua Pengajuan' : implode(' · ', $titleParts));
 
         return view('pages.dashboard.detail', [
             'judul' => $judul,
@@ -184,6 +184,13 @@ class HomeController extends Controller
         $pengajuanParam = (string) request()->query('pengajuan');
         $pengajuan = in_array($pengajuanParam, ['belum', 'sudah'], true) ? $pengajuanParam : 'all';
 
+        $nikParam = (string) request()->query('nik');
+        $nik = in_array($nikParam, ['belum', 'sudah'], true) ? $nikParam : 'all';
+
+        // nik=belum menampilkan daftar penduduk; ?tampilan=kelompok mengembalikan
+        // ke daftar organisasi dengan filter yang sama.
+        $perKelompok = request()->query('tampilan') === 'kelompok';
+
         $judulJenis = match ($jenis) {
             JenisPengajuan::BANSOS => 'Bantuan Sosial',
             JenisPengajuan::HIBAH => 'Hibah',
@@ -197,10 +204,18 @@ class HomeController extends Controller
             default => '',
         };
 
+        $judulNik = match ($nik) {
+            'belum' => ' · Verifikasi NIK',
+            'sudah' => ' · NIK Terverifikasi',
+            default => '',
+        };
+
         return view('pages.dashboard.organisasi', [
             'jenis' => $jenis->value,
             'pengajuan' => $pengajuan,
-            'judul' => 'Organisasi Teregistrasi · ' . $judulJenis . $judulPengajuan,
+            'nik' => $nik,
+            'perKelompok' => $perKelompok,
+            'judul' => 'Organisasi Teregistrasi · '.$judulJenis.$judulPengajuan.$judulNik,
         ]);
     }
 
@@ -235,12 +250,12 @@ class HomeController extends Controller
             ->groupBy('kategori_pengajuan', 'status')
             ->get()
             ->mapWithKeys(fn ($r) => [
-                $r->getRawOriginal('kategori_pengajuan') . '|' . $r->getRawOriginal('status') => (int) $r->total,
+                $r->getRawOriginal('kategori_pengajuan').'|'.$r->getRawOriginal('status') => (int) $r->total,
             ]);
 
         $pengCount = fn (JenisPengajuan $k): int => (int) $pengajuanPerKategori->get($k->value, 0);
         $verifCount = fn (JenisPengajuan $k): int => (int) $verifikasiPerKategori->get($k->value, 0);
-        $statusCount = fn (JenisPengajuan $k, PengajuanStatus $s): int => (int) ($pengajuanPerKategoriStatus[$k->value . '|' . $s->value] ?? 0);
+        $statusCount = fn (JenisPengajuan $k, PengajuanStatus $s): int => (int) ($pengajuanPerKategoriStatus[$k->value.'|'.$s->value] ?? 0);
 
         // Kartu total per jenis pengajuan (Total = Usulan + Verifikasi BA)
         $definisiKartu = [
@@ -257,10 +272,26 @@ class HomeController extends Controller
             return Organisasi::query()->whereIn('jenis', $jenisOrganisasi)->count();
         };
 
+        // Verifikasi NIK = jumlah orang yang NIK-nya belum pernah diverifikasi Dukcapil,
+        // di antara anggota organisasi/kelompok yang jenisnya sesuai jenis pengajuan ini.
+        // Ikut dihitung meski kelompoknya belum pernah mengajukan. Satuannya orang agar
+        // sama dengan daftar pada halaman detail (dashboard.organisasi?nik=belum).
+        $verifikasiNikCount = function (JenisPengajuan $k): int {
+            $jenisOrganisasi = array_map(fn ($j) => $j->value, $k->getJenisOrganisasi());
+
+            return Penduduk::query()
+                ->whereNull('validated_at')
+                ->whereHas(
+                    'organisasiDetails.organisasi',
+                    fn ($q) => $q->whereIn('jenis', $jenisOrganisasi)
+                )
+                ->count();
+        };
+
         // Jenis pengajuan yang teregistrasinya dihitung dari jumlah organisasi (bukan pengajuan).
         $teregistrasiDariOrganisasi = [JenisPengajuan::HIBAH, JenisPengajuan::BANTUAN_KELOMPOK, JenisPengajuan::BANSOS, JenisPengajuan::SUBSIDI_BUNGA];
 
-        $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount, $statusCount, $organisasiTeregistrasiCount, $teregistrasiDariOrganisasi): array {
+        $kartuKategori = array_map(function (array $def) use ($pengCount, $verifCount, $verifikasiNikCount, $statusCount, $organisasiTeregistrasiCount, $teregistrasiDariOrganisasi): array {
             $total = $pengCount($def['jenis']);
             $verifikasi = $verifCount($def['jenis']);
 
@@ -280,6 +311,7 @@ class HomeController extends Controller
                 'teregistrasiOrganisasi' => $dariOrganisasi,
                 'usulan' => max(0, $total - $verifikasi),
                 'verifikasi' => $verifikasi,
+                'verifikasiNik' => $verifikasiNikCount($def['jenis']),
                 'diajukan' => $statusCount($def['jenis'], PengajuanStatus::DIAJUKAN),
                 'disetujui' => $statusCount($def['jenis'], PengajuanStatus::DISETUJUI),
             ];
@@ -294,7 +326,6 @@ class HomeController extends Controller
             ->selectRaw('kategori_pengajuan, COUNT(*) as total')
             ->groupBy('kategori_pengajuan')
             ->pluck('total', 'kategori_pengajuan');
-
 
         $orgCount = fn (JenisPengajuan $k): int => (int) $organisasiPerKategori->get($k->value, 0);
         $orgHibah = $orgCount(JenisPengajuan::HIBAH);
@@ -358,10 +389,10 @@ class HomeController extends Controller
     private function dummyDashboardData(): array
     {
         $kartuKategori = [
-            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'chartLabel' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'teregistrasi' => 30, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
-            ['title' => 'Hibah', 'label' => 'Hibah', 'chartLabel' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'teregistrasi' => 40, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
-            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'chartLabel' => 'BDSKM', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'teregistrasi' => 52, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'diajukan' => 12, 'disetujui' => 8],
-            ['title' => 'Subsidi Bunga', 'label' => 'Subsidi Bunga', 'chartLabel' => 'Subsidi Bunga', 'jenis' => JenisPengajuan::SUBSIDI_BUNGA->value, 'total' => 18, 'teregistrasi' => 24, 'teregistrasiOrganisasi' => true, 'usulan' => 13, 'verifikasi' => 5, 'diajukan' => 9, 'disetujui' => 5],
+            ['title' => 'Bansos', 'label' => 'Bantuan Sosial', 'chartLabel' => 'Bantuan Sosial', 'jenis' => JenisPengajuan::BANSOS->value, 'total' => 26, 'teregistrasi' => 30, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'verifikasiNik' => 7, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'Hibah', 'label' => 'Hibah', 'chartLabel' => 'Hibah', 'jenis' => JenisPengajuan::HIBAH->value, 'total' => 26, 'teregistrasi' => 40, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'verifikasiNik' => 9, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'BDSKM', 'label' => 'Bantuan ke Masyarakat', 'chartLabel' => 'BDSKM', 'jenis' => JenisPengajuan::BANTUAN_KELOMPOK->value, 'total' => 26, 'teregistrasi' => 52, 'teregistrasiOrganisasi' => true, 'usulan' => 20, 'verifikasi' => 6, 'verifikasiNik' => 11, 'diajukan' => 12, 'disetujui' => 8],
+            ['title' => 'Subsidi Bunga', 'label' => 'Subsidi Bunga', 'chartLabel' => 'Subsidi Bunga', 'jenis' => JenisPengajuan::SUBSIDI_BUNGA->value, 'total' => 18, 'teregistrasi' => 24, 'teregistrasiOrganisasi' => true, 'usulan' => 13, 'verifikasi' => 5, 'verifikasiNik' => 4, 'diajukan' => 9, 'disetujui' => 5],
         ];
 
         return [
