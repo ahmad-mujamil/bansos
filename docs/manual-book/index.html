@@ -1,0 +1,382 @@
+<title>Manual Book Si-BATUR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #fbfbfc;
+    --paper-2: #f3f4f7;
+    --ink: #1e232d;
+    --ink-2: #4f5866;
+    --ink-3: #8a93a1;
+    --line: #dfe2e8;
+    --brand: #c1121f;
+    --brand-deep: #8a0f18;
+    --brand-tint: #fbeaec;
+    --warn: #9a5b00;
+    --warn-tint: #fff4dd;
+    --ok: #1a7f4b;
+    --ok-tint: #e6f5ec;
+    --code-bg: #eef0f4;
+    --shadow: 0 1px 2px rgba(30, 35, 45, .06), 0 8px 24px rgba(30, 35, 45, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15181e; --paper-2: #1c2028; --ink: #e8eaef; --ink-2: #b4bac6; --ink-3: #7d8593;
+      --line: #2b313c; --brand: #f04b57; --brand-deep: #ff8a92; --brand-tint: #35181c;
+      --warn: #f2b45a; --warn-tint: #2f2410; --ok: #5fcf8f; --ok-tint: #12291c; --code-bg: #232833;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15181e; --paper-2: #1c2028; --ink: #e8eaef; --ink-2: #b4bac6; --ink-3: #7d8593;
+    --line: #2b313c; --brand: #f04b57; --brand-deep: #ff8a92; --brand-tint: #35181c;
+    --warn: #f2b45a; --warn-tint: #2f2410; --ok: #5fcf8f; --ok-tint: #12291c; --code-bg: #232833;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size: 17px; line-height: 1.6;
+    padding-inline: 20px; padding-block: 0 80px;
+  }
+  h1, h2, h3, h4, .ui { font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.2; margin: 0; }
+  a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+  code, kbd { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: .85em; background: var(--code-bg); padding: .1em .4em; border-radius: 4px; }
+  strong { font-weight: 600; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 56px; }
+  @media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+  /* Cover */
+  .cover { grid-column: 1 / -1; padding-block: 56px 40px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
+  .cover .eyebrow { font-family: "Plus Jakarta Sans", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); margin-bottom: 14px; }
+  .cover h1 { font-size: clamp(34px, 5vw, 56px); font-weight: 800; letter-spacing: -.02em; }
+  .cover .sub { font-family: "Plus Jakarta Sans", sans-serif; font-size: 18px; color: var(--ink-2); margin-top: 10px; max-width: 60ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 28px 44px; margin-top: 32px; font-family: "Plus Jakarta Sans", sans-serif; }
+  .meta div { display: grid; gap: 2px; }
+  .meta dt { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .meta dd { margin: 0; font-size: 15px; font-weight: 600; }
+
+  /* TOC */
+  .toc { position: sticky; top: 24px; align-self: start; font-family: "Plus Jakarta Sans", sans-serif; font-size: 14px; }
+  .toc .label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .toc a { display: block; color: var(--ink-2); text-decoration: none; padding: 5px 10px; border-left: 2px solid transparent; }
+  .toc a:hover { color: var(--ink); background: var(--paper-2); }
+  .toc ol ol { margin-left: 10px; }
+  .toc ol ol a { font-size: 13px; padding-block: 3px; }
+  @media (max-width: 900px) { .toc { position: static; margin-bottom: 36px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; } }
+
+  /* Content */
+  main { min-width: 0; max-width: 760px; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  h2 { font-size: 28px; font-weight: 800; letter-spacing: -.01em; padding-bottom: 10px; border-bottom: 2px solid var(--ink); margin-bottom: 22px; }
+  h2 .num, h3 .num { color: var(--brand); font-variant-numeric: tabular-nums; margin-right: .5em; }
+  h3 { font-size: 20px; font-weight: 700; margin-block: 34px 12px; }
+  h4 { font-size: 15px; font-weight: 700; margin-block: 24px 8px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  ol.steps { padding-left: 0; margin: 0 0 18px; list-style: none; counter-reset: step; display: grid; gap: 10px; max-width: 68ch; }
+  ol.steps li { position: relative; padding-left: 40px; counter-increment: step; }
+  ol.steps li::before { content: counter(step); position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; font: 700 13px/26px "Plus Jakarta Sans", sans-serif; text-align: center; }
+  ul { padding-left: 22px; margin: 0 0 14px; max-width: 68ch; }
+  li { margin-bottom: 4px; }
+
+  figure { margin: 22px 0 28px; }
+  figure img { display: block; width: 100%; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); background: #fff; }
+  figcaption { font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; color: var(--ink-2); margin-top: 10px; }
+  figcaption b { color: var(--ink); font-weight: 700; }
+
+  .tbl { overflow-x: auto; margin: 0 0 22px; }
+  table { border-collapse: collapse; width: 100%; font-family: "Plus Jakarta Sans", sans-serif; font-size: 14.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); border-bottom: 2px solid var(--ink); }
+  td.num { width: 44px; }
+  .badge { display: inline-block; width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: #fff; font: 700 12px/24px "Plus Jakarta Sans", sans-serif; text-align: center; }
+  .req { color: var(--brand); font-weight: 700; }
+  .btn { display: inline-block; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: .85em; padding: 1px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper-2); white-space: nowrap; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.ok { color: var(--ok); }
+  .btn.danger { color: var(--brand); }
+
+  .note { border-left: 3px solid var(--brand); background: var(--brand-tint); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 22px; max-width: 72ch; }
+  .note.warn { border-color: var(--warn); background: var(--warn-tint); }
+  .note.ok { border-color: var(--ok); background: var(--ok-tint); }
+  .note .t { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+  .note.warn .t { color: var(--warn); } .note.ok .t { color: var(--ok); } .note .t { color: var(--brand); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  .faq dt { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; margin-top: 18px; }
+  .faq dd { margin: 4px 0 0; max-width: 68ch; }
+
+  footer { grid-column: 1 / -1; border-top: 1px solid var(--line); margin-top: 20px; padding-top: 20px; font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+  @media print {
+    body { padding: 0; font-size: 11pt; background: #fff; color: #000; }
+    .wrap { display: block; max-width: none; }
+    .toc { display: none; }
+    section { break-inside: auto; }
+    h2 { break-before: page; }
+    .cover + main section:first-child h2 { break-before: auto; }
+    figure { break-inside: avoid; }
+    figure img { box-shadow: none; }
+    a { color: inherit; text-decoration: none; }
+  }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <header class="cover">
+    <div class="eyebrow">Panduan Pengguna · Peran Administrator</div>
+    <h1>Manual Book Si-BATUR</h1>
+    <p class="sub">Sistem Informasi Bantuan Terpadu dan Terukur — Pemerintah Kabupaten Lombok Barat</p>
+    <dl class="meta">
+      <div><dt>Versi aplikasi</dt><dd>Final</dd></div>
+      <div><dt>Versi dokumen</dt><dd>1.0 · September 2026</dd></div>
+      <div><dt>Disusun oleh</dt><dd>PT Digimedia Insan Lombok</dd></div>
+    </dl>
+  </header>
+
+  <nav class="toc" aria-label="Daftar isi">
+    <div class="label">Daftar isi</div>
+    <ol>
+      <li><a href="#s1">1. Pendahuluan</a></li>
+      <li><a href="#s2">2. Masuk ke Aplikasi</a></li>
+      <li><a href="#s3">3. Tampilan Utama</a></li>
+      <li><a href="#s4">4. Contoh: Master Data → OPD</a>
+        <ol>
+          <li><a href="#s41">4.1 Membuka menu</a></li>
+          <li><a href="#s42">4.2 Halaman daftar</a></li>
+          <li><a href="#s43">4.3 Menambah data</a></li>
+          <li><a href="#s44">4.4 Mencari data</a></li>
+          <li><a href="#s45">4.5 Mengubah data</a></li>
+          <li><a href="#s46">4.6 Menghapus data</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">5. Daftar Menu Administrator</a></li>
+      <li><a href="#s6">6. Pertanyaan Umum</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="s1">
+      <h2><span class="num">1</span>Pendahuluan</h2>
+      <h3>1.1 Tentang aplikasi</h3>
+      <p>Si-BATUR adalah aplikasi berbasis web untuk mengelola bantuan sosial di lingkungan Pemerintah Kabupaten Lombok Barat. Aplikasi ini mencakup seluruh alur bantuan: pendaftaran kelompok masyarakat, verifikasi NIK oleh Dukcapil, pengajuan bantuan oleh OPD, verifikasi berjenjang, berita acara serah terima (BAST), SP2D, realisasi, hingga pelaporan.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Jenis bantuan</th><th>Keterangan</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Bansos</strong></td><td>Bantuan Sosial untuk perorangan / lembaga non-pemerintah</td></tr>
+          <tr><td><strong>Hibah</strong></td><td>Bantuan hibah untuk organisasi, lembaga, dan badan</td></tr>
+          <tr><td><strong>BDSKM</strong></td><td>Bantuan ke Masyarakat — barang yang diserahkan ke kelompok masyarakat</td></tr>
+          <tr><td><strong>Subsidi Bunga</strong></td><td>Subsidi bunga kredit untuk UMKM dan kelompok tani</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>1.2 Peran pengguna</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Peran</th><th>Fungsi utama</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Super Admin</strong></td><td>Akses penuh ke seluruh menu</td></tr>
+          <tr><td><strong>Administrator</strong></td><td>Master data, kelompok masyarakat, wilayah, landing page, laporan, tahun anggaran</td></tr>
+          <tr><td><strong>OPD</strong></td><td>Mengajukan dan merealisasikan bantuan untuk OPD-nya sendiri</td></tr>
+          <tr><td><strong>Bendahara</strong></td><td>BAST, SP2D, realisasi, laporan</td></tr>
+          <tr><td><strong>Dukcapil</strong></td><td>Verifikasi NIK penduduk</td></tr>
+          <tr><td><strong>User / Masyarakat</strong></td><td>Mengajukan bantuan sebagai pemohon</td></tr>
+        </tbody>
+      </table></div>
+      <p>Panduan ini ditulis untuk peran <strong>Administrator</strong>. Menu yang tampil bisa berbeda untuk peran lain.</p>
+
+      <h3>1.3 Konvensi penulisan</h3>
+      <ul>
+        <li><strong>Teks tebal</strong> menandai nama menu, tombol, atau kolom yang ada di layar.</li>
+        <li>Penanda <span class="badge">1</span> pada gambar merujuk ke tabel penjelasan di bawahnya.</li>
+        <li>Kotak berwarna kuning menandai hal yang perlu diperhatikan sebelum melakukan tindakan.</li>
+      </ul>
+
+      <h3>1.4 Kebutuhan perangkat</h3>
+      <ul>
+        <li>Browser modern: Google Chrome, Microsoft Edge, atau Mozilla Firefox versi terbaru.</li>
+        <li>Resolusi layar minimal 1366 × 768 piksel.</li>
+        <li>Koneksi ke jaringan tempat aplikasi dipasang.</li>
+      </ul>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">2</span>Masuk ke Aplikasi</h2>
+      <ol class="steps">
+        <li>Buka alamat aplikasi di browser. Halaman login akan tampil.</li>
+        <li>Isi <strong>Username</strong> dan <strong>Kata sandi</strong> yang diberikan oleh Super Admin. Login memakai <em>username</em>, bukan alamat email.</li>
+        <li>Centang <strong>Biarkan saya tetap masuk</strong> bila memakai komputer pribadi, agar tidak perlu login ulang setiap kali membuka aplikasi.</li>
+        <li>Klik tombol <span class="btn primary">Masuk</span>.</li>
+      </ol>
+      <figure><img src="img/01-login.png" alt="Halaman login Si-BATUR" loading="lazy"><figcaption><b>Gambar 1.</b> Halaman login.</figcaption></figure>
+      <figure><img src="img/02-login-terisi.png" alt="Form login dengan username dan kata sandi terisi" loading="lazy"><figcaption><b>Gambar 2.</b> Username dan kata sandi sudah terisi, siap klik Masuk.</figcaption></figure>
+      <p>Bila username atau kata sandi salah, aplikasi menampilkan pesan kesalahan di bawah kolom isian. Bila lupa kata sandi, hubungi Super Admin untuk pengaturan ulang.</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">3</span>Mengenal Tampilan Utama</h2>
+      <p>Setelah login berhasil, Anda diarahkan ke <strong>Dashboard</strong>.</p>
+      <figure><img src="img/03-dashboard.png" alt="Dashboard Administrator dengan penanda nomor" loading="lazy"><figcaption><b>Gambar 3.</b> Dashboard Administrator.</figcaption></figure>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Bagian</th><th>Fungsi</th></tr></thead>
+        <tbody>
+          <tr><td class="num"><span class="badge">1</span></td><td><strong>Menu atas</strong></td><td>Menu utama Administrator: Master Data, Landing Page, Kelompok Masyarakat, Wilayah, Laporan</td></tr>
+          <tr><td class="num"><span class="badge">2</span></td><td><strong>Pemilih Tahun Anggaran</strong></td><td>Semua data dipisah per tahun anggaran. Klik untuk berpindah tahun</td></tr>
+          <tr><td class="num"><span class="badge">3</span></td><td><strong>Nama pengguna</strong></td><td>Klik untuk membuka profil atau keluar dari aplikasi</td></tr>
+          <tr><td class="num"><span class="badge">4</span></td><td><strong>Sidebar</strong></td><td>Dashboard, Monitoring Bantuan, dan Cari Penduduk (NIK)</td></tr>
+          <tr><td class="num"><span class="badge">5</span></td><td><strong>Kartu ringkasan</strong></td><td>Jumlah usulan per jenis bantuan beserta rincian Verifikasi NIK, Proses Pengajuan SKPD, dan Verifikasi BA. Setiap angka bisa diklik untuk melihat detailnya</td></tr>
+          <tr><td class="num"><span class="badge">6</span></td><td><strong>Grafik</strong></td><td>Visualisasi usulan dan pengajuan per jenis bantuan</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note warn"><div class="t">Perhatikan tahun anggaran</div><p>Periksa <strong>Tahun Anggaran</strong> yang aktif di pojok kanan atas sebelum bekerja. Data yang Anda tambahkan akan tercatat pada tahun tersebut.</p></div>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">4</span>Contoh Lengkap: Menu Master Data → OPD</h2>
+      <p>Bab ini menjelaskan satu menu secara tuntas — mulai dari membuka menu, melihat daftar, menambah, mencari, mengubah, sampai menghapus data. Pola yang sama berlaku untuk hampir semua menu master data lainnya (Penduduk, Jenis Bantuan, Tahun Anggaran, Pengguna, Kecamatan, Desa).</p>
+      <p><strong>OPD</strong> (Organisasi Perangkat Daerah) adalah dinas atau badan yang mengajukan dan menyalurkan bantuan. Setiap kelompok masyarakat dan setiap pengajuan bantuan terhubung ke satu OPD, sehingga data OPD harus lengkap sebelum pengajuan dibuat.</p>
+
+      <h3 id="s41">4.1 Membuka menu</h3>
+      <ol class="steps">
+        <li>Klik <strong>Master Data</strong> pada menu atas.</li>
+        <li>Pilih <strong>OPD</strong> dari daftar yang muncul.</li>
+      </ol>
+      <figure><img src="img/04-menu-master-data.png" alt="Dropdown Master Data terbuka menampilkan Penduduk, Jenis Bantuan, Tahun Anggaran, OPD, Pengguna" loading="lazy"><figcaption><b>Gambar 4.</b> Submenu Master Data: Penduduk, Jenis Bantuan, Tahun Anggaran, OPD, dan Pengguna.</figcaption></figure>
+
+      <h3 id="s42">4.2 Halaman daftar OPD</h3>
+      <figure><img src="img/05-daftar-opd.png" alt="Halaman daftar OPD dengan penanda nomor" loading="lazy"><figcaption><b>Gambar 5.</b> Halaman daftar OPD.</figcaption></figure>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Bagian</th><th>Fungsi</th></tr></thead>
+        <tbody>
+          <tr><td class="num"><span class="badge">1</span></td><td><span class="btn">+ Tambah Data</span></td><td>Membuka form untuk menambah OPD baru</td></tr>
+          <tr><td class="num"><span class="badge">2</span></td><td><strong>Show … entries</strong></td><td>Mengatur jumlah baris per halaman (10, 25, 50, 100)</td></tr>
+          <tr><td class="num"><span class="badge">3</span></td><td><strong>Search</strong></td><td>Mencari berdasarkan nama atau kepala OPD; hasil langsung difilter saat mengetik</td></tr>
+          <tr><td class="num"><span class="badge">4</span></td><td><strong>Ikon cetak &amp; unduh</strong></td><td>Mencetak daftar, atau mengekspor ke Copy / Excel / CSV</td></tr>
+          <tr><td class="num"><span class="badge">5</span></td><td><strong>Tabel</strong></td><td>Kolom Nama OPD, Kepala OPD, No. Telepon, Jumlah Kelompok, Aksi. Klik judul kolom untuk mengurutkan</td></tr>
+          <tr><td class="num"><span class="badge">6</span></td><td><span class="btn ok">Edit</span> <span class="btn danger">Delete</span></td><td>Mengubah atau menghapus baris tersebut</td></tr>
+          <tr><td class="num"><span class="badge">7</span></td><td><strong>Navigasi halaman</strong></td><td>Berpindah halaman bila data lebih dari jumlah baris yang ditampilkan</td></tr>
+        </tbody>
+      </table></div>
+      <p>Kolom <strong>Jumlah Kelompok</strong> menunjukkan berapa kelompok masyarakat yang terdaftar di bawah OPD tersebut pada tahun anggaran aktif.</p>
+
+      <h3 id="s43">4.3 Menambah OPD baru</h3>
+      <h4>Langkah 1 — Buka form</h4>
+      <p>Klik <span class="btn">+ Tambah Data</span> di kanan atas halaman daftar. Form kosong akan tampil.</p>
+      <figure><img src="img/06-form-tambah-kosong.png" alt="Form tambah OPD kosong" loading="lazy"><figcaption><b>Gambar 6.</b> Form tambah OPD. Kolom bertanda <span class="req">*</span> wajib diisi.</figcaption></figure>
+
+      <h4>Langkah 2 — Isi kolom</h4>
+      <div class="tbl"><table>
+        <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nama OPD</strong></td><td class="req">✔</td><td>Nama resmi dinas/badan, mis. <em>Dinas Sosial Kabupaten Lombok Barat</em></td></tr>
+          <tr><td><strong>Kepala OPD</strong></td><td class="req">✔</td><td>Nama lengkap beserta gelar</td></tr>
+          <tr><td><strong>NIP</strong></td><td class="req">✔</td><td>Nomor Induk Pegawai kepala OPD, 18 digit</td></tr>
+          <tr><td><strong>Alamat</strong></td><td class="req">✔</td><td>Alamat kantor</td></tr>
+          <tr><td><strong>No. Telepon</strong></td><td class="req">✔</td><td>Nomor telepon kantor</td></tr>
+          <tr><td><strong>Fax</strong></td><td>—</td><td>Boleh dikosongkan</td></tr>
+          <tr><td><strong>Email</strong></td><td class="req">✔</td><td>Alamat email resmi dalam format email yang benar</td></tr>
+          <tr><td><strong>Website</strong></td><td>—</td><td>Boleh dikosongkan; bila diisi, awali dengan <code>https://</code></td></tr>
+        </tbody>
+      </table></div>
+      <figure><img src="img/08-form-tambah-terisi.png" alt="Form tambah OPD terisi lengkap" loading="lazy"><figcaption><b>Gambar 7.</b> Contoh form yang sudah terisi lengkap.</figcaption></figure>
+
+      <h4>Langkah 3 — Simpan</h4>
+      <p>Klik <span class="btn primary">Simpan Data</span>. Bila berhasil, Anda kembali ke halaman daftar dan muncul pemberitahuan hijau <strong>“Data berhasil disimpan”</strong> di pojok kanan atas. Data baru tampil di baris teratas.</p>
+      <figure><img src="img/09-simpan-berhasil.png" alt="Daftar OPD dengan notifikasi data berhasil disimpan" loading="lazy"><figcaption><b>Gambar 8.</b> Pemberitahuan sukses setelah menyimpan.</figcaption></figure>
+
+      <h4>Bila ada kolom yang belum diisi</h4>
+      <p>Aplikasi menolak menyimpan dan menampilkan daftar kesalahan di bagian atas form. Kolom yang bermasalah diberi garis merah dan keterangan di bawahnya. Isi kolom tersebut lalu klik <span class="btn primary">Simpan Data</span> lagi — data yang sudah Anda ketik tidak hilang.</p>
+      <figure><img src="img/07-validasi-error.png" alt="Form OPD dengan pesan validasi kolom wajib" loading="lazy"><figcaption><b>Gambar 9.</b> Pesan validasi untuk kolom wajib yang kosong.</figcaption></figure>
+      <p>Untuk membatalkan tanpa menyimpan, klik <span class="btn">← Kembali</span> di kanan atas.</p>
+
+      <h3 id="s44">4.4 Mencari data</h3>
+      <p>Ketik kata kunci pada kotak <strong>Search</strong> di kanan atas tabel. Tabel langsung menyaring baris yang cocok tanpa perlu menekan Enter. Keterangan <em>“filtered from … total entries”</em> di bawah tabel menunjukkan jumlah data sebelum disaring. Kosongkan kotak pencarian untuk menampilkan seluruh data kembali.</p>
+      <figure><img src="img/10-pencarian.png" alt="Hasil pencarian OPD" loading="lazy"><figcaption><b>Gambar 10.</b> Hasil pencarian menampilkan 1 dari 38 data.</figcaption></figure>
+
+      <h3 id="s45">4.5 Mengubah data OPD</h3>
+      <ol class="steps">
+        <li>Cari baris OPD yang ingin diubah.</li>
+        <li>Klik <span class="btn ok">Edit</span> pada kolom <strong>Aksi</strong>.</li>
+        <li>Form tampil dengan data yang sudah terisi. Ubah kolom yang diperlukan.</li>
+        <li>Klik <span class="btn primary">Simpan Data</span>.</li>
+      </ol>
+      <figure><img src="img/11-form-edit.png" alt="Form edit OPD dengan data terisi" loading="lazy"><figcaption><b>Gambar 11.</b> Form edit OPD.</figcaption></figure>
+      <p>Aturan pengisian dan pesan validasi sama dengan saat menambah data (lihat 4.3).</p>
+
+      <h3 id="s46">4.6 Menghapus data OPD</h3>
+      <ol class="steps">
+        <li>Cari baris OPD yang ingin dihapus.</li>
+        <li>Klik <span class="btn danger">Delete</span> pada kolom <strong>Aksi</strong>.</li>
+        <li>Dialog konfirmasi tampil. Klik <strong>Yes, delete it!</strong> untuk melanjutkan, atau <strong>Cancel</strong> untuk membatalkan.</li>
+        <li>Bila berhasil, muncul pemberitahuan <strong>“Data berhasil dihapus”</strong> dan baris tersebut hilang dari daftar.</li>
+      </ol>
+      <figure><img src="img/12-konfirmasi-hapus.png" alt="Dialog konfirmasi hapus data" loading="lazy"><figcaption><b>Gambar 12.</b> Dialog konfirmasi sebelum menghapus.</figcaption></figure>
+      <figure><img src="img/13-hapus-berhasil.png" alt="Daftar OPD dengan notifikasi data berhasil dihapus" loading="lazy"><figcaption><b>Gambar 13.</b> Pemberitahuan sukses setelah menghapus.</figcaption></figure>
+      <div class="note warn">
+        <div class="t">Penghapusan tidak dapat dibatalkan</div>
+        <ul>
+          <li>OPD yang <strong>masih memiliki kelompok masyarakat</strong> (Jumlah Kelompok &gt; 0) <strong>tidak dapat dihapus</strong>. Aplikasi menampilkan pesan kesalahan merah. Pindahkan atau hapus kelompoknya terlebih dahulu.</li>
+          <li><strong>Seluruh pengajuan bantuan</strong> milik OPD tersebut akan <strong>ikut terhapus</strong>.</li>
+          <li>Akun pengguna berperan OPD yang terhubung tidak dihapus, tetapi kehilangan tautan OPD-nya dan perlu diatur ulang lewat menu <strong>Pengguna</strong>.</li>
+        </ul>
+        <p>Untuk OPD yang sudah pernah dipakai, lebih aman mengubah datanya daripada menghapusnya.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">5</span>Daftar Menu Administrator</h2>
+      <p>Semua menu berikut mengikuti pola yang sama dengan contoh di Bab 4: <strong>daftar → Tambah Data → form → Simpan</strong>, dengan tombol <span class="btn ok">Edit</span> dan <span class="btn danger">Delete</span> di kolom Aksi.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Menu atas</th><th>Submenu</th><th>Fungsi</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="5"><strong>Master Data</strong></td><td>Penduduk</td><td>Data penduduk (NIK, nama, alamat, desil); dasar verifikasi NIK dan anggota kelompok</td></tr>
+          <tr><td>Jenis Bantuan</td><td>Daftar jenis bantuan per kategori (Bansos / Hibah / Bantuan Kelompok)</td></tr>
+          <tr><td>Tahun Anggaran</td><td>Menambah tahun anggaran baru dan mengunci tahun yang sudah tutup buku</td></tr>
+          <tr><td>OPD</td><td>Dinas/badan penyalur bantuan <em>(Bab 4)</em></td></tr>
+          <tr><td>Pengguna</td><td>Akun pengguna beserta perannya</td></tr>
+          <tr><td><strong>Landing Page</strong></td><td>Berita, Slider, Gallery, Profile, Alur Bantuan</td><td>Konten halaman depan publik</td></tr>
+          <tr><td><strong>Kelompok Masyarakat</strong></td><td>Jenis Kelompok, Data Kelompok</td><td>Kelompok/organisasi penerima bantuan beserta anggotanya</td></tr>
+          <tr><td><strong>Wilayah</strong></td><td>Kecamatan, Desa/Kelurahan</td><td>Data wilayah administratif</td></tr>
+          <tr><td><strong>Laporan</strong></td><td>Laporan Pengajuan, Penerima Bantuan, Realisasi, Rekap Kelompok, Anggota Kelompok</td><td>Laporan dengan filter jenis bantuan, OPD, status, dan bulan; dapat diekspor ke Excel</td></tr>
+        </tbody>
+      </table></div>
+      <h4>Menu di sidebar kiri</h4>
+      <div class="tbl"><table>
+        <thead><tr><th>Menu</th><th>Fungsi</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Dashboard</strong></td><td>Ringkasan dan grafik (Bab 3)</td></tr>
+          <tr><td><strong>Monitoring Bantuan</strong></td><td>Memantau perkembangan tiap pengajuan dari diajukan sampai realisasi</td></tr>
+          <tr><td><strong>Cari Penduduk (NIK)</strong></td><td>Mencari penduduk berdasarkan NIK dan melihat riwayat bantuan yang diterimanya</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">6</span>Pertanyaan Umum</h2>
+      <dl class="faq">
+        <dt>Data yang baru saya tambahkan tidak muncul di daftar.</dt>
+        <dd>Periksa <strong>Tahun Anggaran</strong> di pojok kanan atas. Data tercatat pada tahun yang aktif saat disimpan; pilih tahun yang sesuai.</dd>
+        <dt>Tombol Tambah Data / Edit tidak ada.</dt>
+        <dd>Tahun anggaran yang dipilih sudah <strong>dikunci</strong> (read-only). Pilih tahun berjalan, atau minta Super Admin membuka kuncinya.</dd>
+        <dt>Muncul pesan “419 Page Expired” saat menyimpan.</dt>
+        <dd>Sesi login sudah kedaluwarsa karena halaman dibiarkan terlalu lama. Muat ulang halaman, login kembali, lalu ulangi.</dd>
+        <dt>Delete gagal dengan pesan kesalahan merah.</dt>
+        <dd>Data tersebut masih dipakai oleh data lain (mis. OPD yang masih punya kelompok). Hapus atau pindahkan data yang terhubung terlebih dahulu.</dd>
+        <dt>Saya ingin mengekspor daftar ke Excel.</dt>
+        <dd>Klik ikon unduh di atas tabel lalu pilih <strong>Excel</strong>. Yang diekspor adalah baris yang sedang tampil, jadi atur <strong>Show … entries</strong> ke jumlah yang cukup terlebih dahulu.</dd>
+        <dt>Bagaimana cara keluar dari aplikasi?</dt>
+        <dd>Klik nama pengguna di pojok kanan atas, lalu pilih <strong>Keluar</strong>.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 Pemerintah Kabupaten Lombok Barat</span>
+    <span>Dikembangkan oleh PT Digimedia Insan Lombok</span>
+  </footer>
+</div>
