@@ -9,8 +9,8 @@ use App\Models\Pengajuan;
 use App\Models\Sp2d;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -30,6 +30,11 @@ class MonitoringBantuanList extends Component
     public string $opdId = '';
 
     public string $tahun = '';
+
+    /** Jumlah baris per halaman; pilihan mengikuti tabel lain di aplikasi. */
+    public int $perPage = 10;
+
+    public const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
     // Form input SP2D (khusus bendahara) untuk pengajuan yang sudah BAST.
     public ?string $sp2dPengajuanId = null;
@@ -80,6 +85,14 @@ class MonitoringBantuanList extends Component
 
     public function updatedSearch(): void
     {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        if (! in_array($this->perPage, self::PER_PAGE_OPTIONS, true)) {
+            $this->perPage = 10;
+        }
         $this->resetPage();
     }
 
@@ -482,7 +495,8 @@ class MonitoringBantuanList extends Component
         $stats = $this->stats();
 
         return view('livewire.monitoring-bantuan-list', [
-            'pengajuanList' => $query->paginate(10),
+            'pengajuanList' => $query->paginate($this->perPage),
+            'perPageOptions' => self::PER_PAGE_OPTIONS,
             'stats' => $stats,
             'isBendahara' => $this->isBendahara(),
             'showOpdFilter' => $this->shouldShowOpdFilter(),

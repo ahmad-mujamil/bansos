@@ -6,6 +6,8 @@
         .monitoring-row .chevron { transition: transform .2s ease; }
         .monitoring-row[aria-expanded="true"] .chevron { transform: rotate(90deg); }
         .monitoring-row:hover { background-color: rgba(0, 0, 0, .02); }
+        /* Teks "Showing x to y" bawaan paginasi Livewire sejajar dengan kontrol "Show entries" */
+        .monitoring-pagination p { margin-bottom: 0; }
 
         .laporan-tabs { padding: 0.25rem 0; }
         .laporan-tab {
@@ -169,7 +171,7 @@
                 </div>
             </div>
 
-            <div class="mt-2 text-muted text-small" wire:loading wire:target="tahap,kategori,setKategori,search,opdId,tahun,setSemuaTahun">
+            <div class="mt-2 text-muted text-small" wire:loading wire:target="tahap,kategori,setKategori,search,opdId,tahun,setSemuaTahun,perPage">
                 Memuat data...
             </div>
         </div>
@@ -414,13 +416,24 @@
                     @endforeach
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
-                    <div class="text-small text-muted">
-                        Menampilkan {{ $pengajuanList->firstItem() }}-{{ $pengajuanList->lastItem() }}
-                        dari {{ $pengajuanList->total() }} data.
-                    </div>
-                    <div>
-                        {{ $pengajuanList->links() }}
+                {{-- Baris bawah mengikuti tabel DataTables lain: "Show N entries" di kiri, paginasi di kanan,
+                     di dalam card supaya tombol halaman (bg putih) menyatu seperti di halaman laporan. --}}
+                <div class="card mt-3">
+                    <div class="card-body py-2 d-flex align-items-center flex-wrap gap-3">
+                        <label for="per-page-monitoring" class="d-inline-flex align-items-center gap-2 mb-0 text-nowrap">
+                            Show
+                            <select id="per-page-monitoring"
+                                    class="form-control form-control-sm custom-select custom-select-sm w-auto d-inline-block"
+                                    wire:model.live="perPage">
+                                @foreach ($perPageOptions as $option)
+                                    <option value="{{ $option }}">{{ $option }}</option>
+                                @endforeach
+                            </select>
+                            entries
+                        </label>
+                        <div class="flex-grow-1 monitoring-pagination">
+                            {{ $pengajuanList->onEachSide(1)->links() }}
+                        </div>
                     </div>
                 </div>
             @endif
