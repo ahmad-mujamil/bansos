@@ -35,7 +35,7 @@ class VerifikasiPengajuanController extends Controller
 
         $query = Pengajuan::query()
             ->with(['user', 'verifiedBy', 'logs', 'verifikasiPengajuan.media'])
-            ->when(!in_array(Auth::user()?->role, [RoleUser::SUPER, RoleUser::ADMIN], true), fn($query) => $query->where('opd_id', Auth::user()->opd_id))
+            ->when(! in_array(Auth::user()?->role, [RoleUser::SUPER, RoleUser::ADMIN], true), fn ($query) => $query->where('opd_id', Auth::user()->opd_id))
             ->latest();
 
         if ($statusRequest !== 'all' && in_array($statusRequest, $allowedStatuses, true)) {
@@ -48,7 +48,7 @@ class VerifikasiPengajuanController extends Controller
         }
 
         return DataTables::of($query)
-            ->editColumn('kode_pengajuan', fn($row) => $row->kode_pengajuan)
+            ->editColumn('kode_pengajuan', fn ($row) => $row->kode_pengajuan)
             ->addColumn('jenis', function ($row) {
                 $kategori = $row->kategori_pengajuan;
                 $warna = match ($kategori) {
@@ -58,22 +58,22 @@ class VerifikasiPengajuanController extends Controller
                     \App\Enums\JenisPengajuan::BANSOS => 'bg-success',
                     default => 'bg-secondary',
                 };
-                $badge = '<span class="badge ' . $warna . '">' . e($kategori?->getDescription() ?? '-') . '</span>';
+                $badge = '<span class="badge '.$warna.'">'.e($kategori?->getDescription() ?? '-').'</span>';
                 if ($row->jenisBantuan?->nama) {
-                    $badge .= '<div class="text-muted text-small mt-1">' . e($row->jenisBantuan->nama) . '</div>';
+                    $badge .= '<div class="text-muted text-small mt-1">'.e($row->jenisBantuan->nama).'</div>';
                 }
 
                 return $badge;
             })
-            ->editColumn('judul', fn($row) => $row->judul ?? '-')
-            ->addColumn('status', function ($row) {
+            ->editColumn('judul', fn ($row) => $row->judul ?? '-')
+            ->editColumn('status', function ($row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
 
-                return '<span class="badge bg-' . $badge . '">' . e($status?->getDescription() ?? '-') . '</span>';
+                return '<span class="badge bg-'.$badge.'">'.e($status?->getDescription() ?? '-').'</span>';
             })
-            ->addColumn('tanggal', fn($row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
-            ->addColumn('user', fn($row) => $row->user?->nama ?? $row->user?->email ?? '-')
+            ->addColumn('tanggal', fn ($row) => $row->created_at?->translatedFormat('d M Y') ?? '-')
+            ->addColumn('user', fn ($row) => $row->user?->nama ?? $row->user?->email ?? '-')
             ->addColumn('action', function ($row) {
                 $lihat = route('verifikasi-pengajuan.show', $row->id);
                 $label = $row->status === PengajuanStatus::DIAJUKAN ? 'Verifikasi' : 'Lihat';
@@ -105,12 +105,12 @@ class VerifikasiPengajuanController extends Controller
                         }
                     } else {
                         $action .= " <div class='btn-group ms-1'>"
-                            . "<a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success' title='Download BA Verifikasi (template)'>Download BA (PDF)</a>"
-                            . "<button type='button' class='btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split' data-bs-toggle='dropdown' aria-expanded='false'><span class='visually-hidden'>Pilih format</span></button>"
-                            . "<ul class='dropdown-menu'>"
-                            . "<li><a class='dropdown-item' href='{$downloadBaUrl}' target='_blank'>Download sebagai PDF</a></li>"
-                            . "<li><a class='dropdown-item' href='{$downloadBaWordUrl}' target='_blank'>Download sebagai Word</a></li>"
-                            . "</ul></div>";
+                            ."<a href='{$downloadBaUrl}' target='_blank' class='btn btn-sm btn-outline-success' title='Download BA Verifikasi (template)'>Download BA (PDF)</a>"
+                            ."<button type='button' class='btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split' data-bs-toggle='dropdown' aria-expanded='false'><span class='visually-hidden'>Pilih format</span></button>"
+                            ."<ul class='dropdown-menu'>"
+                            ."<li><a class='dropdown-item' href='{$downloadBaUrl}' target='_blank'>Download sebagai PDF</a></li>"
+                            ."<li><a class='dropdown-item' href='{$downloadBaWordUrl}' target='_blank'>Download sebagai Word</a></li>"
+                            .'</ul></div>';
                         $action .= $actionUpload;
                         $action .= $batalButton;
                     }
@@ -136,7 +136,7 @@ class VerifikasiPengajuanController extends Controller
         $pengajuan->load(['user', 'verifiedBy', 'logs.user', 'details.penduduk', 'pemeriksa', 'organisasi', 'desa.kecamatan', 'verifikasiPengajuan.media']);
 
         $verifikasiIds = $pengajuan->logs
-            ->map(fn(PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
+            ->map(fn (PengajuanLog $log) => $log->metadata['verifikasi_pengajuan_id'] ?? null)
             ->filter()
             ->unique()
             ->values()
@@ -299,6 +299,7 @@ class VerifikasiPengajuanController extends Controller
 
         if (! $processed) {
             toast()->error('Gagal', 'Pengajuan belum diverifikasi.');
+
             return redirect()->back();
         }
 
@@ -308,6 +309,7 @@ class VerifikasiPengajuanController extends Controller
 
         if (! $isAdmin && $verifikasi && $verifikasi->getFirstMedia('ba-verifikasi')) {
             toast()->error('Gagal', 'BA Verifikasi sudah diunggah. Pembatalan tidak dapat dilakukan.');
+
             return redirect()->back();
         }
 
@@ -369,7 +371,6 @@ class VerifikasiPengajuanController extends Controller
 
             return redirect()->route('verifikasi-pengajuan.index');
         }
-
 
         try {
             DB::beginTransaction();
@@ -471,7 +472,7 @@ class VerifikasiPengajuanController extends Controller
 
                     return $idx === false ? count($prioritasJabatan) : $idx;
                 })
-                ->first(fn($detail) => $detail->penduduk?->nama);
+                ->first(fn ($detail) => $detail->penduduk?->nama);
 
             if ($ketua?->penduduk?->nama) {
                 $pemohon = $ketua->penduduk->nama;
@@ -482,7 +483,7 @@ class VerifikasiPengajuanController extends Controller
             ?? $pengajuan->details()->first()?->penduduk?->nama
             ?? '-';
 
-        $isIndividu =  $pengajuan->organisasi_id === null;
+        $isIndividu = $pengajuan->organisasi_id === null;
 
         // Utamakan data beku saat disetujui agar dokumen konsisten dengan kondisi
         // saat di-ACC, walau nama kelompok/anggota berubah setelahnya.
@@ -505,7 +506,7 @@ class VerifikasiPengajuanController extends Controller
 
                     return $idx === false ? count($prioritasJabatanSnapshot) : $idx;
                 })
-                ->first(fn($anggota) => $anggota->nama);
+                ->first(fn ($anggota) => $anggota->nama);
 
             if ($ketuaSnapshot?->nama) {
                 $pemohon = $ketuaSnapshot->nama;
@@ -558,7 +559,7 @@ class VerifikasiPengajuanController extends Controller
             : (int) round((float) $pengajuan->nilai);
 
         $nilaiBesar = number_format($nilaiBesarAngka, 0, ',', '.');
-        $nilaiBesarTerbilang = trim(terbilang($nilaiBesarAngka) . ' rupiah');
+        $nilaiBesarTerbilang = trim(terbilang($nilaiBesarAngka).' rupiah');
 
         $html = view('pages.verifikasi-pengajuan.ba-verifikasi', [
             'pengajuan' => $pengajuan,
@@ -580,7 +581,7 @@ class VerifikasiPengajuanController extends Controller
             'nilaiBesarTerbilang' => $nilaiBesarTerbilang,
         ])->render();
 
-        $baseName = 'BA-Verifikasi-' . ($pengajuan->kode_pengajuan ?: $pengajuan->id);
+        $baseName = 'BA-Verifikasi-'.($pengajuan->kode_pengajuan ?: $pengajuan->id);
 
         // Word: serve the same HTML as an editable .doc. Word's HTML engine ignores @page size,
         // position:fixed and inline-block, so inject an MSO print-view header + overrides to match the PDF.
@@ -601,11 +602,11 @@ HTML;
                 '<html lang="id" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">',
                 $html,
             );
-            $wordHtml = str_replace('</head>', $msoHead . "\n</head>", $wordHtml);
+            $wordHtml = str_replace('</head>', $msoHead."\n</head>", $wordHtml);
 
             return response($wordHtml)
                 ->header('Content-Type', 'application/msword')
-                ->header('Content-Disposition', 'attachment; filename="' . $baseName . '.doc"');
+                ->header('Content-Disposition', 'attachment; filename="'.$baseName.'.doc"');
         }
 
         $dompdf = new Dompdf([
@@ -619,7 +620,7 @@ HTML;
 
         $pdfContent = $dompdf->output();
 
-        $fileName = $baseName . '.pdf';
+        $fileName = $baseName.'.pdf';
 
         // $verifikasi->addMediaFromString($pdfContent)
         //     ->usingFileName($fileName)
@@ -627,6 +628,6 @@ HTML;
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$fileName.'"');
     }
 }

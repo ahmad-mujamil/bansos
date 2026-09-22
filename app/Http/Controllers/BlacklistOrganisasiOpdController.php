@@ -21,8 +21,9 @@ class BlacklistOrganisasiOpdController extends Controller
             ->latest();
 
         return DataTables::of($query)
-            ->addColumn('nama', fn (Organisasi $row) => e($row->nama ?? '-'))
-            ->addColumn('jenis', fn (Organisasi $row) => e($row->jenis ?? '-'))
+            // editColumn (bukan addColumn) agar kolom asli tetap ikut pencarian & pengurutan.
+            ->editColumn('nama', fn (Organisasi $row) => e($row->nama ?? '-'))
+            ->editColumn('jenis', fn (Organisasi $row) => e($row->jenis ?? '-'))
             ->addColumn('status_blacklist', function (Organisasi $row) {
                 return $row->is_blacklist
                     ? '<span class="badge bg-danger">Blacklist</span>'
@@ -89,12 +90,13 @@ class BlacklistOrganisasiOpdController extends Controller
             DB::commit();
 
             toast()->success('Berhasil', $jadiBlacklist ? 'Kelompok/Organisasi berhasil diblacklist.' : 'Blacklist berhasil dibatalkan.');
+
             return back();
         } catch (\Throwable $e) {
             DB::rollBack();
             toast()->error('Gagal', $e->getMessage());
+
             return back()->withInput();
         }
     }
 }
-
