@@ -86,6 +86,14 @@ class PengajuanOpdController extends Controller
 
                 return '<span class="badge bg-secondary me-1">Individu</span>'.e($nama ?? '-');
             })
+            // Pemohon bukan kolom tabel (nama kelompok atau nama penduduk penerima),
+            // jadi pencariannya didefinisikan manual lewat relasi.
+            ->filterColumn('pemohon', function ($query, $keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->whereHas('organisasi', fn ($o) => $o->where('nama', 'like', "%{$keyword}%"))
+                        ->orWhereHas('details.penduduk', fn ($p) => $p->where('nama', 'like', "%{$keyword}%"));
+                });
+            })
             ->editColumn('judul', fn ($row) => e($row->judul ?? '-'))
             ->editColumn('status', function ($row) {
                 $status = $row->status;

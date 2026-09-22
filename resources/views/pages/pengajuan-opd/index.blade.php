@@ -249,7 +249,7 @@
         columns: [
             { data: 'kode_pengajuan', name: 'kode_pengajuan' },
             { data: 'jenis_bantuan', name: 'jenis_bantuan', orderable: false, searchable: false },
-            { data: 'pemohon', name: 'pemohon', orderable: false, searchable: false },
+            { data: 'pemohon', name: 'pemohon', orderable: false },
             { data: 'judul', name: 'judul' },
             { data: 'status', name: 'status' },
             { data: 'tanggal', name: 'created_at' },
