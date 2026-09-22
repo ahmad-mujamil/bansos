@@ -25,6 +25,13 @@ class BastController extends Controller
         return DataTables::of($data)
             ->editColumn('tanggal', fn ($row) => $row->tanggal->format('d-m-Y'))
             ->addColumn('kode_pengajuan', fn ($row) => $row->pengajuan?->kode_pengajuan ?? '-')
+            // Kolom relasi: perlu filter khusus agar bisa dicari lewat kotak Search.
+            ->filterColumn('kode_pengajuan', fn ($query, $keyword) => $query->whereHas(
+                'pengajuan', fn ($p) => $p->where('kode_pengajuan', 'like', "%{$keyword}%")
+            ))
+            ->orderColumn('kode_pengajuan', fn ($query, $order) => $query->orderBy(
+                Pengajuan::query()->select('kode_pengajuan')->whereColumn('pengajuan.id', 'bast.pengajuan_id'), $order
+            ))
             ->addColumn('jenis_bantuan', function ($row) {
                 $kategori = $row->pengajuan?->kategori_pengajuan;
                 $warna = match ($kategori) {

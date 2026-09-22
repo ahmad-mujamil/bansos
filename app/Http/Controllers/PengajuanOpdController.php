@@ -51,15 +51,18 @@ class PengajuanOpdController extends Controller
 
         $query = Pengajuan::query()
             ->with(['organisasi', 'details.penduduk', 'verifikasiPengajuan'])
-            ->where('user_id', Auth::id())
-            ->latest();
+            ->where('user_id', Auth::id());
+        // Urutan bawaan (terbaru dulu) diatur DataTables di blade (order: [[5, 'desc']]);
+        // latest() di sini akan mengalahkan klik sortir kolom dari pengguna.
 
         if ($statusRequest !== 'all' && in_array($statusRequest, $allowedStatuses, true)) {
             $query->where('status', $statusRequest);
         }
 
         return DataTables::of($query)
-            ->addColumn('kode_pengajuan', fn ($row) => e($row->kode_pengajuan))
+            // Kolom asli tabel memakai editColumn agar tetap ikut pencarian & pengurutan;
+            // addColumn membuat Yajra mengecualikannya dari global search.
+            ->editColumn('kode_pengajuan', fn ($row) => e($row->kode_pengajuan))
             ->addColumn('jenis_bantuan', function ($row) {
                 $jp = $row->kategori_pengajuan;
                 if ($jp === null) {
@@ -83,8 +86,8 @@ class PengajuanOpdController extends Controller
 
                 return '<span class="badge bg-secondary me-1">Individu</span>'.e($nama ?? '-');
             })
-            ->addColumn('judul', fn ($row) => e($row->judul ?? '-'))
-            ->addColumn('status', function ($row) {
+            ->editColumn('judul', fn ($row) => e($row->judul ?? '-'))
+            ->editColumn('status', function ($row) {
                 $status = $row->status;
                 $badge = $status?->badgeColor() ?? 'secondary';
 
@@ -107,7 +110,7 @@ class PengajuanOpdController extends Controller
                     $html .= "<form action='{$submit}' method='POST' class='form-ajukan-pengajuan'>"
                         ."<input type='hidden' name='_token' value='{$csrf}'>"
                         ."<button type='submit' class='btn btn-sm btn-success'>Ajukan</button>"
-                        ."</form>";
+                        .'</form>';
                 }
 
                 if ($row->canDelete()) {
@@ -116,7 +119,7 @@ class PengajuanOpdController extends Controller
                         ."<input type='hidden' name='_token' value='{$csrf}'>"
                         ."<input type='hidden' name='_method' value='DELETE'>"
                         ."<button type='submit' class='btn btn-sm btn-danger'>Hapus</button>"
-                        ."</form>";
+                        .'</form>';
                 }
 
                 $html .= '</div>';
