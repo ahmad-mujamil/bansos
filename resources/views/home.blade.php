@@ -32,7 +32,7 @@
         <div class="page-title-container mb-3">
             <div class="row">
                 <div class="col mb-2">
-                    <h4>Selamat Datang, <b>{{ auth()->user()->nama ?? '-' }}</b></h4>
+                    <h4>Selamat, <b>{{ auth()->user()->nama ?? '-' }}</b></h4>
                     <div class="text-muted font-heading text-small">Halaman Beranda</div>
                 </div>
             </div>
