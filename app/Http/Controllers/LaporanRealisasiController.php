@@ -87,7 +87,7 @@ class LaporanRealisasiController extends Controller
                 return $nilai !== null ? 'Rp '.number_format($nilai, 0, ',', '.') : '-';
             })
             ->addColumn('status_realisasi', function ($row) {
-                return $row->realisasi
+                return $row->bast
                     ? '<span class="badge bg-success">Sudah</span>'
                     : '<span class="badge bg-warning">Belum</span>';
             })
