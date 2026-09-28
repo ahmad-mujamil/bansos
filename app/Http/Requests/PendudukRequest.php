@@ -34,7 +34,7 @@ class PendudukRequest extends FormRequest
             'rt_rw' => ['required', 'string', 'max:7'],
             'desa_id' => ['nullable', 'exists:desa,id'],
             'kecamatan_id' => ['nullable', 'exists:kecamatan,id'],
-            'level_desil' => ['required', Rule::enum(LevelDesil::class)],
+            'level_desil' => ['nullable', Rule::enum(LevelDesil::class)],
         ];
     }
 }
