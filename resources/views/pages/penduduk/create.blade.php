@@ -144,8 +144,8 @@
                             ])
                         </div>
                         <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                            <label class="form-label text-small text-uppercase">Level Desil</label>
-                            <select class="form-control select2-penduduk @error('level_desil') is-invalid @enderror" id="level_desil" name="level_desil" required>
+                            <label class="form-label text-small text-uppercase">Level Desil <span class="text-muted">(opsional)</span></label>
+                            <select class="form-control select2-penduduk @error('level_desil') is-invalid @enderror" id="level_desil" name="level_desil">
                                 <option value="">Pilih Level Desil</option>
                                 @foreach($level_desil as $desil)
                                     <option value="{{ $desil->value }}" {{ old('level_desil', $penduduk->level_desil->value ?? '') === $desil->value ? 'selected' : '' }}>{{ $desil->value }} - {{ $desil->getDescription() }}</option>
